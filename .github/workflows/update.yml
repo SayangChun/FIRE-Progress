@@ -1,6 +1,14 @@
 name: 更新 FIRE 进度
 
 on:
+  push:
+    branches: [main]
+    # 机器人自己的提交只动这几个路径，忽略掉，
+    # 否则会形成「提交 → 触发 → 再提交」的循环。
+    paths-ignore:
+      - "data/**"
+      - "README.md"
+      - "reports/**"
   schedule:
     # 每小时轮询。持仓数据是每周手动更新的，但估值要按实时行情折算，
     # 且 GitHub 的 schedule 事件实际会延迟数小时触发，高频轮询可收敛滞后。
