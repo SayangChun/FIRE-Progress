@@ -40,6 +40,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: 语法与冒烟检查（样例数据）
         run: python scripts/update.py --mock
+      - name: 提交门控回归测试
+        run: python tests/test_commit_gate.py
 
   update:
     needs: verify

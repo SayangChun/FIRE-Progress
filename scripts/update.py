@@ -147,19 +147,34 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
 
 
 def is_material(previous: dict, data: dict, cfg) -> tuple[bool, str]:
+    """判断本次结果是否值得提交。
+
+    阈值 = max(绝对下限, 上次总资产 × 比例)。
+
+    为什么用比例而不是固定金额：固定金额不随资产规模变化。
+    资产 ¥13k 时「变动 1 元」只占 0.007%，比特币几秒就能波动这么多，
+    结果就是每小时都提交（实测约 720 次/月）；等资产涨到几十万，
+    同一个金额又小到失去意义。按比例设阈值才能真正「只在有意义时提交」。
+    """
     if not previous:
         return True, "首次生成"
     if previous.get("as_of_date") != data["as_of_date"]:
-        return True, "新的一天"
+        return True, "新的一天（保证曲线每天至少一个点）"
+
     prev_total = ((previous.get("assets") or {}).get("total_cny")) or 0.0
-    prev_pct = ((previous.get("assets") or {}).get("progress_pct")) or 0.0
-    delta_cny = abs(data["assets"]["total_cny"] - prev_total)
-    delta_pct = abs(data["assets"]["progress_pct"] - prev_pct)
-    if delta_pct >= float(cfg.automation.get("min_commit_delta_pct", 0.005)):
-        return True, f"完成度变动 {delta_pct:.4f} 个百分点"
-    if delta_cny >= float(cfg.automation.get("min_commit_delta_cny", 1.0)):
-        return True, f"总资产变动 {delta_cny:.2f} 元"
-    return False, f"变动不足阈值（Δ{delta_cny:.4f} 元 / Δ{delta_pct:.6f} 个百分点）"
+    cur_total = data["assets"]["total_cny"]
+    delta = abs(cur_total - prev_total)
+
+    floor = float(cfg.automation.get("min_commit_delta_cny", 1.0))
+    ratio = float(cfg.automation.get("min_commit_delta_ratio", 0.003))
+    threshold = max(floor, prev_total * ratio)
+
+    if delta >= threshold:
+        return True, f"总资产变动 ¥{delta:,.2f}，达到阈值 ¥{threshold:,.2f}"
+    return False, (
+        f"总资产变动 ¥{delta:,.2f}，未达阈值 ¥{threshold:,.2f}"
+        f"（{ratio * 100:.2f}% 与 ¥{floor:,.0f} 取大）"
+    )
 
 
 # ------------------------------------------------------------------ 主流程
@@ -214,7 +229,10 @@ def main() -> int:
     if not material and not args.force:
         print(f"→ 跳过写入：{reason}")
         return 0
-    print(f"→ 写入（{reason}）")
+    if not material:
+        print(f"→ 强制写入（忽略阈值：{reason}）")
+    else:
+        print(f"→ 写入（{reason}）")
 
     history = upsert_snapshot(history, data)
     data["history_days"] = len(history)
