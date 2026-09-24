@@ -173,16 +173,38 @@ sp500-dca/portfolio.json ──► total.market_value ────────�
 
 ```
 verify  ──►  用 tests/fixtures 的样例数据跑一遍（不联网）
-             ↓ 通过才继续
+             + 跑提交门控的回归测试
+             ↓ 全部通过才继续
 update  ──►  读持仓仓库 + 抓行情 → 重算 → 写 README/曲线 → git commit & push
 ```
 
-- 触发：`cron: "0 * * * *"`（每小时）+ `workflow_dispatch`（可勾选 force 强制重写）
+- 触发：
+  - `push` 到 `main` —— 带 `paths-ignore: [data/**, README.md, reports/**]`，
+    排除机器人自己改的那几个路径，避免「提交 → 触发 → 再提交」的循环
+  - `cron: "0 * * * *"`（每小时）
+  - `workflow_dispatch`（可勾选 force 强制重写）
 - 权限：`contents: write`（提交需要）
 - 并发：`concurrency` 串行化，避免两次运行互相覆盖
 - **密钥：无。** 两个数据源都是公开仓库，行情是公开接口。
-- 提交门控：总资产变动 ≥ ¥1 **或** 完成度变动 ≥ 0.005 个百分点 **或** 跨天，才提交。
-  跨天必提交是为了保证曲线每天至少有一个点。
+- 校验：`verify` 里除了冒烟检查，还跑 `tests/test_commit_gate.py`（14 项断言）。
+  门控逻辑改错了不会报错、只会让提交变多，所以必须靠测试守住。
+
+#### 提交门控
+
+阈值 = `max(min_commit_delta_cny, 上次总资产 × min_commit_delta_ratio)`，
+当前配置为 `max(¥1, 0.3%)`；另外**跨天必定提交一次**，保证曲线每天至少一个点。
+
+| 资产规模 | 阈值 |
+| --- | ---: |
+| ¥1,000 | ¥3 |
+| ¥13,535 | ¥40.61 |
+| ¥500,000 | ¥1,500 |
+
+> **为什么用比例而不是固定金额**：固定金额不随资产规模变化。
+> 初版用「变动 ¥1 即提交」，资产 ¥13.5k 时那只占 0.0074%，
+> 而比特币小时级波动就有 0.1%~0.5% —— 结果几乎每小时都提交，约 **720 次/月**；
+> 等资产涨到几十万，同一个金额又小到失去意义。
+> 改成比例后预计降到 **2~4 次/天**。
 
 > 为什么是每小时而不是每天：`sp500-dca` 的提交记录已经验证过——
 > GitHub 的 schedule 事件实际比计划时间晚 4.5~5.5 小时。每小时轮询把最大滞后压到约 1 小时。
@@ -264,7 +286,9 @@ FIRE-Progress/
 │   ├── history.json             # 按天的进度快照（曲线数据源）
 │   └── latest.json              # 最近一次结果（兜底缓存，必须入库）
 ├── reports/curve.svg            # 进度曲线
-├── tests/fixtures/              # 样例数据，供 --mock 使用
+├── tests/
+│   ├── fixtures/                # 样例数据，供 --mock 使用
+│   └── test_commit_gate.py      # 提交门控的回归测试（14 项）
 └── .github/workflows/update.yml
 ```
 
@@ -287,12 +311,31 @@ FIRE-Progress/
 
 ```bash
 # 1. 本地验证（不联网，用样例数据）
+pip install -r requirements.txt
 python scripts/update.py --mock
+python tests/test_commit_gate.py
 
 # 2. 推送
 git remote add origin https://github.com/SayangChun/FIRE-Progress.git
 git push -u origin main
 ```
 
-**不需要配置任何 Secrets。** 推送后手动触发一次 Actions（workflow_dispatch），
-确认抓到的持仓数量与 `0.1BTC` 仓库 README 显示的一致即可。
+**不需要配置任何 Secrets。** 推送本身就会触发工作流，无需手动操作；
+若想跳过阈值立即重算，可在 Actions 页面用 `workflow_dispatch` 勾选 force。
+
+首次跑完建议核对三件事：
+
+1. 比特币数量与 `0.1BTC` 仓库 README 显示的是否一致；
+2. 完成度是否落在预期区间；
+3. 页脚标注的行情源 —— 如果显示的不是首选源，说明发生了自动降级（正常，但要知情）。
+
+---
+
+## 9. 变更记录
+
+| 日期 | 变更 |
+| --- | --- |
+| 2026-09-24 | 初版：比特币走币安/欧易 API（需密钥，且 OKX 强制 IP 白名单与 CI 冲突） |
+| 2026-09-24 | 改读 `0.1BTC` 仓库的 `holdings.csv`，移除全部交易所 API 与密钥依赖 |
+| 2026-09-24 | 增加 `push` 触发（带 `paths-ignore` 防循环） |
+| 2026-09-24 | 修正提交门控：固定金额 → 按资产比例；新增门控回归测试 |
