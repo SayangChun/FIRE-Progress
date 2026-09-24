@@ -1,0 +1,30 @@
+{
+  "available": true,
+  "market_value": 524.01,
+  "invested": 519.74,
+  "profit": 4.27,
+  "return_rate": 0.008216,
+  "trading_days": 26,
+  "latest_nav_date": "2026-09-22",
+  "updated_at": "2026-09-23T22:40:43+08:00",
+  "funds": [
+    {
+      "code": "017641",
+      "short_name": "摩根标普500 A",
+      "market_value": 261.88,
+      "invested": 259.74,
+      "shares": 152.44,
+      "latest_nav": 1.7179
+    },
+    {
+      "code": "019305",
+      "short_name": "摩根标普500 C",
+      "market_value": 262.13,
+      "invested": 260.0,
+      "shares": 154.07,
+      "latest_nav": 1.7014
+    }
+  ],
+  "timeline": [],
+  "warnings": []
+}

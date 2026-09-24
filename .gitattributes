@@ -1,0 +1,8 @@
+# 统一换行符为 LF。
+# 本仓库的数据与 README 由 Linux 上的 CI 写入，若不做统一，
+# Windows 本地克隆后会出现「整文件都被改动」的假 diff。
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary

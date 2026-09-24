@@ -1,0 +1,25 @@
+# 凭证——绝不入库
+.env
+*.key
+*.pem
+secrets.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# 编辑器
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# AI 助手的工作区数据（本地记忆等），不属于项目内容
+.workbuddy-ai/
+
+# 本地临时产物
+/tmp/
+*.log

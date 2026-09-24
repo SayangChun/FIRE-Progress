@@ -1,0 +1,63 @@
+name: 更新 FIRE 进度
+
+on:
+  schedule:
+    # 每小时轮询。持仓数据是每周手动更新的，但估值要按实时行情折算，
+    # 且 GitHub 的 schedule 事件实际会延迟数小时触发，高频轮询可收敛滞后。
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "忽略变更阈值，强制重写"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fire-progress
+  cancel-in-progress: false
+
+jobs:
+  # 先用样例数据跑一遍，代码有错就不要去动真实数据
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+      - name: 语法与冒烟检查（样例数据）
+        run: python scripts/update.py --mock
+
+  update:
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      # 无需任何密钥：持仓读公开仓库，行情与汇率走公开接口
+      - name: 更新数据与 README
+        run: python scripts/update.py ${{ inputs.force && '--force' || '' }}
+
+      - name: 提交变更
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "没有需要提交的变更"
+            exit 0
+          fi
+          git commit -m "chore(data): 更新 FIRE 进度 $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
+          git push
