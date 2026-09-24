@@ -1,0 +1,90 @@
+{
+  "as_of": "2026-09-24T21:07:56+08:00",
+  "as_of_date": "2026-09-24",
+  "fire": {
+    "monthly_expense": 2000.0,
+    "withdrawal_rate": 0.043,
+    "annual_expense": 24000.0,
+    "target_cny": 558139.53
+  },
+  "assets": {
+    "total_cny": 13535.02,
+    "progress": 0.024250244317086393,
+    "progress_pct": 2.425,
+    "remaining_cny": 544604.51,
+    "btc": {
+      "qty": 0.02311808,
+      "price_cny": 562806.69,
+      "value_cny": 13011.01,
+      "snapshot_date": "2026-09-20",
+      "stale_days": 4,
+      "positions": [
+        {
+          "venue": "币安",
+          "location": "binance",
+          "product": "账户持仓",
+          "asset": "BTC",
+          "amount": 0.00785078,
+          "avg_usd": 68163.56,
+          "note": "Binance账户；均价 $68,163.56/BTC"
+        },
+        {
+          "venue": "欧易",
+          "location": "okx",
+          "product": "账户持仓",
+          "asset": "BTC",
+          "amount": 0.0152673,
+          "avg_usd": 68158.3,
+          "note": "OKX账户；均价 $68,158.3/BTC"
+        }
+      ]
+    },
+    "sp500": {
+      "value_cny": 524.01,
+      "invested_cny": 519.74,
+      "profit_cny": 4.27,
+      "return_rate": 0.008216,
+      "latest_nav_date": "2026-09-22",
+      "funds": [
+        {
+          "code": "017641",
+          "short_name": "摩根标普500 A",
+          "market_value": 261.88,
+          "invested": 259.74,
+          "shares": 152.44,
+          "latest_nav": 1.7179
+        },
+        {
+          "code": "019305",
+          "short_name": "摩根标普500 C",
+          "market_value": 262.13,
+          "invested": 260.0,
+          "shares": 154.07,
+          "latest_nav": 1.7014
+        }
+      ]
+    }
+  },
+  "cost_basis": {
+    "btc_cny": 10593.09,
+    "btc_estimated": true,
+    "sp500_cny": 519.74,
+    "total_cny": 11112.83,
+    "profit_cny": 2422.19
+  },
+  "price": {
+    "btc_usdt": 83717.92,
+    "usd_cny": 6.722655,
+    "btc_cny": 562806.69,
+    "btc_source": "binance:data-api.binance.vision",
+    "fx_source": "open.er-api.com",
+    "fetched_at": "2026-09-24T13:07:56+00:00"
+  },
+  "projection": null,
+  "sources": {
+    "btc": true,
+    "sp500": true
+  },
+  "warnings": [],
+  "history_days": 1
+}
