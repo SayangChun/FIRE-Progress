@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 240" width="680" height="240" role="img" aria-label="FIRE 进度曲线">
   <title>FIRE 进度曲线</title>
-  <desc>从 2026-09-24 到 2026-09-25 的完成度变化，最新 2.463%。</desc>
+  <desc>从 2026-09-24 到 2026-09-26 的完成度变化，最新 2.433%。</desc>
   <defs>
     <linearGradient id="fireArea" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#d97706" stop-opacity="0.30"/>
@@ -18,10 +18,10 @@
     </style>
   </defs>
   <line class="grid" x1="58" y1="26.0" x2="660" y2="26.0"/><text class="fg-muted" x="50" y="30.0" text-anchor="end" font-size="10">2.832%</text><line class="grid" x1="58" y1="71.0" x2="660" y2="71.0"/><text class="fg-muted" x="50" y="75.0" text-anchor="end" font-size="10">2.124%</text><line class="grid" x1="58" y1="116.0" x2="660" y2="116.0"/><text class="fg-muted" x="50" y="120.0" text-anchor="end" font-size="10">1.416%</text><line class="grid" x1="58" y1="161.0" x2="660" y2="161.0"/><text class="fg-muted" x="50" y="165.0" text-anchor="end" font-size="10">0.708%</text><line class="grid" x1="58" y1="206.0" x2="660" y2="206.0"/><text class="fg-muted" x="50" y="210.0" text-anchor="end" font-size="10">0.000%</text>
-  <path d="M58.0,51.9 L660.0,49.5 L660.0,206.0 L58.0,206.0 Z" fill="url(#fireArea)"/>
-  <path d="M58.0,51.9 L660.0,49.5" class="line"/>
-  <circle cx="660.0" cy="49.5" r="3.5" fill="#d97706"/>
+  <path d="M58.0,51.9 L359.0,49.5 L660.0,51.4 L660.0,206.0 L58.0,206.0 Z" fill="url(#fireArea)"/>
+  <path d="M58.0,51.9 L359.0,49.5 L660.0,51.4" class="line"/>
+  <circle cx="660.0" cy="51.4" r="3.5" fill="#d97706"/>
   <text class="fg-muted" x="58" y="228" font-size="10">2026-09-24</text>
-  <text class="fg-muted" x="660" y="228" text-anchor="end" font-size="10">2026-09-25</text>
-  <text class="fg-muted" x="660.0" y="39.5" text-anchor="end" font-size="11" font-weight="500">2.463%</text>
+  <text class="fg-muted" x="660" y="228" text-anchor="end" font-size="10">2026-09-26</text>
+  <text class="fg-muted" x="660.0" y="41.4" text-anchor="end" font-size="11" font-weight="500">2.433%</text>
 </svg>
