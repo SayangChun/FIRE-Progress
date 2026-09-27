@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-09-27T02:24:10+08:00",
+  "as_of": "2026-09-27T14:20:47+08:00",
   "as_of_date": "2026-09-27",
   "fire": {
     "monthly_expense": 2000.0,
@@ -8,34 +8,34 @@
     "target_cny": 558139.53
   },
   "assets": {
-    "total_cny": 13614.24,
-    "progress": 0.024392186190050662,
-    "progress_pct": 2.4392,
-    "remaining_cny": 544525.29,
+    "total_cny": 14159.41,
+    "progress": 0.025368945997577247,
+    "progress_pct": 2.5369,
+    "remaining_cny": 543980.12,
     "btc": {
-      "qty": 0.02311808,
-      "price_cny": 565527.65,
-      "value_cny": 13073.91,
-      "snapshot_date": "2026-09-20",
-      "stale_days": 6,
+      "qty": 0.02392337,
+      "price_cny": 569279.4,
+      "value_cny": 13619.08,
+      "snapshot_date": "2026-09-27",
+      "stale_days": 0,
       "positions": [
         {
           "venue": "币安",
           "location": "binance",
           "product": "账户持仓",
           "asset": "BTC",
-          "amount": 0.00785078,
-          "avg_usd": 68163.56,
-          "note": "Binance账户；均价 $68,163.56/BTC"
+          "amount": 0.00864654,
+          "avg_usd": 68694.15,
+          "note": "Binance账户；均价 $68,694.15/BTC"
         },
         {
           "venue": "欧易",
           "location": "okx",
           "product": "账户持仓",
           "asset": "BTC",
-          "amount": 0.0152673,
-          "avg_usd": 68158.3,
-          "note": "OKX账户；均价 $68,158.3/BTC"
+          "amount": 0.01527683,
+          "avg_usd": 68139.8,
+          "note": "OKX账户；均价 $68,139.8/BTC"
         }
       ]
     },
@@ -66,21 +66,27 @@
     }
   },
   "cost_basis": {
-    "btc_cny": 10596.22,
+    "btc_cny": 11001.48,
     "btc_estimated": true,
     "sp500_cny": 539.73,
-    "total_cny": 11135.95,
-    "profit_cny": 2478.29
+    "total_cny": 11541.21,
+    "profit_cny": 2618.21
   },
   "price": {
-    "btc_usdt": 84097.82,
-    "usd_cny": 6.724641,
-    "btc_cny": 565527.65,
+    "btc_usdt": 84600.49,
+    "usd_cny": 6.729032,
+    "btc_cny": 569279.4,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-09-26T18:24:09+00:00"
+    "fetched_at": "2026-09-27T06:20:46+00:00"
   },
-  "projection": null,
+  "projection": {
+    "daily_gain_cny": 26.4067,
+    "days_to_target": 20600,
+    "eta": "2083-02-20",
+    "window_days": 30,
+    "reason": null
+  },
   "sources": {
     "btc": true,
     "sp500": true
