@@ -3,11 +3,13 @@
 口径（唯一权威定义，改口径只改这里 + config.yaml）：
 
     FIRE 目标资产 = 月开销 × 12 ÷ 提取率
-                  = 2000 × 12 ÷ 0.043
-                  = 558,139.53 元
+    当前资产      = 比特币市值 + 标普500基金市值
+    完成度        = 当前资产 ÷ FIRE 目标资产
 
-    当前资产 = 比特币市值 + 标普500基金市值
-    完成度   = 当前资产 ÷ FIRE 目标资产
+「月开销」默认由 life_plan（FIRE 生活规划）逐项推导而来，
+每一项都在 config.yaml 里标注了依据，见 scripts/lifeplan.py。
+若 config.yaml 里手工填了 fire.monthly_expense，则以手工值为准
+（用于临时试算），并在结果里标记 override。
 
 只统计这两项资产，其他一律不计入。
 比特币持仓数量来自 0.1BTC 仓库（每周手动更新，存在延迟），
@@ -17,6 +19,8 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+
+from scripts import lifeplan as lifeplan_mod
 
 
 def _now(tz_name: str = "Asia/Shanghai") -> datetime:
@@ -101,7 +105,7 @@ def compute(
     history: list[dict],
     as_of: str | None = None,
 ) -> dict:
-    monthly = float(cfg.fire.monthly_expense)
+    monthly, plan_summary = lifeplan_mod.resolve_monthly(cfg)
     rate = float(cfg.fire.withdrawal_rate)
     target = target_cny(monthly, rate)
 
@@ -142,7 +146,10 @@ def compute(
             "withdrawal_rate": rate,
             "annual_expense": monthly * 12,
             "target_cny": round(target, 2),
+            "target_with_one_off": (plan_summary or {}).get("target_with_one_off"),
+            "monthly_override": bool((plan_summary or {}).get("override")),
         },
+        "life_plan": plan_summary,
         "assets": {
             "total_cny": round(total, 2),
             "progress": progress,

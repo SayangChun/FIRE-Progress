@@ -175,6 +175,76 @@ def _positions_table(positions: list[dict], cfg) -> str:
     return "\n".join(rows) + "\n"
 
 
+def _life_plan_block(data: dict, cfg) -> str:
+    """FIRE 后月开销明细：让「目标资产」的来历可追溯。
+
+    这里的金额不做隐私遮蔽——它是未来生活预算，不是持仓金额。
+    """
+    plan = data.get("life_plan")
+    if not plan or not plan.get("groups"):
+        return ""
+
+    total = plan["monthly_expense"] or 1
+    out: list[str] = []
+
+    title = plan.get("headline") or plan.get("profile") or "生活规划"
+    out.append("<details>")
+    out.append(f"<summary>FIRE 后月开销明细 · {title}</summary>")
+    out.append("")
+    out.append("| 项目 | 月支出 | 占比 |")
+    out.append("| --- | ---: | ---: |")
+    for group in plan["groups"]:
+        share = group["subtotal"] / total * 100
+        out.append(
+            f"| **{group['group']}** | **{money(group['subtotal'], cfg)}** | {share:.1f}% |"
+        )
+        for item in group["items"]:
+            out.append(
+                f"| {item['label']} | {money(item['monthly'], cfg)} | "
+                f"{item['monthly'] / total * 100:.1f}% |"
+            )
+    out.append(f"| **合计** | **{money(plan['monthly_expense'], cfg)}** | 100.0% |")
+    out.append("")
+
+    if plan.get("override"):
+        out.append(
+            f"> ⚠️ 当前为**手工覆盖值**（`fire.monthly_expense`），"
+            f"逐项预算推导值为 {money(plan.get('derived_monthly_expense'), cfg)}。"
+        )
+        out.append("")
+
+    if plan.get("one_off"):
+        out.append("**一次性支出**（不进入 FIRE 目标，落地那年发生一次）：")
+        out.append("")
+        out.append("| 项目 | 金额 |")
+        out.append("| --- | ---: |")
+        for row in plan["one_off"]:
+            out.append(f"| {row['label']} | {money(row['amount'], cfg)} |")
+        out.append(f"| **合计** | **{money(plan['one_off_total'], cfg)}** |")
+        out.append("")
+
+    out.append(
+        "> `月开销 = 上表逐项相加`，`FIRE 目标 = 月开销 × 12 ÷ 提取率`。"
+        "每项金额的依据见 [config.yaml](config.yaml) 与 "
+        "[docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。"
+    )
+    out.append(">")
+    out.append(
+        "> 一次性支出**不摊进月开销**——它不产生永续现金流，"
+        "摊进去会同时虚增月开销与 FIRE 目标。"
+    )
+    if plan.get("target_with_one_off"):
+        out.append(">")
+        out.append(
+            f"> 含一次性支出的资金需求：**{money(plan['target_with_one_off'], cfg)}**"
+            f"（= FIRE 目标 + 一次性支出）。"
+        )
+    out.append("")
+    out.append("</details>")
+    out.append("")
+    return "\n".join(out)
+
+
 def render_block(data: dict, cfg, history: list[dict]) -> str:
     fire = data["fire"]
     assets = data["assets"]
@@ -211,6 +281,12 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append(f"| 📈 完成度 | **{pct:.3f}%** |")
     out.append(f"| ⏳ 距离目标 | {money(assets['remaining_cny'], cfg)} |")
     out.append("")
+
+    if cfg.display.get("show_life_plan", True):
+        plan_block = _life_plan_block(data, cfg)
+        if plan_block:
+            out.append(plan_block.strip())
+            out.append("")
 
     out.append("### 资产构成")
     out.append("")
@@ -327,7 +403,8 @@ def merge_readme(existing: str, block: str) -> str:
     return existing.rstrip() + "\n\n" + block
 
 
-def default_readme(block: str, cfg) -> str:
+def default_readme(block: str, cfg, monthly: float) -> str:
+    rate = float(cfg.fire.withdrawal_rate)
     return f"""# FIRE-Progress
 
 > 我的 FIRE 进度看板。只统计**比特币**与**标普500基金**两项资产，
@@ -338,11 +415,13 @@ def default_readme(block: str, cfg) -> str:
 
 | 参数 | 取值 |
 | --- | ---: |
-| 月开销 | ¥{cfg.fire.monthly_expense:,.0f} |
-| 提取率 | {cfg.fire.withdrawal_rate * 100:.1f}% |
-| **FIRE 目标资产** | **¥{cfg.fire.monthly_expense * 12 / cfg.fire.withdrawal_rate:,.2f}** |
+| 月开销 | ¥{monthly:,.0f} |
+| 提取率 | {rate * 100:.1f}% |
+| **FIRE 目标资产** | **¥{monthly * 12 / rate:,.2f}** |
 
 公式：`FIRE 目标 = 月开销 × 12 ÷ 提取率`，`完成度 = 当前资产 ÷ FIRE 目标`。
+月开销由 [config.yaml](config.yaml) 的 `life_plan` 逐项推导，见
+[docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。
 
 ## 计入范围
 

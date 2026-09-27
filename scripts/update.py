@@ -220,6 +220,15 @@ def main() -> int:
 
     fire = data["fire"]
     assets = data["assets"]
+    plan = data.get("life_plan")
+    if plan:
+        print(f"  生活规划 = {plan.get('headline') or plan.get('profile')}")
+        for group in plan.get("groups", []):
+            print(f"    {group['group']}：¥{group['subtotal']:,.2f}")
+        note = "（手工覆盖）" if plan.get("override") else "（逐项推导）"
+        print(f"    月开销合计 = ¥{plan['monthly_expense']:,.2f}{note}")
+        if plan.get("one_off_total"):
+            print(f"    一次性支出 = ¥{plan['one_off_total']:,.2f}（不计入月开销）")
     print(f"  目标 = ¥{fire['target_cny']:,.2f}（{fire['monthly_expense']:.0f} × 12 ÷ {fire['withdrawal_rate']}）")
     print(f"  比特币 = {assets['btc']['qty']:.8f} → ¥{assets['btc']['value_cny']:,.2f}")
     print(f"  标普500 = ¥{assets['sp500']['value_cny']:,.2f}")
@@ -250,7 +259,7 @@ def main() -> int:
     if rendermod.START_MARK in existing:
         merged_readme = rendermod.merge_readme(existing, block)
     else:
-        merged_readme = rendermod.default_readme(block, cfg)
+        merged_readme = rendermod.default_readme(block, cfg, fire["monthly_expense"])
     readme_path.write_text(merged_readme, encoding="utf-8")
     print("→ 已更新 README.md")
 

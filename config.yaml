@@ -4,10 +4,101 @@
 # ============================================================
 
 fire:
-  monthly_expense: 2000 # 月开销（元）
+  # 月开销（元）。
+  #   null = 由下面的 life_plan 逐项推导（推荐，每一分钱都能追溯到依据）
+  #   数字 = 覆盖 life_plan 的结果，用于临时试算「如果每月只花 X 会怎样」
+  monthly_expense: null
   withdrawal_rate: 0.043 # 提取率 4.3%
   currency: CNY
   currency_symbol: "¥"
+
+# ------------------------------------------------------------
+# FIRE 生活规划（Life Plan）
+# ------------------------------------------------------------
+# 目的：把「月开销」从拍脑袋的数字，换成一份可追溯的逐项预算。
+#
+#       FIRE 目标 = 月开销 × 12 ÷ 提取率
+#
+# 所以这里每一项金额都会直接改变 FIRE 目标、进而改变完成度。
+# 改一项，全盘重算——这正是把它写进 config 而不是写进文档的原因。
+#
+# 口径：
+#   1. 只统计「FIRE 之后」的经常性支出，不是当前的生活成本。
+#   2. 一次性支出（搬家、押金、家具）不进月开销。它们不产生永续
+#      现金流，混进「月开销 × 12 ÷ 提取率」会同时虚增月开销与目标，
+#      所以单列在 one_off，另外加总。
+#   3. 逐项都标注依据；凡估算值一律写明「估算」。
+#
+# 切换方案：改 life_plan.profile 一行即可，其余自动重算。
+# 若 profile 写了不存在的名字，程序会直接报错，不会静默回落——
+# 静默回落会让 FIRE 目标悄悄跑偏，比报错危险得多。
+# ------------------------------------------------------------
+life_plan:
+  enabled: true
+  profile: hegang-rent-minimal # ← 改这一行即可切换方案
+
+  profiles:
+    # 当前选定的基准方案。所有金额为 2026 年鹤岗口径的估算值，
+    # 依据来自黑龙江省市监局/商务部生活必需品价格监测与实地实测报道。
+    hegang-rent-minimal:
+      city: 鹤岗
+      province: 黑龙江
+      housing: rent
+      household: 1
+      lifestyle: 极简
+      headline: 鹤岗 · 单人 · 租房 · 极简
+      items:
+        - {key: rent, group: 住房与水电燃气, label: 房租, monthly: 520, note: "一居室/简装小两居（老城区）。鹤岗住宅均价 ¥2083/㎡、售租比 17，折算 50㎡ 一居室月租约 ¥500-620，取 520，属估算"}
+        - {key: heating, group: 住房与水电燃气, label: 取暖费, monthly: 100, note: "集中供暖。建筑面积 50㎡ × 87% 计费面积 × ¥27.5/㎡ ÷ 12 ≈ ¥100/月。鹤岗按建筑面积的 87% 计费"}
+        - {key: property_fee, group: 住房与水电燃气, label: 物业费, monthly: 20, note: "老旧小区约 ¥0.4/㎡/月；部分小区由财政兜底，可能更低"}
+        - {key: water, group: 住房与水电燃气, label: 水费, monthly: 12, note: "单人约 3 吨/月"}
+        - {key: electricity, group: 住房与水电燃气, label: 电费, monthly: 55, note: "约 110 度/月。冬季靠集中供暖，不需要电暖器，所以用电量低于南方"}
+        - {key: gas, group: 住房与水电燃气, label: 燃气/液化气, monthly: 35, note: "自己做饭，约 1/3 罐 15kg 液化气/月；有管道燃气的楼栋会更便宜"}
+        - {key: telecom, group: 日常开销, label: 网络与手机, monthly: 55, note: "宽带 + 手机套餐"}
+        - {key: food, group: 日常开销, label: 食品, monthly: 500, note: "自己做饭为主、早市采购，约 ¥17/天。东北菜价：大米约 ¥6/kg、猪肉约 ¥23/kg、鸡蛋约 ¥8/kg、蔬菜约 ¥8-10/kg"}
+        - {key: supplies, group: 日常开销, label: 日用品, monthly: 60, note: "洗护、纸品、清洁等"}
+        - {key: transport, group: 日常开销, label: 交通, monthly: 40, note: "公交 ¥1 全程、月卡 ¥50；极简以步行/骑车为主"}
+        - {key: clothing, group: 日常开销, label: 衣物, monthly: 40, note: "按年摊销。东北冬装单价高但更新慢"}
+        - {key: misc, group: 日常开销, label: 娱乐与杂项, monthly: 50, note: "极简档：几乎不外食、不旅行"}
+        - {key: resident_medical, group: 医疗与保障, label: 城乡居民医保, monthly: 33, note: "¥400/年，2026 年国家统一标准。不交社保后这是唯一的兜底医保"}
+        - {key: huiminbao, group: 医疗与保障, label: 惠民保, monthly: 13, note: "龙江惠民保升级版 ¥150/年，补充医保目录外费用。以当年实际保费为准"}
+        - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 80, note: "居民医保报销比例低于职工医保，门诊与小额自付需自己留出"}
+        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 137, note: "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1750"}
+
+    # 对照方案：同样在鹤岗租房，但生活档次放宽到常规
+    # （每周外食 2-3 次、每年一次短途旅行、公交+偶尔打车）。
+    hegang-rent-normal:
+      city: 鹤岗
+      province: 黑龙江
+      housing: rent
+      household: 1
+      lifestyle: 常规
+      headline: 鹤岗 · 单人 · 租房 · 常规
+      items:
+        - {key: rent, group: 住房与水电燃气, label: 房租, monthly: 600, note: "一居室精装或小两居"}
+        - {key: heating, group: 住房与水电燃气, label: 取暖费, monthly: 120, note: "建筑面积 60㎡ × 87% × ¥27.5/㎡ ÷ 12"}
+        - {key: property_fee, group: 住房与水电燃气, label: 物业费, monthly: 30, note: "有正规物业的小区"}
+        - {key: water, group: 住房与水电燃气, label: 水费, monthly: 15, note: "单人约 4 吨/月"}
+        - {key: electricity, group: 住房与水电燃气, label: 电费, monthly: 70, note: "约 140 度/月"}
+        - {key: gas, group: 住房与水电燃气, label: 燃气/液化气, monthly: 45, note: "做饭频次更高"}
+        - {key: telecom, group: 日常开销, label: 网络与手机, monthly: 70, note: "更高带宽 + 流量套餐"}
+        - {key: food, group: 日常开销, label: 食品, monthly: 750, note: "含每周 2-3 次外食"}
+        - {key: supplies, group: 日常开销, label: 日用品, monthly: 80, note: "洗护、纸品、清洁等"}
+        - {key: transport, group: 日常开销, label: 交通, monthly: 120, note: "公交月卡 + 偶尔打车"}
+        - {key: clothing, group: 日常开销, label: 衣物, monthly: 100, note: "按年摊销"}
+        - {key: misc, group: 日常开销, label: 娱乐与杂项, monthly: 150, note: "含每年一次短途旅行的摊销"}
+        - {key: resident_medical, group: 医疗与保障, label: 城乡居民医保, monthly: 33, note: "¥400/年，2026 年国家统一标准"}
+        - {key: huiminbao, group: 医疗与保障, label: 惠民保, monthly: 13, note: "龙江惠民保升级版 ¥150/年"}
+        - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 120, note: "门诊与小额自付"}
+        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 184, note: "按月留一笔机动钱；此项同时用于把合计取整到 ¥2500"}
+
+  # 一次性支出：不进入「月开销 × 12 ÷ 提取率」，单独加总。
+  # 它们只在 FIRE 落地的那一年发生一次。
+  one_off:
+    - {key: deposit, label: 租房押金, amount: 1000, note: "押一付三中的押金，退租时返还；按 2 个月租金估算"}
+    - {key: moving, label: 搬家与长途运输, amount: 3000, note: "从北京到鹤岗，含打包与物流"}
+    - {key: furniture, label: 家具家电添置, amount: 8000, note: "出租房常不带全套家电；洗衣机、冰箱、床、桌椅等"}
+    - {key: winter_kit, label: 过冬装备, amount: 3000, note: "羽绒服、雪地靴、厚被褥等，一次性投入"}
 
 # ------------------------------------------------------------
 # 数据来源
@@ -74,6 +165,7 @@ display:
   projection_window_days: 30
   show_curve: true
   curve_days: 90
+  show_life_plan: true # 在 README 里展示月开销明细（FIRE 生活预算）
 
 # ------------------------------------------------------------
 # 自动化

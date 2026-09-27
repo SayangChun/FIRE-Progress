@@ -1,21 +1,203 @@
 {
-  "as_of": "2026-09-27T14:20:47+08:00",
+  "as_of": "2026-09-27T17:20:19+08:00",
   "as_of_date": "2026-09-27",
   "fire": {
-    "monthly_expense": 2000.0,
+    "monthly_expense": 1750.0,
     "withdrawal_rate": 0.043,
-    "annual_expense": 24000.0,
-    "target_cny": 558139.53
+    "annual_expense": 21000.0,
+    "target_cny": 488372.09,
+    "target_with_one_off": 503372.09,
+    "monthly_override": false
+  },
+  "life_plan": {
+    "enabled": true,
+    "profile": "hegang-rent-minimal",
+    "city": "鹤岗",
+    "province": "黑龙江",
+    "housing": "rent",
+    "household": 1,
+    "lifestyle": "极简",
+    "headline": "鹤岗 · 单人 · 租房 · 极简",
+    "monthly_expense": 1750.0,
+    "annual_expense": 21000.0,
+    "target_cny": 488372.09,
+    "groups": [
+      {
+        "group": "住房与水电燃气",
+        "items": [
+          {
+            "key": "rent",
+            "group": "住房与水电燃气",
+            "label": "房租",
+            "monthly": 520.0,
+            "note": "一居室/简装小两居（老城区）。鹤岗住宅均价 ¥2083/㎡、售租比 17，折算 50㎡ 一居室月租约 ¥500-620，取 520，属估算"
+          },
+          {
+            "key": "heating",
+            "group": "住房与水电燃气",
+            "label": "取暖费",
+            "monthly": 100.0,
+            "note": "集中供暖。建筑面积 50㎡ × 87% 计费面积 × ¥27.5/㎡ ÷ 12 ≈ ¥100/月。鹤岗按建筑面积的 87% 计费"
+          },
+          {
+            "key": "property_fee",
+            "group": "住房与水电燃气",
+            "label": "物业费",
+            "monthly": 20.0,
+            "note": "老旧小区约 ¥0.4/㎡/月；部分小区由财政兜底，可能更低"
+          },
+          {
+            "key": "water",
+            "group": "住房与水电燃气",
+            "label": "水费",
+            "monthly": 12.0,
+            "note": "单人约 3 吨/月"
+          },
+          {
+            "key": "electricity",
+            "group": "住房与水电燃气",
+            "label": "电费",
+            "monthly": 55.0,
+            "note": "约 110 度/月。冬季靠集中供暖，不需要电暖器，所以用电量低于南方"
+          },
+          {
+            "key": "gas",
+            "group": "住房与水电燃气",
+            "label": "燃气/液化气",
+            "monthly": 35.0,
+            "note": "自己做饭，约 1/3 罐 15kg 液化气/月；有管道燃气的楼栋会更便宜"
+          }
+        ],
+        "subtotal": 742.0
+      },
+      {
+        "group": "日常开销",
+        "items": [
+          {
+            "key": "telecom",
+            "group": "日常开销",
+            "label": "网络与手机",
+            "monthly": 55.0,
+            "note": "宽带 + 手机套餐"
+          },
+          {
+            "key": "food",
+            "group": "日常开销",
+            "label": "食品",
+            "monthly": 500.0,
+            "note": "自己做饭为主、早市采购，约 ¥17/天。东北菜价：大米约 ¥6/kg、猪肉约 ¥23/kg、鸡蛋约 ¥8/kg、蔬菜约 ¥8-10/kg"
+          },
+          {
+            "key": "supplies",
+            "group": "日常开销",
+            "label": "日用品",
+            "monthly": 60.0,
+            "note": "洗护、纸品、清洁等"
+          },
+          {
+            "key": "transport",
+            "group": "日常开销",
+            "label": "交通",
+            "monthly": 40.0,
+            "note": "公交 ¥1 全程、月卡 ¥50；极简以步行/骑车为主"
+          },
+          {
+            "key": "clothing",
+            "group": "日常开销",
+            "label": "衣物",
+            "monthly": 40.0,
+            "note": "按年摊销。东北冬装单价高但更新慢"
+          },
+          {
+            "key": "misc",
+            "group": "日常开销",
+            "label": "娱乐与杂项",
+            "monthly": 50.0,
+            "note": "极简档：几乎不外食、不旅行"
+          }
+        ],
+        "subtotal": 745.0
+      },
+      {
+        "group": "医疗与保障",
+        "items": [
+          {
+            "key": "resident_medical",
+            "group": "医疗与保障",
+            "label": "城乡居民医保",
+            "monthly": 33.0,
+            "note": "¥400/年，2026 年国家统一标准。不交社保后这是唯一的兜底医保"
+          },
+          {
+            "key": "huiminbao",
+            "group": "医疗与保障",
+            "label": "惠民保",
+            "monthly": 13.0,
+            "note": "龙江惠民保升级版 ¥150/年，补充医保目录外费用。以当年实际保费为准"
+          },
+          {
+            "key": "medical_buffer",
+            "group": "医疗与保障",
+            "label": "医疗自付预留",
+            "monthly": 80.0,
+            "note": "居民医保报销比例低于职工医保，门诊与小额自付需自己留出"
+          }
+        ],
+        "subtotal": 126.0
+      },
+      {
+        "group": "风险缓冲",
+        "items": [
+          {
+            "key": "buffer",
+            "group": "风险缓冲",
+            "label": "应急与物价缓冲",
+            "monthly": 137.0,
+            "note": "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1750"
+          }
+        ],
+        "subtotal": 137.0
+      }
+    ],
+    "one_off": [
+      {
+        "key": "deposit",
+        "label": "租房押金",
+        "amount": 1000.0,
+        "note": "押一付三中的押金，退租时返还；按 2 个月租金估算"
+      },
+      {
+        "key": "moving",
+        "label": "搬家与长途运输",
+        "amount": 3000.0,
+        "note": "从北京到鹤岗，含打包与物流"
+      },
+      {
+        "key": "furniture",
+        "label": "家具家电添置",
+        "amount": 8000.0,
+        "note": "出租房常不带全套家电；洗衣机、冰箱、床、桌椅等"
+      },
+      {
+        "key": "winter_kit",
+        "label": "过冬装备",
+        "amount": 3000.0,
+        "note": "羽绒服、雪地靴、厚被褥等，一次性投入"
+      }
+    ],
+    "one_off_total": 15000.0,
+    "target_with_one_off": 503372.09,
+    "override": false
   },
   "assets": {
-    "total_cny": 14159.41,
-    "progress": 0.025368945997577247,
-    "progress_pct": 2.5369,
-    "remaining_cny": 543980.12,
+    "total_cny": 14168.67,
+    "progress": 0.029012045070174394,
+    "progress_pct": 2.9012,
+    "remaining_cny": 474203.42,
     "btc": {
       "qty": 0.02392337,
-      "price_cny": 569279.4,
-      "value_cny": 13619.08,
+      "price_cny": 569666.53,
+      "value_cny": 13628.34,
       "snapshot_date": "2026-09-27",
       "stale_days": 0,
       "positions": [
@@ -70,20 +252,20 @@
     "btc_estimated": true,
     "sp500_cny": 539.73,
     "total_cny": 11541.21,
-    "profit_cny": 2618.21
+    "profit_cny": 2627.47
   },
   "price": {
-    "btc_usdt": 84600.49,
+    "btc_usdt": 84658.02,
     "usd_cny": 6.729032,
-    "btc_cny": 569279.4,
-    "btc_source": "binance:data-api.binance.vision",
+    "btc_cny": 569666.53,
+    "btc_source": "binance:api.binance.com",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-09-27T06:20:46+00:00"
+    "fetched_at": "2026-09-27T17:20:17+08:00"
   },
   "projection": {
-    "daily_gain_cny": 26.4067,
-    "days_to_target": 20600,
-    "eta": "2083-02-20",
+    "daily_gain_cny": 208.13,
+    "days_to_target": 2278,
+    "eta": "2032-12-22",
     "window_days": 30,
     "reason": null
   },

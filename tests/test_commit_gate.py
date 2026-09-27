@@ -14,10 +14,13 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from scripts import config as cfgmod  # noqa: E402
+from scripts import lifeplan as lifeplan_mod  # noqa: E402
 from scripts.update import is_material  # noqa: E402
 
 cfg = cfgmod.load()
-TARGET = float(cfg.fire.monthly_expense) * 12 / float(cfg.fire.withdrawal_rate)
+# 月开销现在默认由 life_plan 逐项推导，不能直接读 fire.monthly_expense（可能是 null）
+MONTHLY, _ = lifeplan_mod.resolve_monthly(cfg)
+TARGET = MONTHLY * 12 / float(cfg.fire.withdrawal_rate)
 RATIO = float(cfg.automation.get("min_commit_delta_ratio", 0.003))
 FLOOR = float(cfg.automation.get("min_commit_delta_cny", 1.0))
 
