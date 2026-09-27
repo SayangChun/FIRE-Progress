@@ -1,12 +1,12 @@
 {
-  "as_of": "2026-09-27T17:20:19+08:00",
+  "as_of": "2026-09-27T17:45:05+08:00",
   "as_of_date": "2026-09-27",
   "fire": {
-    "monthly_expense": 1750.0,
+    "monthly_expense": 1905.0,
     "withdrawal_rate": 0.043,
-    "annual_expense": 21000.0,
-    "target_cny": 488372.09,
-    "target_with_one_off": 503372.09,
+    "annual_expense": 22860.0,
+    "target_cny": 531627.91,
+    "target_with_one_off": 546627.91,
     "monthly_override": false
   },
   "life_plan": {
@@ -18,9 +18,9 @@
     "household": 1,
     "lifestyle": "极简",
     "headline": "鹤岗 · 单人 · 租房 · 极简",
-    "monthly_expense": 1750.0,
-    "annual_expense": 21000.0,
-    "target_cny": 488372.09,
+    "monthly_expense": 1905.0,
+    "annual_expense": 22860.0,
+    "target_cny": 531627.91,
     "groups": [
       {
         "group": "住房与水电燃气",
@@ -66,9 +66,16 @@
             "label": "燃气/液化气",
             "monthly": 35.0,
             "note": "自己做饭，约 1/3 罐 15kg 液化气/月；有管道燃气的楼栋会更便宜"
+          },
+          {
+            "key": "appliance",
+            "group": "住房与水电燃气",
+            "label": "家电维修与更换摊销",
+            "monthly": 40.0,
+            "note": "洗衣机、冰箱等按 10 年更换摊销，含小修费用。租房时通常需自备"
           }
         ],
-        "subtotal": 742.0
+        "subtotal": 782.0
       },
       {
         "group": "日常开销",
@@ -88,6 +95,13 @@
             "note": "自己做饭为主、早市采购，约 ¥17/天。东北菜价：大米约 ¥6/kg、猪肉约 ¥23/kg、鸡蛋约 ¥8/kg、蔬菜约 ¥8-10/kg"
           },
           {
+            "key": "drinking_water",
+            "group": "日常开销",
+            "label": "饮用水",
+            "monthly": 15.0,
+            "note": "桶装水或净水器滤芯；自来水费已单列在水费里"
+          },
+          {
             "key": "supplies",
             "group": "日常开销",
             "label": "日用品",
@@ -100,6 +114,13 @@
             "label": "交通",
             "monthly": 40.0,
             "note": "公交 ¥1 全程、月卡 ¥50；极简以步行/骑车为主"
+          },
+          {
+            "key": "home_visit",
+            "group": "日常开销",
+            "label": "探亲与返乡交通",
+            "monthly": 100.0,
+            "note": "每年 1-2 次往返，单次火车往返约 ¥1000，折算 ≈ ¥100/月"
           },
           {
             "key": "clothing",
@@ -116,7 +137,7 @@
             "note": "极简档：几乎不外食、不旅行"
           }
         ],
-        "subtotal": 745.0
+        "subtotal": 860.0
       },
       {
         "group": "医疗与保障",
@@ -153,7 +174,7 @@
             "group": "风险缓冲",
             "label": "应急与物价缓冲",
             "monthly": 137.0,
-            "note": "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1750"
+            "note": "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1905"
           }
         ],
         "subtotal": 137.0
@@ -186,18 +207,18 @@
       }
     ],
     "one_off_total": 15000.0,
-    "target_with_one_off": 503372.09,
+    "target_with_one_off": 546627.91,
     "override": false
   },
   "assets": {
-    "total_cny": 14168.67,
-    "progress": 0.029012045070174394,
-    "progress_pct": 2.9012,
-    "remaining_cny": 474203.42,
+    "total_cny": 14192.21,
+    "progress": 0.0266957611339309,
+    "progress_pct": 2.6696,
+    "remaining_cny": 517435.7,
     "btc": {
       "qty": 0.02392337,
-      "price_cny": 569666.53,
-      "value_cny": 13628.34,
+      "price_cny": 570650.44,
+      "value_cny": 13651.88,
       "snapshot_date": "2026-09-27",
       "stale_days": 0,
       "positions": [
@@ -252,20 +273,20 @@
     "btc_estimated": true,
     "sp500_cny": 539.73,
     "total_cny": 11541.21,
-    "profit_cny": 2627.47
+    "profit_cny": 2651.01
   },
   "price": {
-    "btc_usdt": 84658.02,
+    "btc_usdt": 84804.24,
     "usd_cny": 6.729032,
-    "btc_cny": 569666.53,
+    "btc_cny": 570650.44,
     "btc_source": "binance:api.binance.com",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-09-27T17:20:17+08:00"
+    "fetched_at": "2026-09-27T17:45:04+08:00"
   },
   "projection": {
-    "daily_gain_cny": 208.13,
-    "days_to_target": 2278,
-    "eta": "2032-12-22",
+    "daily_gain_cny": 217.67,
+    "days_to_target": 2377,
+    "eta": "2033-03-31",
     "window_days": 30,
     "reason": null
   },

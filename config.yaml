@@ -54,16 +54,19 @@ life_plan:
         - {key: water, group: 住房与水电燃气, label: 水费, monthly: 12, note: "单人约 3 吨/月"}
         - {key: electricity, group: 住房与水电燃气, label: 电费, monthly: 55, note: "约 110 度/月。冬季靠集中供暖，不需要电暖器，所以用电量低于南方"}
         - {key: gas, group: 住房与水电燃气, label: 燃气/液化气, monthly: 35, note: "自己做饭，约 1/3 罐 15kg 液化气/月；有管道燃气的楼栋会更便宜"}
+        - {key: appliance, group: 住房与水电燃气, label: 家电维修与更换摊销, monthly: 40, note: "洗衣机、冰箱等按 10 年更换摊销，含小修费用。租房时通常需自备"}
         - {key: telecom, group: 日常开销, label: 网络与手机, monthly: 55, note: "宽带 + 手机套餐"}
         - {key: food, group: 日常开销, label: 食品, monthly: 500, note: "自己做饭为主、早市采购，约 ¥17/天。东北菜价：大米约 ¥6/kg、猪肉约 ¥23/kg、鸡蛋约 ¥8/kg、蔬菜约 ¥8-10/kg"}
+        - {key: drinking_water, group: 日常开销, label: 饮用水, monthly: 15, note: "桶装水或净水器滤芯；自来水费已单列在水费里"}
         - {key: supplies, group: 日常开销, label: 日用品, monthly: 60, note: "洗护、纸品、清洁等"}
         - {key: transport, group: 日常开销, label: 交通, monthly: 40, note: "公交 ¥1 全程、月卡 ¥50；极简以步行/骑车为主"}
+        - {key: home_visit, group: 日常开销, label: 探亲与返乡交通, monthly: 100, note: "每年 1-2 次往返，单次火车往返约 ¥1000，折算 ≈ ¥100/月"}
         - {key: clothing, group: 日常开销, label: 衣物, monthly: 40, note: "按年摊销。东北冬装单价高但更新慢"}
         - {key: misc, group: 日常开销, label: 娱乐与杂项, monthly: 50, note: "极简档：几乎不外食、不旅行"}
         - {key: resident_medical, group: 医疗与保障, label: 城乡居民医保, monthly: 33, note: "¥400/年，2026 年国家统一标准。不交社保后这是唯一的兜底医保"}
         - {key: huiminbao, group: 医疗与保障, label: 惠民保, monthly: 13, note: "龙江惠民保升级版 ¥150/年，补充医保目录外费用。以当年实际保费为准"}
         - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 80, note: "居民医保报销比例低于职工医保，门诊与小额自付需自己留出"}
-        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 137, note: "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1750"}
+        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 137, note: "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1905"}
 
     # 对照方案：同样在鹤岗租房，但生活档次放宽到常规
     # （每周外食 2-3 次、每年一次短途旅行、公交+偶尔打车）。
@@ -81,16 +84,19 @@ life_plan:
         - {key: water, group: 住房与水电燃气, label: 水费, monthly: 15, note: "单人约 4 吨/月"}
         - {key: electricity, group: 住房与水电燃气, label: 电费, monthly: 70, note: "约 140 度/月"}
         - {key: gas, group: 住房与水电燃气, label: 燃气/液化气, monthly: 45, note: "做饭频次更高"}
+        - {key: appliance, group: 住房与水电燃气, label: 家电维修与更换摊销, monthly: 40, note: "洗衣机、冰箱等按 10 年更换摊销"}
         - {key: telecom, group: 日常开销, label: 网络与手机, monthly: 70, note: "更高带宽 + 流量套餐"}
         - {key: food, group: 日常开销, label: 食品, monthly: 750, note: "含每周 2-3 次外食"}
+        - {key: drinking_water, group: 日常开销, label: 饮用水, monthly: 20, note: "桶装水或净水器滤芯"}
         - {key: supplies, group: 日常开销, label: 日用品, monthly: 80, note: "洗护、纸品、清洁等"}
         - {key: transport, group: 日常开销, label: 交通, monthly: 120, note: "公交月卡 + 偶尔打车"}
+        - {key: home_visit, group: 日常开销, label: 探亲与返乡交通, monthly: 100, note: "每年 1-2 次往返，单次火车往返约 ¥1000，折算 ≈ ¥100/月"}
         - {key: clothing, group: 日常开销, label: 衣物, monthly: 100, note: "按年摊销"}
         - {key: misc, group: 日常开销, label: 娱乐与杂项, monthly: 150, note: "含每年一次短途旅行的摊销"}
         - {key: resident_medical, group: 医疗与保障, label: 城乡居民医保, monthly: 33, note: "¥400/年，2026 年国家统一标准"}
         - {key: huiminbao, group: 医疗与保障, label: 惠民保, monthly: 13, note: "龙江惠民保升级版 ¥150/年"}
         - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 120, note: "门诊与小额自付"}
-        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 184, note: "按月留一笔机动钱；此项同时用于把合计取整到 ¥2500"}
+        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 184, note: "按月留一笔机动钱；此项同时用于把合计取整到 ¥2660"}
 
   # 一次性支出：不进入「月开销 × 12 ÷ 提取率」，单独加总。
   # 它们只在 FIRE 落地的那一年发生一次。
