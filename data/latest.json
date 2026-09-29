@@ -1,12 +1,12 @@
 {
-  "as_of": "2026-09-29T12:54:53+08:00",
+  "as_of": "2026-09-29T13:31:56+08:00",
   "as_of_date": "2026-09-29",
   "fire": {
-    "monthly_expense": 1780.0,
+    "monthly_expense": 1758.0,
     "withdrawal_rate": 0.043,
-    "annual_expense": 21360.0,
-    "target_cny": 496744.19,
-    "target_with_one_off": 511744.19,
+    "annual_expense": 21096.0,
+    "target_cny": 490604.65,
+    "target_with_one_off": 505604.65,
     "monthly_override": false
   },
   "life_plan": {
@@ -18,9 +18,9 @@
     "household": 1,
     "lifestyle": "极简",
     "headline": "牡丹江 · 单人 · 租房 · 极简",
-    "monthly_expense": 1780.0,
-    "annual_expense": 21360.0,
-    "target_cny": 496744.19,
+    "monthly_expense": 1758.0,
+    "annual_expense": 21096.0,
+    "target_cny": 490604.65,
     "groups": [
       {
         "group": "住房与水电燃气",
@@ -105,8 +105,8 @@
             "key": "supplies",
             "group": "日常开销",
             "label": "日用品",
-            "monthly": 50.0,
-            "note": "洗护、纸品、清洁等，含理发"
+            "monthly": 28.0,
+            "note": "极限档 ¥28：香皂替代洗发水与沐浴露、洗衣皂替代洗衣液、只买卷纸不买抽纸、小苏打+白醋替代专用清洁剂。含洗护、纸品、清洁、垃圾袋与杂项摊销。理发已改为自理，不再计入"
           },
           {
             "key": "transport",
@@ -137,7 +137,7 @@
             "note": "极简档：几乎不外食、不旅行，含软件订阅与域名"
           }
         ],
-        "subtotal": 745.0
+        "subtotal": 723.0
       },
       {
         "group": "医疗与保障",
@@ -174,7 +174,7 @@
             "group": "风险缓冲",
             "label": "应急与物价缓冲",
             "monthly": 137.0,
-            "note": "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1780。经确认不下调"
+            "note": "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1758。经确认不下调"
           }
         ],
         "subtotal": 137.0
@@ -207,18 +207,18 @@
       }
     ],
     "one_off_total": 15000.0,
-    "target_with_one_off": 511744.19,
+    "target_with_one_off": 505604.65,
     "override": false
   },
   "assets": {
-    "total_cny": 13939.69,
-    "progress": 0.028062118171735144,
-    "progress_pct": 2.8062,
-    "remaining_cny": 482804.49,
+    "total_cny": 13944.39,
+    "progress": 0.02842286784557699,
+    "progress_pct": 2.8423,
+    "remaining_cny": 476660.26,
     "btc": {
       "qty": 0.02392337,
-      "price_cny": 559257.08,
-      "value_cny": 13379.31,
+      "price_cny": 559453.42,
+      "value_cny": 13384.01,
       "snapshot_date": "2026-09-27",
       "stale_days": 2,
       "positions": [
@@ -273,20 +273,20 @@
     "btc_estimated": true,
     "sp500_cny": 559.72,
     "total_cny": 11549.01,
-    "profit_cny": 2390.68
+    "profit_cny": 2395.38
   },
   "price": {
-    "btc_usdt": 83203.23,
+    "btc_usdt": 83232.44,
     "usd_cny": 6.721579,
-    "btc_cny": 559257.08,
+    "btc_cny": 559453.42,
     "btc_source": "binance:api.binance.com",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-09-29T12:54:52+08:00"
+    "fetched_at": "2026-09-29T13:31:53+08:00"
   },
   "projection": {
-    "daily_gain_cny": 95.716,
-    "days_to_target": 5044,
-    "eta": "2040-07-21",
+    "daily_gain_cny": 84.368,
+    "days_to_target": 5649,
+    "eta": "2042-03-18",
     "window_days": 30,
     "reason": null
   },
