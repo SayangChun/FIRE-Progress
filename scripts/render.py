@@ -178,6 +178,10 @@ def _positions_table(positions: list[dict], cfg) -> str:
 def _life_plan_block(data: dict, cfg) -> str:
     """FIRE 后月开销明细：让「目标资产」的来历可追溯。
 
+    分两层展示，避免「分类行和明细行长得一样、只靠加粗区分」：
+      1. 分类汇总表 —— 先看清钱花在哪几个大类、各占多少
+      2. 每类一张独立小表 —— 分类名单独成行，不再混进表格当行
+
     这里的金额不做隐私遮蔽——它是未来生活预算，不是持仓金额。
     """
     plan = data.get("life_plan")
@@ -185,26 +189,44 @@ def _life_plan_block(data: dict, cfg) -> str:
         return ""
 
     total = plan["monthly_expense"] or 1
+    n_items = sum(len(g["items"]) for g in plan["groups"])
     out: list[str] = []
 
     title = plan.get("headline") or plan.get("profile") or "生活规划"
     out.append("<details>")
     out.append(f"<summary>FIRE 后月开销明细 · {title}</summary>")
     out.append("")
-    out.append("| 项目 | 月支出 | 占比 |")
+    out.append(f"共 **{n_items} 项**，合计 **{money(plan['monthly_expense'], cfg)}/月**。")
+    out.append("")
+
+    out.append("**分类汇总**")
+    out.append("")
+    out.append("| 分类 | 月支出 | 占比 |")
     out.append("| --- | ---: | ---: |")
+    for group in plan["groups"]:
+        out.append(
+            f"| {group['group']} | {money(group['subtotal'], cfg)} | "
+            f"{group['subtotal'] / total * 100:.1f}% |"
+        )
+    out.append(f"| **合计** | **{money(plan['monthly_expense'], cfg)}** | 100.0% |")
+    out.append("")
+
+    out.append("**逐项明细**")
+    out.append("")
     for group in plan["groups"]:
         share = group["subtotal"] / total * 100
         out.append(
-            f"| **{group['group']}** | **{money(group['subtotal'], cfg)}** | {share:.1f}% |"
+            f"**{group['group']}** · {money(group['subtotal'], cfg)}/月 · 占 {share:.1f}%"
         )
+        out.append("")
+        out.append("| 项目 | 月支出 | 占总计 |")
+        out.append("| --- | ---: | ---: |")
         for item in group["items"]:
             out.append(
                 f"| {item['label']} | {money(item['monthly'], cfg)} | "
                 f"{item['monthly'] / total * 100:.1f}% |"
             )
-    out.append(f"| **合计** | **{money(plan['monthly_expense'], cfg)}** | 100.0% |")
-    out.append("")
+        out.append("")
 
     if plan.get("override"):
         out.append(
