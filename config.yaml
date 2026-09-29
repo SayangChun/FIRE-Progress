@@ -73,11 +73,11 @@ life_plan:
         - {key: transport, group: 日常开销, label: 交通, monthly: 30, note: "市区面积比鹤岗大，公交月卡与骑车并用。冬季约 −25℃，11-3 月需留公交余量"}
         - {key: home_visit, group: 日常开销, label: 探亲与返乡交通, monthly: 100, note: "每年 1-2 次往返，单次火车往返约 ¥1000，折算 ≈ ¥100/月。牡丹江是铁路枢纽，班次多于鹤岗"}
         - {key: clothing, group: 日常开销, label: 衣物, monthly: 30, note: "按年摊销，含冬装更新。东北冬装单价高但更新慢"}
-        - {key: misc, group: 日常开销, label: 娱乐与杂项, monthly: 40, note: "极简档：几乎不外食、不旅行，含软件订阅与域名"}
+        - {key: misc, group: 日常开销, label: 杂项（快递与小额）, monthly: 5, note: "2026-09-29 拆细后确认：无域名、无代理订阅、无视频音乐会员、无云存储、付费 AI 为 ¥0、娱乐与外食为 ¥0。仅保留快递与零星小额支出。⚠️ 若实际有代理订阅需加回 ¥10-30"}
         - {key: resident_medical, group: 医疗与保障, label: 城乡居民医保, monthly: 33, note: "¥400/年，2026 年国家统一标准。不交社保后这是唯一的兜底医保"}
         - {key: huiminbao, group: 医疗与保障, label: 惠民保, monthly: 13, note: "龙江惠民保升级版 ¥150/年，黑龙江省统一。以当年实际保费为准"}
         - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 80, note: "居民医保报销比例低于职工医保，门诊与小额自付需自己留出。不建议压缩"}
-        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 137, note: "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1758。经确认不下调"}
+        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 137, note: "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1723。经确认不下调"}
 
     # 对照方案：同样在牡丹江租房，但生活档次放宽到常规
     # （每周外食 2-3 次、每年一次短途旅行、公交 + 偶尔打车）。
