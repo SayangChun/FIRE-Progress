@@ -248,6 +248,11 @@ def main() -> int:
     write_json(cfgmod.HISTORY_PATH, history)
     write_json(cfgmod.LATEST_PATH, data)
 
+    if cfg.display.get("show_progress_bar", True):
+        svg = rendermod.progress_svg(data, cfg)
+        (cfgmod.REPORTS_DIR / "progress.svg").write_text(svg, encoding="utf-8")
+        print("→ 已写出 reports/progress.svg")
+
     if cfg.display.get("show_curve", True):
         svg = rendermod.curve_svg(history, cfg)
         (cfgmod.REPORTS_DIR / "curve.svg").write_text(svg, encoding="utf-8")

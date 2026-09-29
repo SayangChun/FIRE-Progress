@@ -180,6 +180,10 @@ privacy:
 display:
   show_projection: true # 按近期增速线性外推（非预测，可关闭）
   projection_window_days: 30
+  # 自绘 SVG 进度条（reports/progress.svg）。
+  # 不用 shields.io 徽章：那是不可控的外部服务，大陆网络时通时不通，
+  # 且 label 含中文时未 URL 编码会直接返回 404；文本进度条则受字体宽度影响。
+  show_progress_bar: true
   show_curve: true
   curve_days: 90
   show_life_plan: true # 在 README 里展示月开销明细（FIRE 生活预算）

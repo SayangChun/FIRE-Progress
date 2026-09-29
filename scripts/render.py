@@ -8,25 +8,7 @@ from __future__ import annotations
 START_MARK = "<!-- FIRE:START -->"
 END_MARK = "<!-- FIRE:END -->"
 
-_FRACTIONS = " ▏▎▍▌▋▊▉"
-
-
 # ---------------------------------------------------------------- 基础格式化
-
-
-def progress_bar(pct: float, width: int = 40) -> str:
-    """用八分之一方块画进度条，避免低进度时看起来完全是空的。"""
-    ratio = max(min(pct, 1.0), 0.0)
-    filled = ratio * width
-    full = int(filled)
-    index = int((filled - full) * 8)
-
-    bar = "█" * full
-    if full < width and index > 0:
-        bar += _FRACTIONS[index]
-    if full == 0 and index == 0 and ratio > 0:
-        bar = "▏"  # 最小可见刻度：有资产但不足一格
-    return bar + "░" * max(width - len(bar), 0)
 
 
 def money(value, cfg, *, decimals: int = 2, symbol: str | None = None) -> str:
@@ -38,16 +20,63 @@ def money(value, cfg, *, decimals: int = 2, symbol: str | None = None) -> str:
     return f"{symbol}{value:,.{decimals}f}"
 
 
-def badge_color(pct: float) -> str:
-    if pct >= 100:
-        return "brightgreen"
-    if pct >= 75:
-        return "yellowgreen"
-    if pct >= 50:
-        return "yellow"
-    if pct >= 25:
-        return "orange"
-    return "e05d44"
+# ---------------------------------------------------------------- 进度条 SVG
+#
+# 为什么不用「█░▎」拼文本进度条：
+# 这些块字符（U+2588 全块 / U+2591 浅阴影 / U+258E 左四分之一块）在
+# Unicode 里的 East Asian Width 是 Ambiguous —— 中文环境下会被渲染成
+# 全角（2 倍宽），英文环境下是半角；一旦两端 fallback 到不同字体，
+# 整条进度条就会宽度错乱、看起来「不对」，且不同平台表现不一致。
+# SVG 按坐标绘制，与字体无关，跨平台完全一致。
+#
+# 同理不再使用 shields.io 徽章：它是不可控的外部服务，大陆网络下
+# 时通时不通（本地实测直连与代理均不可达），且 label 含中文时若不
+# URL 编码会直接返回「404 badge not found」。进度标识改为自绘。
+
+
+def progress_svg(data: dict, cfg) -> str:
+    """自绘 FIRE 完成度进度条。"""
+    assets = data["assets"]
+    fire = data["fire"]
+
+    ratio = max(min(float(assets.get("progress") or 0.0), 1.0), 0.0)
+    pct = ratio * 100
+
+    width, height = 680, 92
+    track_y, track_h = 40, 14
+    track_r = track_h / 2
+
+    # 极小进度也留 1px，避免「有资产却完全看不见」
+    fill_w = max(width * ratio, 1.0) if ratio > 0 else 0.0
+    fill_r = min(track_r, fill_w / 2) if fill_w else 0.0
+
+    current = money(assets.get("total_cny"), cfg)
+    target = money(fire.get("target_cny"), cfg)
+    remaining = money(assets.get("remaining_cny"), cfg)
+
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="FIRE 完成度 {pct:.3f}%">
+  <title>FIRE 完成度 {pct:.3f}%</title>
+  <desc>当前资产 {current}，FIRE 目标 {target}，完成度 {pct:.3f}%，距离目标还差 {remaining}。</desc>
+  <style>
+    .fg {{ fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
+    .fg-muted {{ fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
+    .track {{ fill: #e7ebef; }}
+    .fill {{ fill: #d97706; }}
+    @media (prefers-color-scheme: dark) {{
+      .fg {{ fill: #e6edf3; }}
+      .fg-muted {{ fill: #8b949e; }}
+      .track {{ fill: #21262d; }}
+      .fill {{ fill: #f0b429; }}
+    }}
+  </style>
+  <text class="fg-muted" x="0" y="18" font-size="12">FIRE 完成度</text>
+  <text class="fg" x="{width}" y="20" text-anchor="end" font-size="19" font-weight="600">{pct:.3f}%</text>
+  <rect class="track" x="0" y="{track_y}" width="{width}" height="{track_h}" rx="{track_r}"/>
+  <rect class="fill" x="0" y="{track_y}" width="{fill_w:.1f}" height="{track_h}" rx="{fill_r:.1f}"/>
+  <text class="fg-muted" x="0" y="82" font-size="11">已积累 {current}</text>
+  <text class="fg-muted" x="{width}" y="82" text-anchor="end" font-size="11">目标 {target} · 还差 {remaining}</text>
+</svg>
+"""
 
 
 # ---------------------------------------------------------------- 曲线 SVG
@@ -58,7 +87,7 @@ def curve_svg(history: list[dict], cfg) -> str:
     pad_l, pad_r, pad_t, pad_b = 58, 20, 26, 34
 
     points = [
-        (row["date"], float(row.get("progress_pct") or 0.0))
+        (row["date"], float(row.get("progress_pct") or 0.0), row.get("target_cny"))
         for row in history
         if row.get("date") and row.get("progress_pct") is not None
     ]
@@ -88,7 +117,7 @@ def curve_svg(history: list[dict], cfg) -> str:
     def y_at(value: float) -> float:
         return pad_t + plot_h * (1 - value / y_max)
 
-    line_pts = [(x_at(i), y_at(v)) for i, (_, v) in enumerate(points)]
+    line_pts = [(x_at(i), y_at(v)) for i, (_, v, _t) in enumerate(points)]
     line_path = " ".join(
         f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(line_pts)
     )
@@ -110,9 +139,32 @@ def curve_svg(history: list[dict], cfg) -> str:
         )
 
     last_x, last_y = line_pts[-1]
+
+    # 口径调整点：相邻两天的 target_cny 不同，说明 FIRE 目标（分母）变了。
+    # 这类台阶不是资产涨跌造成的，必须在图上标出来，否则会被误读。
+    marks: list[str] = []
+    for i in range(1, len(points)):
+        prev_target, cur_target = points[i - 1][2], points[i][2]
+        if prev_target is None or cur_target is None or prev_target == cur_target:
+            continue
+        mx = x_at(i)
+        marks.append(
+            f'<line class="mark" x1="{mx:.1f}" y1="{pad_t}" '
+            f'x2="{mx:.1f}" y2="{pad_t + plot_h:.1f}"/>'
+        )
+        right = mx > pad_l + plot_w * 0.7
+        anchor = "end" if right else "start"
+        tx = mx - 4 if right else mx + 4
+        marks.append(
+            f'<text class="fg-muted" x="{tx:.1f}" y="{pad_t - 9}" '
+            f'text-anchor="{anchor}" font-size="9">口径调整</text>'
+        )
+
+    note = "竖虚线处为口径调整（FIRE 目标变化），不是资产变动。" if marks else ""
+
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="FIRE 进度曲线">
   <title>FIRE 进度曲线</title>
-  <desc>从 {points[0][0]} 到 {points[-1][0]} 的完成度变化，最新 {points[-1][1]:.3f}%。</desc>
+  <desc>从 {points[0][0]} 到 {points[-1][0]} 的完成度变化，最新 {points[-1][1]:.3f}%。{note}</desc>
   <defs>
     <linearGradient id="fireArea" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#d97706" stop-opacity="0.30"/>
@@ -121,15 +173,18 @@ def curve_svg(history: list[dict], cfg) -> str:
     <style>
       .fg-muted {{ fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
       .grid {{ stroke: #d8dee4; stroke-width: 1; stroke-dasharray: 3 4; }}
+      .mark {{ stroke: #b9c0c8; stroke-width: 1; stroke-dasharray: 2 3; }}
       .line {{ fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
       @media (prefers-color-scheme: dark) {{
         .fg-muted {{ fill: #8b949e; }}
         .grid {{ stroke: #30363d; }}
+        .mark {{ stroke: #4d545c; }}
         .line {{ stroke: #f0b429; }}
       }}
     </style>
   </defs>
   {''.join(grid)}
+  {''.join(marks)}
   <path d="{area_path}" fill="url(#fireArea)"/>
   <path d="{line_path}" class="line"/>
   <circle cx="{last_x:.1f}" cy="{last_y:.1f}" r="3.5" fill="#d97706"/>
@@ -279,11 +334,6 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append(START_MARK)
     out.append("")
 
-    out.append(
-        f"![FIRE 进度](https://img.shields.io/badge/FIRE-{pct:.3f}%25-{badge_color(pct)})"
-        f" ![数据更新时间](https://img.shields.io/badge/更新-{data['as_of'][:10]}-informational)"
-    )
-    out.append("")
     out.append(f"**更新时间**：{data['as_of'].replace('T', ' ')}")
     out.append("")
     freshness = _freshness(btc, sp500)
@@ -291,10 +341,15 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append(freshness)
         out.append("")
 
-    out.append("```text")
-    out.append(f"{progress_bar(assets['progress'])}  {pct:.3f}%")
-    out.append("```")
-    out.append("")
+    if cfg.display.get("show_progress_bar", True):
+        out.append("![FIRE 完成度](reports/progress.svg)")
+        out.append("")
+        out.append(
+            "> 完成度 = 当前资产 ÷ FIRE 目标。**分子看行情，分母看口径**——"
+            "月开销或提取率一调整，这个百分比就会跟着变，"
+            "所以它变了不一定代表资产涨跌。"
+        )
+        out.append("")
 
     out.append("| 指标 | 数值 |")
     out.append("| --- | ---: |")
@@ -372,6 +427,15 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("### 进度曲线")
         out.append("")
         out.append("![FIRE 进度曲线](reports/curve.svg)")
+        out.append("")
+        out.append(
+            "> 曲线是**每日完成度快照**，按 `data/history.json` 里当天记录的原值连线，不回填、不重算。"
+        )
+        out.append(">")
+        out.append(
+            "> 图中竖虚线处是**口径调整**——FIRE 目标（分母）变了，不是资产变了，"
+            "所以曲线会出现台阶。每天的目标值都记在 `data/history.json` 里，这个台阶可追溯，不是数据错误。"
+        )
         out.append("")
 
     proj = data.get("projection")
