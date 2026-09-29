@@ -1,12 +1,12 @@
 {
-  "as_of": "2026-09-29T13:41:24+08:00",
+  "as_of": "2026-09-29T13:52:58+08:00",
   "as_of_date": "2026-09-29",
   "fire": {
-    "monthly_expense": 1723.0,
+    "monthly_expense": 1592.0,
     "withdrawal_rate": 0.043,
-    "annual_expense": 20676.0,
-    "target_cny": 480837.21,
-    "target_with_one_off": 495837.21,
+    "annual_expense": 19104.0,
+    "target_cny": 444279.07,
+    "target_with_one_off": 459279.07,
     "monthly_override": false
   },
   "life_plan": {
@@ -18,9 +18,9 @@
     "household": 1,
     "lifestyle": "极简",
     "headline": "牡丹江 · 单人 · 租房 · 极简",
-    "monthly_expense": 1723.0,
-    "annual_expense": 20676.0,
-    "target_cny": 480837.21,
+    "monthly_expense": 1592.0,
+    "annual_expense": 19104.0,
+    "target_cny": 444279.07,
     "groups": [
       {
         "group": "住房与水电燃气",
@@ -91,8 +91,8 @@
             "key": "food",
             "group": "日常开销",
             "label": "食品",
-            "monthly": 450.0,
-            "note": "约 ¥15/天。早市采购 + 10 月囤冬菜腌酸菜 + 提高豆制品与鸡蛋比例。城区物价比鹤岗略高"
+            "monthly": 319.0,
+            "note": "偏紧档 ¥319（约 ¥11/天，16:8 两餐）。挂面为主食、鸡蛋+豆腐作主力蛋白、猪肉约 2.5kg/月；蔬菜靠早市+10月冬储；含少量乳制品与水果。构成见规划书 §6.5"
           },
           {
             "key": "drinking_water",
@@ -137,7 +137,7 @@
             "note": "2026-09-29 拆细后确认：无域名、无代理订阅、无视频音乐会员、无云存储、付费 AI 为 ¥0、娱乐与外食为 ¥0。仅保留快递与零星小额支出。⚠️ 若实际有代理订阅需加回 ¥10-30"
           }
         ],
-        "subtotal": 688.0
+        "subtotal": 557.0
       },
       {
         "group": "医疗与保障",
@@ -174,7 +174,7 @@
             "group": "风险缓冲",
             "label": "应急与物价缓冲",
             "monthly": 137.0,
-            "note": "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1723。经确认不下调"
+            "note": "按月留一笔机动钱，应付物价波动与临时支出；经确认不下调，这是安全垫，不建议压缩"
           }
         ],
         "subtotal": 137.0
@@ -207,18 +207,18 @@
       }
     ],
     "one_off_total": 15000.0,
-    "target_with_one_off": 495837.21,
+    "target_with_one_off": 459279.07,
     "override": false
   },
   "assets": {
-    "total_cny": 13925.99,
-    "progress": 0.028961961679213673,
-    "progress_pct": 2.8962,
-    "remaining_cny": 466911.22,
+    "total_cny": 13965.87,
+    "progress": 0.031434903231704885,
+    "progress_pct": 3.1435,
+    "remaining_cny": 430313.2,
     "btc": {
       "qty": 0.02392337,
-      "price_cny": 558684.2,
-      "value_cny": 13365.61,
+      "price_cny": 560351.22,
+      "value_cny": 13405.49,
       "snapshot_date": "2026-09-27",
       "stale_days": 2,
       "positions": [
@@ -273,20 +273,20 @@
     "btc_estimated": true,
     "sp500_cny": 559.72,
     "total_cny": 11549.01,
-    "profit_cny": 2376.98
+    "profit_cny": 2416.86
   },
   "price": {
-    "btc_usdt": 83118.0,
+    "btc_usdt": 83366.01,
     "usd_cny": 6.721579,
-    "btc_cny": 558684.2,
+    "btc_cny": 560351.22,
     "btc_source": "binance:api.binance.com",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-09-29T13:41:22+08:00"
+    "fetched_at": "2026-09-29T13:52:56+08:00"
   },
   "projection": {
-    "daily_gain_cny": 77.164,
-    "days_to_target": 6050,
-    "eta": "2043-04-23",
+    "daily_gain_cny": 85.626,
+    "days_to_target": 5025,
+    "eta": "2040-07-02",
     "window_days": 30,
     "reason": null
   },

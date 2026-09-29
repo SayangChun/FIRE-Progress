@@ -67,7 +67,7 @@ life_plan:
         - {key: gas, group: 住房与水电燃气, label: 燃气/液化气, monthly: 35, note: "自己做饭；牡丹江管道燃气覆盖较好，可能低于此值"}
         - {key: appliance, group: 住房与水电燃气, label: 家电维修与更换摊销, monthly: 20, note: "改买二手（约 ¥200-300）。按 10 年摊销，无保修"}
         - {key: telecom, group: 日常开销, label: 网络与手机, monthly: 30, note: "纯流量卡约 ¥29/月，不装宽带（用手机热点）。代价：依赖手机信号，大流量受限"}
-        - {key: food, group: 日常开销, label: 食品, monthly: 450, note: "约 ¥15/天。早市采购 + 10 月囤冬菜腌酸菜 + 提高豆制品与鸡蛋比例。城区物价比鹤岗略高"}
+        - {key: food, group: 日常开销, label: 食品, monthly: 319, note: "偏紧档 ¥319（约 ¥11/天，16:8 两餐）。挂面为主食、鸡蛋+豆腐作主力蛋白、猪肉约 2.5kg/月；蔬菜靠早市+10月冬储；含少量乳制品与水果。构成见规划书 §6.5"}
         - {key: drinking_water, group: 日常开销, label: 饮用水, monthly: 15, note: "桶装水或净水器滤芯；自来水费已单列在水费里"}
         - {key: supplies, group: 日常开销, label: 日用品, monthly: 28, note: "极限档 ¥28：香皂替代洗发水与沐浴露、洗衣皂替代洗衣液、只买卷纸不买抽纸、小苏打+白醋替代专用清洁剂。含洗护、纸品、清洁、垃圾袋与杂项摊销。理发已改为自理，不再计入"}
         - {key: transport, group: 日常开销, label: 交通, monthly: 30, note: "市区面积比鹤岗大，公交月卡与骑车并用。冬季约 −25℃，11-3 月需留公交余量"}
@@ -77,7 +77,7 @@ life_plan:
         - {key: resident_medical, group: 医疗与保障, label: 城乡居民医保, monthly: 33, note: "¥400/年，2026 年国家统一标准。不交社保后这是唯一的兜底医保"}
         - {key: huiminbao, group: 医疗与保障, label: 惠民保, monthly: 13, note: "龙江惠民保升级版 ¥150/年，黑龙江省统一。以当年实际保费为准"}
         - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 80, note: "居民医保报销比例低于职工医保，门诊与小额自付需自己留出。不建议压缩"}
-        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 137, note: "按月留一笔机动钱，应付物价波动与临时支出；此项同时用于把合计取整到 ¥1723。经确认不下调"}
+        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 137, note: "按月留一笔机动钱，应付物价波动与临时支出；经确认不下调，这是安全垫，不建议压缩"}
 
     # 对照方案：同样在牡丹江租房，但生活档次放宽到常规
     # （每周外食 2-3 次、每年一次短途旅行、公交 + 偶尔打车）。
