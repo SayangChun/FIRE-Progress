@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-09-29T14:37:59+08:00",
-  "as_of_date": "2026-09-29",
+  "as_of": "2026-09-30T03:09:48+08:00",
+  "as_of_date": "2026-09-30",
   "fire": {
     "monthly_expense": 1592.0,
     "withdrawal_rate": 0.043,
@@ -211,14 +211,14 @@
     "override": false
   },
   "assets": {
-    "total_cny": 14043.92,
-    "progress": 0.03161057516487777,
-    "progress_pct": 3.1611,
-    "remaining_cny": 430235.15,
+    "total_cny": 14032.99,
+    "progress": 0.0315859700525768,
+    "progress_pct": 3.1586,
+    "remaining_cny": 430246.08,
     "btc": {
       "qty": 0.02392337,
-      "price_cny": 563613.61,
-      "value_cny": 13483.54,
+      "price_cny": 562408.03,
+      "value_cny": 13454.7,
       "snapshot_date": "2026-09-27",
       "stale_days": 2,
       "positions": [
@@ -243,27 +243,27 @@
       ]
     },
     "sp500": {
-      "value_cny": 560.38,
-      "invested_cny": 559.72,
-      "profit_cny": 0.66,
-      "return_rate": 0.001179,
-      "latest_nav_date": "2026-09-24",
+      "value_cny": 578.29,
+      "invested_cny": 579.71,
+      "profit_cny": -1.42,
+      "return_rate": -0.00245,
+      "latest_nav_date": "2026-09-28",
       "funds": [
         {
           "code": "017641",
           "short_name": "摩根标普500 A",
-          "market_value": 280.06,
-          "invested": 279.72,
-          "shares": 164.16,
-          "latest_nav": 1.706
+          "market_value": 289.02,
+          "invested": 289.71,
+          "shares": 170.04,
+          "latest_nav": 1.6997
         },
         {
           "code": "019305",
           "short_name": "摩根标普500 C",
-          "market_value": 280.32,
-          "invested": 280.0,
-          "shares": 165.91,
-          "latest_nav": 1.6896
+          "market_value": 289.28,
+          "invested": 290.0,
+          "shares": 171.85,
+          "latest_nav": 1.6833
         }
       ]
     }
@@ -271,22 +271,22 @@
   "cost_basis": {
     "btc_cny": 10989.29,
     "btc_estimated": true,
-    "sp500_cny": 559.72,
-    "total_cny": 11549.01,
-    "profit_cny": 2494.91
+    "sp500_cny": 579.71,
+    "total_cny": 11569.0,
+    "profit_cny": 2463.99
   },
   "price": {
-    "btc_usdt": 83851.37,
+    "btc_usdt": 83672.01,
     "usd_cny": 6.721579,
-    "btc_cny": 563613.61,
+    "btc_cny": 562408.03,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-09-29T06:37:59+00:00"
+    "fetched_at": "2026-09-29T19:09:47+00:00"
   },
   "projection": {
-    "daily_gain_cny": 86.17,
-    "days_to_target": 4992,
-    "eta": "2040-05-30",
+    "daily_gain_cny": 101.78,
+    "days_to_target": 4227,
+    "eta": "2038-04-27",
     "window_days": 30,
     "reason": null
   },
@@ -295,5 +295,5 @@
     "sp500": true
   },
   "warnings": [],
-  "history_days": 6
+  "history_days": 7
 }
