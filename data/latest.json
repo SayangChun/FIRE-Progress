@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-10-04T18:57:12+08:00",
-  "as_of_date": "2026-10-04",
+  "as_of": "2026-10-05T03:16:00+08:00",
+  "as_of_date": "2026-10-05",
   "fire": {
     "monthly_expense": 1592.0,
     "withdrawal_rate": 0.043,
@@ -211,14 +211,14 @@
     "override": false
   },
   "assets": {
-    "total_cny": 14315.46,
-    "progress": 0.032221768193355885,
-    "progress_pct": 3.2222,
-    "remaining_cny": 429963.61,
+    "total_cny": 14325.6,
+    "progress": 0.03224458719878463,
+    "progress_pct": 3.2245,
+    "remaining_cny": 429953.47,
     "btc": {
       "qty": 0.02392337,
-      "price_cny": 573411.99,
-      "value_cny": 13717.95,
+      "price_cny": 573835.76,
+      "value_cny": 13728.09,
       "snapshot_date": "2026-09-27",
       "stale_days": 7,
       "positions": [
@@ -273,20 +273,20 @@
     "btc_estimated": true,
     "sp500_cny": 599.7,
     "total_cny": 11586.54,
-    "profit_cny": 2728.92
+    "profit_cny": 2739.06
   },
   "price": {
-    "btc_usdt": 85328.15,
+    "btc_usdt": 85391.21,
     "usd_cny": 6.72008,
-    "btc_cny": 573411.99,
+    "btc_cny": 573835.76,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-10-04T10:57:12+00:00"
+    "fetched_at": "2026-10-04T19:16:00+00:00"
   },
   "projection": {
-    "daily_gain_cny": 69.836,
-    "days_to_target": 6156,
-    "eta": "2043-08-12",
+    "daily_gain_cny": 78.044,
+    "days_to_target": 5509,
+    "eta": "2041-11-04",
     "window_days": 30,
     "reason": null
   },
@@ -295,5 +295,5 @@
     "sp500": true
   },
   "warnings": [],
-  "history_days": 11
+  "history_days": 12
 }
