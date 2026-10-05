@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 240" width="680" height="240" role="img" aria-label="FIRE 进度曲线">
   <title>FIRE 进度曲线</title>
-  <desc>从 2026-09-24 到 2026-10-05 的完成度变化，最新 3.380%。竖虚线处为口径调整（FIRE 目标变化），不是资产变动。</desc>
+  <desc>从 2026-09-24 到 2026-10-06 的完成度变化，最新 3.340%。竖虚线处为口径调整（FIRE 目标变化），不是资产变动。</desc>
   <defs>
     <linearGradient id="fireArea" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#d97706" stop-opacity="0.30"/>
@@ -20,11 +20,11 @@
     </style>
   </defs>
   <line class="grid" x1="58" y1="26.0" x2="660" y2="26.0"/><text class="fg-muted" x="50" y="30.0" text-anchor="end" font-size="10">3.886%</text><line class="grid" x1="58" y1="71.0" x2="660" y2="71.0"/><text class="fg-muted" x="50" y="75.0" text-anchor="end" font-size="10">2.915%</text><line class="grid" x1="58" y1="116.0" x2="660" y2="116.0"/><text class="fg-muted" x="50" y="120.0" text-anchor="end" font-size="10">1.943%</text><line class="grid" x1="58" y1="161.0" x2="660" y2="161.0"/><text class="fg-muted" x="50" y="165.0" text-anchor="end" font-size="10">0.972%</text><line class="grid" x1="58" y1="206.0" x2="660" y2="206.0"/><text class="fg-muted" x="50" y="210.0" text-anchor="end" font-size="10">0.000%</text>
-  <line class="mark" x1="222.2" y1="26" x2="222.2" y2="206.0"/><text class="fg-muted" x="226.2" y="17" text-anchor="start" font-size="9">口径调整</text><line class="mark" x1="331.6" y1="26" x2="331.6" y2="206.0"/><text class="fg-muted" x="335.6" y="17" text-anchor="start" font-size="9">口径调整</text>
-  <path d="M58.0,93.7 L112.7,91.9 L167.5,93.3 L222.2,73.4 L276.9,76.5 L331.6,59.6 L386.4,59.4 L441.1,60.0 L495.8,56.5 L550.5,58.3 L605.3,56.8 L660.0,49.5 L660.0,206.0 L58.0,206.0 Z" fill="url(#fireArea)"/>
-  <path d="M58.0,93.7 L112.7,91.9 L167.5,93.3 L222.2,73.4 L276.9,76.5 L331.6,59.6 L386.4,59.4 L441.1,60.0 L495.8,56.5 L550.5,58.3 L605.3,56.8 L660.0,49.5" class="line"/>
-  <circle cx="660.0" cy="49.5" r="3.5" fill="#d97706"/>
+  <line class="mark" x1="208.5" y1="26" x2="208.5" y2="206.0"/><text class="fg-muted" x="212.5" y="17" text-anchor="start" font-size="9">口径调整</text><line class="mark" x1="308.8" y1="26" x2="308.8" y2="206.0"/><text class="fg-muted" x="312.8" y="17" text-anchor="start" font-size="9">口径调整</text>
+  <path d="M58.0,93.7 L108.2,91.9 L158.3,93.3 L208.5,73.4 L258.7,76.5 L308.8,59.6 L359.0,59.4 L409.2,60.0 L459.3,56.5 L509.5,58.3 L559.7,56.8 L609.8,49.5 L660.0,51.3 L660.0,206.0 L58.0,206.0 Z" fill="url(#fireArea)"/>
+  <path d="M58.0,93.7 L108.2,91.9 L158.3,93.3 L208.5,73.4 L258.7,76.5 L308.8,59.6 L359.0,59.4 L409.2,60.0 L459.3,56.5 L509.5,58.3 L559.7,56.8 L609.8,49.5 L660.0,51.3" class="line"/>
+  <circle cx="660.0" cy="51.3" r="3.5" fill="#d97706"/>
   <text class="fg-muted" x="58" y="228" font-size="10">2026-09-24</text>
-  <text class="fg-muted" x="660" y="228" text-anchor="end" font-size="10">2026-10-05</text>
-  <text class="fg-muted" x="660.0" y="39.5" text-anchor="end" font-size="11" font-weight="500">3.380%</text>
+  <text class="fg-muted" x="660" y="228" text-anchor="end" font-size="10">2026-10-06</text>
+  <text class="fg-muted" x="660.0" y="41.3" text-anchor="end" font-size="11" font-weight="500">3.340%</text>
 </svg>
