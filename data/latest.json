@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-05T09:40:41+08:00",
+  "as_of": "2026-10-05T16:30:31+08:00",
   "as_of_date": "2026-10-05",
   "fire": {
     "monthly_expense": 1592.0,
@@ -211,34 +211,34 @@
     "override": false
   },
   "assets": {
-    "total_cny": 14522.61,
-    "progress": 0.03268804495579427,
-    "progress_pct": 3.2688,
-    "remaining_cny": 429756.46,
+    "total_cny": 15014.26,
+    "progress": 0.03379466653481836,
+    "progress_pct": 3.3795,
+    "remaining_cny": 429264.81,
     "btc": {
-      "qty": 0.02392337,
-      "price_cny": 582071.18,
-      "value_cny": 13925.1,
-      "snapshot_date": "2026-09-27",
-      "stale_days": 8,
+      "qty": 0.02484565,
+      "price_cny": 580252.6,
+      "value_cny": 14416.75,
+      "snapshot_date": "2026-10-05",
+      "stale_days": 0,
       "positions": [
         {
           "venue": "币安",
           "location": "binance",
           "product": "账户持仓",
           "asset": "BTC",
-          "amount": 0.00864654,
-          "avg_usd": 68694.15,
-          "note": "Binance账户；均价 $68,694.15/BTC"
+          "amount": 0.00955781,
+          "avg_usd": 69270.12,
+          "note": "Binance账户；均价 $69,270.12/BTC"
         },
         {
           "venue": "欧易",
           "location": "okx",
           "product": "账户持仓",
           "asset": "BTC",
-          "amount": 0.01527683,
-          "avg_usd": 68139.8,
-          "note": "OKX账户；均价 $68,139.8/BTC"
+          "amount": 0.01528784,
+          "avg_usd": 68090.7,
+          "note": "OKX账户；均价 $68,090.7/BTC"
         }
       ]
     },
@@ -269,24 +269,24 @@
     }
   },
   "cost_basis": {
-    "btc_cny": 10970.95,
+    "btc_cny": 11427.95,
     "btc_estimated": true,
     "sp500_cny": 599.7,
-    "total_cny": 11570.65,
-    "profit_cny": 2951.96
+    "total_cny": 12027.65,
+    "profit_cny": 2986.61
   },
   "price": {
-    "btc_usdt": 86742.13,
+    "btc_usdt": 86471.12,
     "usd_cny": 6.710363,
-    "btc_cny": 582071.18,
+    "btc_cny": 580252.6,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-10-05T01:40:40+00:00"
+    "fetched_at": "2026-10-05T08:30:30+00:00"
   },
   "projection": {
-    "daily_gain_cny": 85.5391,
-    "days_to_target": 5024,
-    "eta": "2040-07-07",
+    "daily_gain_cny": 89.7809,
+    "days_to_target": 4781,
+    "eta": "2039-11-07",
     "window_days": 30,
     "reason": null
   },
