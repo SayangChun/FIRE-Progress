@@ -37,10 +37,10 @@ life_plan:
   enabled: true
   profile: mudanjiang-rent-minimal # ← 改这一行即可切换方案
 
-  # ⚠️ 城市是「占位」：最终定居城市尚未确定。
-  #    牡丹江只是当前代入的样本城市，不代表已经决定。
+  # ⚠️ 定居地已限定为「黑龙江省内」；省内具体城市尚未确定。
+  #    牡丹江只是当前代入的占位城市，不代表已经决定。
   #    确定城市后改 city / province 与各项金额即可，其余自动重算。
-  #    候选城市对比见 docs/FIRE-LIFE-PLAN.md §2。
+  #    省内候选城市对比见 docs/FIRE-LIFE-PLAN.md §2。
 
   profiles:
     # 当前基准方案。金额为 2026 年牡丹江口径的估算值。
@@ -70,8 +70,8 @@ life_plan:
         - {key: food, group: 日常开销, label: 食品, monthly: 319, note: "偏紧档 ¥319（约 ¥11/天，16:8 两餐）。挂面为主食、鸡蛋+豆腐作主力蛋白、猪肉约 2.5kg/月；蔬菜靠早市+10月冬储；含少量乳制品与水果。构成见规划书 §6.5"}
         - {key: drinking_water, group: 日常开销, label: 饮用水, monthly: 15, note: "桶装水或净水器滤芯；自来水费已单列在水费里"}
         - {key: supplies, group: 日常开销, label: 日用品, monthly: 28, note: "极限档 ¥28：香皂替代洗发水与沐浴露、洗衣皂替代洗衣液、只买卷纸不买抽纸、小苏打+白醋替代专用清洁剂。含洗护、纸品、清洁、垃圾袋与杂项摊销。理发已改为自理，不再计入"}
-        - {key: transport, group: 日常开销, label: 交通, monthly: 30, note: "市区面积比鹤岗大，公交月卡与骑车并用。冬季约 −25℃，11-3 月需留公交余量"}
-        - {key: home_visit, group: 日常开销, label: 探亲与返乡交通, monthly: 100, note: "每年 1-2 次往返，单次火车往返约 ¥1000，折算 ≈ ¥100/月。牡丹江是铁路枢纽，班次多于鹤岗"}
+        - {key: transport, group: 日常开销, label: 交通, monthly: 30, note: "牡丹江市区面积较大，公交月卡与骑车并用。冬季约 −25℃，11-3 月需留公交余量"}
+        - {key: home_visit, group: 日常开销, label: 探亲与返乡交通, monthly: 100, note: "每年 1-2 次往返，单次火车往返约 ¥1000，折算 ≈ ¥100/月。牡丹江是铁路枢纽（哈牡、牡佳高铁交汇），往返便利"}
         - {key: clothing, group: 日常开销, label: 衣物, monthly: 30, note: "按年摊销，含冬装更新。东北冬装单价高但更新慢"}
         - {key: misc, group: 日常开销, label: 杂项（快递与小额）, monthly: 5, note: "2026-09-29 拆细后确认：无域名、无代理订阅、无视频音乐会员、无云存储、付费 AI 为 ¥0、娱乐与外食为 ¥0。仅保留快递与零星小额支出。⚠️ 若实际有代理订阅需加回 ¥10-30"}
         - {key: resident_medical, group: 医疗与保障, label: 城乡居民医保, monthly: 33, note: "¥400/年，2026 年国家统一标准。不交社保后这是唯一的兜底医保"}
@@ -113,7 +113,7 @@ life_plan:
   # 它们只在 FIRE 落地的那一年发生一次。
   one_off:
     - {key: deposit, label: 租房押金, amount: 1000, note: "押一付三中的押金，退租时返还；按 2 个月租金估算"}
-    - {key: moving, label: 搬家与长途运输, amount: 3000, note: "从北京到鹤岗，含打包与物流"}
+    - {key: moving, label: 搬家与长途运输, amount: 3000, note: "从北京到牡丹江，含打包与物流"}
     - {key: furniture, label: 家具家电添置, amount: 8000, note: "出租房常不带全套家电；洗衣机、冰箱、床、桌椅等"}
     - {key: winter_kit, label: 过冬装备, amount: 3000, note: "羽绒服、雪地靴、厚被褥等，一次性投入"}
 
