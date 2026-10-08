@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-08T15:37:43+08:00",
+  "as_of": "2026-10-08T15:45:52+08:00",
   "as_of_date": "2026-10-08",
   "fire": {
     "monthly_expense": 1532.0,
@@ -211,17 +211,36 @@
     "override": false
   },
   "assets": {
-    "total_cny": 14460.17,
-    "progress": 0.033822206130763956,
-    "progress_pct": 3.3822,
-    "remaining_cny": 413074.71,
+    "total_cny": 14454.52,
+    "progress": 0.03380898176866093,
+    "progress_pct": 3.3809,
+    "remaining_cny": 413080.36,
     "btc": {
       "qty": 0.02484565,
-      "price_cny": 557951.31,
-      "value_cny": 13862.66,
+      "price_cny": 557723.75,
+      "value_cny": 13857.01,
       "snapshot_date": "2026-10-05",
-      "stale_days": null,
-      "positions": []
+      "stale_days": 3,
+      "positions": [
+        {
+          "venue": "币安",
+          "location": "binance",
+          "product": "账户持仓",
+          "asset": "BTC",
+          "amount": 0.00955781,
+          "avg_usd": 69270.12,
+          "note": "Binance账户；均价 $69,270.12/BTC"
+        },
+        {
+          "venue": "欧易",
+          "location": "okx",
+          "product": "账户持仓",
+          "asset": "BTC",
+          "amount": 0.01528784,
+          "avg_usd": 68090.7,
+          "note": "OKX账户；均价 $68,090.7/BTC"
+        }
+      ]
     },
     "sp500": {
       "value_cny": 597.51,
@@ -250,24 +269,24 @@
     }
   },
   "cost_basis": {
-    "btc_cny": null,
-    "btc_estimated": false,
+    "btc_cny": 11431.52,
+    "btc_estimated": true,
     "sp500_cny": 599.7,
-    "total_cny": 599.7,
-    "profit_cny": 13860.47
+    "total_cny": 12031.22,
+    "profit_cny": 2423.3
   },
   "price": {
-    "btc_usdt": 83121.77,
+    "btc_usdt": 83087.87,
     "usd_cny": 6.712457,
-    "btc_cny": 557951.31,
+    "btc_cny": 557723.75,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-10-08T15:36:25+08:00"
+    "fetched_at": "2026-10-08T07:45:52+00:00"
   },
   "projection": {
-    "daily_gain_cny": 66.3393,
-    "days_to_target": 6226,
-    "eta": "2043-10-25",
+    "daily_gain_cny": 66.0821,
+    "days_to_target": 6251,
+    "eta": "2043-11-19",
     "window_days": 30,
     "reason": null
   },
@@ -275,11 +294,6 @@
     "btc": true,
     "sp500": true
   },
-  "warnings": [
-    "比特币持仓取自上次成功值（本次未读到 holdings.csv）",
-    "比特币：读取 holdings.csv 失败：请求失败 https://raw.githubusercontent.com/SayangChun/0.1BTC/main/data/holdings.csv -> <urlopen error Tunnel connection failed: 502 Bad Gateway>",
-    "标普500 市值取自上次成功值",
-    "标普500：读取失败，沿用上次成功值"
-  ],
+  "warnings": [],
   "history_days": 15
 }
