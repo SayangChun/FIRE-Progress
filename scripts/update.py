@@ -149,7 +149,12 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
 def is_material(previous: dict, data: dict, cfg) -> tuple[bool, str]:
     """判断本次结果是否值得提交。
 
-    阈值 = max(绝对下限, 上次总资产 × 比例)。
+    三类情况必提交：
+      1. 首次生成
+      2. 跨天（保证进度曲线每天至少一个点）
+      3. **数据源告警状态发生变化**（新增或消除）
+
+    其余情况按阈值判断：阈值 = max(绝对下限, 上次总资产 × 比例)。
 
     为什么用比例而不是固定金额：固定金额不随资产规模变化。
     资产 ¥13k 时「变动 1 元」只占 0.007%，比特币几秒就能波动这么多，
@@ -160,6 +165,17 @@ def is_material(previous: dict, data: dict, cfg) -> tuple[bool, str]:
         return True, "首次生成"
     if previous.get("as_of_date") != data["as_of_date"]:
         return True, "新的一天（保证曲线每天至少一个点）"
+
+    # 告警状态变化也必须提交。
+    # 否则会出现这种情况：某次运行数据源挂了 → README 写上告警 → 下次运行数据源恢复、
+    # 但资产变动没到阈值 → 门控跳过 → README 一直挂着已经过期的告警。
+    # 告警是给人看的信号，过期不消比没有更糟。
+    prev_warnings = set(previous.get("warnings") or [])
+    cur_warnings = set(data.get("warnings") or [])
+    if prev_warnings != cur_warnings:
+        added = len(cur_warnings - prev_warnings)
+        removed = len(prev_warnings - cur_warnings)
+        return True, f"数据源告警状态变化（新增 {added} 条、消除 {removed} 条）"
 
     prev_total = ((previous.get("assets") or {}).get("total_cny")) or 0.0
     cur_total = data["assets"]["total_cny"]

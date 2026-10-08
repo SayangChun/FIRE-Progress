@@ -27,10 +27,11 @@ FLOOR = float(cfg.automation.get("min_commit_delta_cny", 1.0))
 failures: list[str] = []
 
 
-def make(total: float, date: str = "2026-09-24") -> dict:
+def make(total: float, date: str = "2026-09-24", warnings=None) -> dict:
     return {
         "as_of_date": date,
         "assets": {"total_cny": total, "progress_pct": total / TARGET * 100},
+        "warnings": list(warnings or []),
     }
 
 
@@ -72,6 +73,26 @@ for total, delta in (
 print("反向变动同样按绝对值判断")
 check("资产下跌超过阈值 -> 提交", make(BASE), make(BASE - 100.0), True)
 check("资产下跌不足阈值 -> 跳过", make(BASE), make(BASE - 5.0), False)
+
+print("告警状态变化必须提交（否则 README 会一直挂着过期告警）")
+W = "标普500：读取失败，沿用上次成功值"
+check("新增告警 -> 提交", make(BASE), make(BASE, warnings=[W]), True)
+check("消除告警 -> 提交", make(BASE, warnings=[W]), make(BASE), True)
+check("告警条数变化 -> 提交", make(BASE, warnings=["A"]), make(BASE, warnings=["A", "B"]), True)
+check("告警内容变化 -> 提交", make(BASE, warnings=["A"]), make(BASE, warnings=["B"]), True)
+check(
+    "告警未变、变动不足 -> 跳过",
+    make(BASE, warnings=[W]),
+    make(BASE + 1.0, warnings=[W]),
+    False,
+)
+check(
+    "告警未变、变动达阈值 -> 提交",
+    make(BASE, warnings=[W]),
+    make(BASE + 100.0, warnings=[W]),
+    True,
+)
+check("告警为空、变动不足 -> 跳过", make(BASE, warnings=[]), make(BASE + 1.0), False)
 
 print()
 if failures:
