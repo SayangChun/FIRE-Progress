@@ -1,12 +1,12 @@
 {
-  "as_of": "2026-10-08T12:55:41+08:00",
+  "as_of": "2026-10-08T15:25:10+08:00",
   "as_of_date": "2026-10-08",
   "fire": {
-    "monthly_expense": 1592.0,
+    "monthly_expense": 1542.0,
     "withdrawal_rate": 0.043,
-    "annual_expense": 19104.0,
-    "target_cny": 444279.07,
-    "target_with_one_off": 459279.07,
+    "annual_expense": 18504.0,
+    "target_cny": 430325.58,
+    "target_with_one_off": 445325.58,
     "monthly_override": false
   },
   "life_plan": {
@@ -18,9 +18,9 @@
     "household": 1,
     "lifestyle": "极简",
     "headline": "牡丹江 · 单人 · 租房 · 极简",
-    "monthly_expense": 1592.0,
-    "annual_expense": 19104.0,
-    "target_cny": 444279.07,
+    "monthly_expense": 1542.0,
+    "annual_expense": 18504.0,
+    "target_cny": 430325.58,
     "groups": [
       {
         "group": "住房与水电燃气",
@@ -29,15 +29,15 @@
             "key": "rent",
             "group": "住房与水电燃气",
             "label": "房租",
-            "monthly": 550.0,
-            "note": "40㎡ 一居室。牡丹江市区二手房均价 ¥4292/㎡、租售比 3.73%，折算 40㎡ 月租约 ¥534，取 550，属估算"
+            "monthly": 500.0,
+            "note": "40㎡ 一居室。房天下 2026-10 实际挂牌：一居室区间 ¥400-850（爱民吉祥花园 50㎡ ¥400、龙门鑫家园 57㎡ ¥450 为低位）。原按均价×租售比推得 ¥534，2026-10-08 结合真实房源取 ¥500"
           },
           {
             "key": "heating",
             "group": "住房与水电燃气",
             "label": "取暖费",
             "monthly": 75.0,
-            "note": "居民供热 ¥28/㎡ 按【使用面积】计收（约合建筑面积 80%）。40㎡ × 80% × ¥28 ÷ 12 ≈ ¥75。各区与热源方式有差异"
+            "note": "居民供热 ¥28/㎡ 按【使用面积】计收（约合建筑面积 80%）。40㎡ × 80% × ¥28 ÷ 12 ≈ ¥75。⚠️ 2026-10-08 查证：是否含在租金内【因房源而异】（房天下把「房租包含取暖费吗」做成逐套问答字段），无「大部分包」的证据；且即使房东包，成本通常已折算进租金。故按租客自付保守建模——看房时务必逐套问清并写进合同"
           },
           {
             "key": "property_fee",
@@ -75,7 +75,7 @@
             "note": "改买二手（约 ¥200-300）。按 10 年摊销，无保修"
           }
         ],
-        "subtotal": 772.0
+        "subtotal": 722.0
       },
       {
         "group": "日常开销",
@@ -207,18 +207,18 @@
       }
     ],
     "one_off_total": 15000.0,
-    "target_with_one_off": 459279.07,
+    "target_with_one_off": 445325.58,
     "override": false
   },
   "assets": {
-    "total_cny": 14384.7,
-    "progress": 0.032377615955929855,
-    "progress_pct": 3.2378,
-    "remaining_cny": 429894.37,
+    "total_cny": 14468.33,
+    "progress": 0.033621832832741,
+    "progress_pct": 3.3622,
+    "remaining_cny": 415857.25,
     "btc": {
       "qty": 0.02484565,
-      "price_cny": 554913.52,
-      "value_cny": 13787.19,
+      "price_cny": 558279.81,
+      "value_cny": 13870.82,
       "snapshot_date": "2026-10-05",
       "stale_days": 3,
       "positions": [
@@ -273,20 +273,20 @@
     "btc_estimated": true,
     "sp500_cny": 599.7,
     "total_cny": 12031.22,
-    "profit_cny": 2353.48
+    "profit_cny": 2437.12
   },
   "price": {
-    "btc_usdt": 82669.21,
+    "btc_usdt": 83170.71,
     "usd_cny": 6.712457,
-    "btc_cny": 554913.52,
+    "btc_cny": 558279.81,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-10-08T04:55:40+00:00"
+    "fetched_at": "2026-10-08T15:25:05+08:00"
   },
   "projection": {
-    "daily_gain_cny": 68.6279,
-    "days_to_target": 6264,
-    "eta": "2043-12-02",
+    "daily_gain_cny": 60.6914,
+    "days_to_target": 6851,
+    "eta": "2045-07-11",
     "window_days": 30,
     "reason": null
   },
