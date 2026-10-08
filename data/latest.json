@@ -1,12 +1,12 @@
 {
-  "as_of": "2026-10-08T15:25:10+08:00",
+  "as_of": "2026-10-08T15:37:43+08:00",
   "as_of_date": "2026-10-08",
   "fire": {
-    "monthly_expense": 1542.0,
+    "monthly_expense": 1532.0,
     "withdrawal_rate": 0.043,
-    "annual_expense": 18504.0,
-    "target_cny": 430325.58,
-    "target_with_one_off": 445325.58,
+    "annual_expense": 18384.0,
+    "target_cny": 427534.88,
+    "target_with_one_off": 442534.88,
     "monthly_override": false
   },
   "life_plan": {
@@ -18,9 +18,9 @@
     "household": 1,
     "lifestyle": "极简",
     "headline": "牡丹江 · 单人 · 租房 · 极简",
-    "monthly_expense": 1542.0,
-    "annual_expense": 18504.0,
-    "target_cny": 430325.58,
+    "monthly_expense": 1532.0,
+    "annual_expense": 18384.0,
+    "target_cny": 427534.88,
     "groups": [
       {
         "group": "住房与水电燃气",
@@ -43,8 +43,8 @@
             "key": "property_fee",
             "group": "住房与水电燃气",
             "label": "物业费",
-            "monthly": 25.0,
-            "note": "约 ¥0.6/㎡/月；老小区更低，部分无物业"
+            "monthly": 15.0,
+            "note": "¥0.375/㎡·月 × 40㎡。牡丹江物业费实行政府指导价并按服务分级，有电梯与无电梯差约一倍；原按 ¥0.6/㎡（≈二级无电梯）建模，2026-10-08 下调到三级无电梯档。⚠️ 与取暖费同理：房天下把「房租包含物业费吗」做成逐套问答字段，即使房东交也可能折算进租金——看房时逐套问清并写进合同"
           },
           {
             "key": "water",
@@ -75,7 +75,7 @@
             "note": "改买二手（约 ¥200-300）。按 10 年摊销，无保修"
           }
         ],
-        "subtotal": 722.0
+        "subtotal": 712.0
       },
       {
         "group": "日常开销",
@@ -207,40 +207,21 @@
       }
     ],
     "one_off_total": 15000.0,
-    "target_with_one_off": 445325.58,
+    "target_with_one_off": 442534.88,
     "override": false
   },
   "assets": {
-    "total_cny": 14468.33,
-    "progress": 0.033621832832741,
-    "progress_pct": 3.3622,
-    "remaining_cny": 415857.25,
+    "total_cny": 14460.17,
+    "progress": 0.033822206130763956,
+    "progress_pct": 3.3822,
+    "remaining_cny": 413074.71,
     "btc": {
       "qty": 0.02484565,
-      "price_cny": 558279.81,
-      "value_cny": 13870.82,
+      "price_cny": 557951.31,
+      "value_cny": 13862.66,
       "snapshot_date": "2026-10-05",
-      "stale_days": 3,
-      "positions": [
-        {
-          "venue": "币安",
-          "location": "binance",
-          "product": "账户持仓",
-          "asset": "BTC",
-          "amount": 0.00955781,
-          "avg_usd": 69270.12,
-          "note": "Binance账户；均价 $69,270.12/BTC"
-        },
-        {
-          "venue": "欧易",
-          "location": "okx",
-          "product": "账户持仓",
-          "asset": "BTC",
-          "amount": 0.01528784,
-          "avg_usd": 68090.7,
-          "note": "OKX账户；均价 $68,090.7/BTC"
-        }
-      ]
+      "stale_days": null,
+      "positions": []
     },
     "sp500": {
       "value_cny": 597.51,
@@ -269,24 +250,24 @@
     }
   },
   "cost_basis": {
-    "btc_cny": 11431.52,
-    "btc_estimated": true,
+    "btc_cny": null,
+    "btc_estimated": false,
     "sp500_cny": 599.7,
-    "total_cny": 12031.22,
-    "profit_cny": 2437.12
+    "total_cny": 599.7,
+    "profit_cny": 13860.47
   },
   "price": {
-    "btc_usdt": 83170.71,
+    "btc_usdt": 83121.77,
     "usd_cny": 6.712457,
-    "btc_cny": 558279.81,
+    "btc_cny": 557951.31,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-10-08T15:25:05+08:00"
+    "fetched_at": "2026-10-08T15:36:25+08:00"
   },
   "projection": {
-    "daily_gain_cny": 60.6914,
-    "days_to_target": 6851,
-    "eta": "2045-07-11",
+    "daily_gain_cny": 66.3393,
+    "days_to_target": 6226,
+    "eta": "2043-10-25",
     "window_days": 30,
     "reason": null
   },
@@ -294,6 +275,11 @@
     "btc": true,
     "sp500": true
   },
-  "warnings": [],
+  "warnings": [
+    "比特币持仓取自上次成功值（本次未读到 holdings.csv）",
+    "比特币：读取 holdings.csv 失败：请求失败 https://raw.githubusercontent.com/SayangChun/0.1BTC/main/data/holdings.csv -> <urlopen error Tunnel connection failed: 502 Bad Gateway>",
+    "标普500 市值取自上次成功值",
+    "标普500：读取失败，沿用上次成功值"
+  ],
   "history_days": 15
 }
