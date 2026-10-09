@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 392" width="680" height="392" role="img" aria-label="FIRE 收益曲线">
   <title>FIRE 收益曲线</title>
-  <desc>从 2026-09-24 到 2026-10-09：累计投入 ¥12,055.97、市值 ¥14,542.75、累计盈亏 +¥2,486.78、累计收益率 +20.63%。上面板为金额（纵轴不从 0 起），下面板为收益率（纵轴含 0）。</desc>
+  <desc>从 2026-09-24 到 2026-10-10：累计投入 ¥12,075.96、市值 ¥14,439.87、累计盈亏 +¥2,363.91、累计收益率 +19.58%。上面板为金额（纵轴不从 0 起），下面板为收益率（纵轴含 0）。</desc>
   <style>
     .fg { fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
     .fg-muted { fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -39,20 +39,20 @@
   <text class="fg-muted" x="86" y="18" font-size="11" dominant-baseline="middle">累计投入</text>
   <line class="value" x1="166" y1="18" x2="184" y2="18"/>
   <text class="fg-muted" x="190" y="18" font-size="11" dominant-baseline="middle">当前市值</text>
-  <text class="up" x="658" y="18" text-anchor="end" font-size="13" font-weight="600" dominant-baseline="middle">累计收益率 +20.63%</text>
+  <text class="up" x="658" y="18" text-anchor="end" font-size="13" font-weight="600" dominant-baseline="middle">累计收益率 +19.58%</text>
   <text class="fg-muted" x="62" y="42" font-size="11" dominant-baseline="middle">金额（元）</text>
   <line class="grid" x1="62" y1="52.0" x2="658" y2="52.0"/><text class="fg-muted" x="54" y="56.0" text-anchor="end" font-size="10">¥16,000</text><line class="grid" x1="62" y1="97.3" x2="658" y2="97.3"/><text class="fg-muted" x="54" y="101.3" text-anchor="end" font-size="10">¥14,000</text><line class="grid" x1="62" y1="142.7" x2="658" y2="142.7"/><text class="fg-muted" x="54" y="146.7" text-anchor="end" font-size="10">¥12,000</text><line class="grid" x1="62" y1="188.0" x2="658" y2="188.0"/><text class="fg-muted" x="54" y="192.0" text-anchor="end" font-size="10">¥10,000</text>
-  <path d="M62.0,107.9 L101.7,103.1 L141.5,106.9 L181.2,92.3 L220.9,99.9 L260.7,96.3 L300.4,96.0 L340.1,97.1 L379.9,89.7 L419.6,93.5 L459.3,90.2 L499.1,74.3 L538.8,74.9 L578.5,84.9 L618.3,88.8 L658.0,85.0 L658.0,141.4 L618.3,141.5 L578.5,141.5 L538.8,141.5 L499.1,141.5 L459.3,151.9 L419.6,151.9 L379.9,151.9 L340.1,151.9 L300.4,151.9 L260.7,152.3 L220.9,152.8 L181.2,153.2 L141.5,162.2 L101.7,162.2 L62.0,162.2 Z" class="gap-up"/>
-  <path d="M62.0,162.2 L101.7,162.2 L141.5,162.2 L181.2,153.2 L220.9,152.8 L260.7,152.3 L300.4,151.9 L340.1,151.9 L379.9,151.9 L419.6,151.9 L459.3,151.9 L499.1,141.5 L538.8,141.5 L578.5,141.5 L618.3,141.5 L658.0,141.4" class="basis"/>
-  <path d="M62.0,107.9 L101.7,103.1 L141.5,106.9 L181.2,92.3 L220.9,99.9 L260.7,96.3 L300.4,96.0 L340.1,97.1 L379.9,89.7 L419.6,93.5 L459.3,90.2 L499.1,74.3 L538.8,74.9 L578.5,84.9 L618.3,88.8 L658.0,85.0" class="value"/>
-  <circle class="dot-basis" cx="658.0" cy="141.4" r="3"/>
-  <circle class="dot-value" cx="658.0" cy="85.0" r="3.5"/>
+  <path d="M62.0,107.9 L99.2,103.1 L136.5,106.9 L173.8,92.3 L211.0,99.9 L248.2,96.3 L285.5,96.0 L322.8,97.1 L360.0,89.7 L397.2,93.5 L434.5,90.2 L471.8,74.3 L509.0,74.9 L546.2,84.9 L583.5,88.8 L620.8,85.0 L658.0,87.4 L658.0,140.9 L620.8,141.4 L583.5,141.5 L546.2,141.5 L509.0,141.5 L471.8,141.5 L434.5,151.9 L397.2,151.9 L360.0,151.9 L322.8,151.9 L285.5,151.9 L248.2,152.3 L211.0,152.8 L173.8,153.2 L136.5,162.2 L99.2,162.2 L62.0,162.2 Z" class="gap-up"/>
+  <path d="M62.0,162.2 L99.2,162.2 L136.5,162.2 L173.8,153.2 L211.0,152.8 L248.2,152.3 L285.5,151.9 L322.8,151.9 L360.0,151.9 L397.2,151.9 L434.5,151.9 L471.8,141.5 L509.0,141.5 L546.2,141.5 L583.5,141.5 L620.8,141.4 L658.0,140.9" class="basis"/>
+  <path d="M62.0,107.9 L99.2,103.1 L136.5,106.9 L173.8,92.3 L211.0,99.9 L248.2,96.3 L285.5,96.0 L322.8,97.1 L360.0,89.7 L397.2,93.5 L434.5,90.2 L471.8,74.3 L509.0,74.9 L546.2,84.9 L583.5,88.8 L620.8,85.0 L658.0,87.4" class="value"/>
+  <circle class="dot-basis" cx="658.0" cy="140.9" r="3"/>
+  <circle class="dot-value" cx="658.0" cy="87.4" r="3.5"/>
   <text class="fg-muted" x="62" y="228" font-size="11" dominant-baseline="middle">累计收益率</text>
   <line class="grid" x1="62" y1="238.0" x2="658" y2="238.0"/><text class="fg-muted" x="54" y="242.0" text-anchor="end" font-size="10">25%</text><line class="grid" x1="62" y1="260.8" x2="658" y2="260.8"/><text class="fg-muted" x="54" y="264.8" text-anchor="end" font-size="10">20%</text><line class="grid" x1="62" y1="283.6" x2="658" y2="283.6"/><text class="fg-muted" x="54" y="287.6" text-anchor="end" font-size="10">15%</text><line class="grid" x1="62" y1="306.4" x2="658" y2="306.4"/><text class="fg-muted" x="54" y="310.4" text-anchor="end" font-size="10">10%</text><line class="grid" x1="62" y1="329.2" x2="658" y2="329.2"/><text class="fg-muted" x="54" y="333.2" text-anchor="end" font-size="10">5%</text><line class="grid" x1="62" y1="352.0" x2="658" y2="352.0"/><text class="fg-muted" x="54" y="356.0" text-anchor="end" font-size="10">0%</text>
-  <path d="M62.0,253.8 L101.7,245.2 L141.5,252.1 L181.2,245.8 L220.9,260.0 L260.7,254.7 L300.4,255.0 L340.1,257.0 L379.9,244.1 L419.6,250.8 L459.3,245.0 L499.1,239.9 L538.8,240.8 L578.5,257.4 L618.3,264.1 L658.0,257.9 L658.0,352.0 L62.0,352.0 Z" class="rate-up"/>
+  <path d="M62.0,253.8 L99.2,245.2 L136.5,252.1 L173.8,245.8 L211.0,260.0 L248.2,254.7 L285.5,255.0 L322.8,257.0 L360.0,244.1 L397.2,250.8 L434.5,245.0 L471.8,239.9 L509.0,240.8 L546.2,257.4 L583.5,264.1 L620.8,257.9 L658.0,262.7 L658.0,352.0 L62.0,352.0 Z" class="rate-up"/>
   <line class="zero" x1="62" y1="352.0" x2="658" y2="352.0"/>
-  <path d="M62.0,253.8 L101.7,245.2 L141.5,252.1 L181.2,245.8 L220.9,260.0 L260.7,254.7 L300.4,255.0 L340.1,257.0 L379.9,244.1 L419.6,250.8 L459.3,245.0 L499.1,239.9 L538.8,240.8 L578.5,257.4 L618.3,264.1 L658.0,257.9" class="rate"/>
-  <circle class="dot-rate" cx="658.0" cy="257.9" r="3.5"/>
+  <path d="M62.0,253.8 L99.2,245.2 L136.5,252.1 L173.8,245.8 L211.0,260.0 L248.2,254.7 L285.5,255.0 L322.8,257.0 L360.0,244.1 L397.2,250.8 L434.5,245.0 L471.8,239.9 L509.0,240.8 L546.2,257.4 L583.5,264.1 L620.8,257.9 L658.0,262.7" class="rate"/>
+  <circle class="dot-rate" cx="658.0" cy="262.7" r="3.5"/>
   <text class="fg-muted" x="62" y="374" font-size="10">2026-09-24</text>
-  <text class="fg-muted" x="658" y="374" text-anchor="end" font-size="10">2026-10-09</text>
+  <text class="fg-muted" x="658" y="374" text-anchor="end" font-size="10">2026-10-10</text>
 </svg>
