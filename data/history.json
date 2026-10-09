@@ -7,7 +7,10 @@
     "btc_cny": 13011.01,
     "btc_qty": 0.02311808,
     "sp500_cny": 524.01,
-    "target_cny": 558139.53
+    "target_cny": 558139.53,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11136.74,
+    "profit_cny": 2398.28
   },
   {
     "date": "2026-09-25",
@@ -17,7 +20,10 @@
     "btc_cny": 13204.67,
     "btc_qty": 0.02311808,
     "sp500_cny": 540.33,
-    "target_cny": 558139.53
+    "target_cny": 558139.53,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11136.74,
+    "profit_cny": 2608.26
   },
   {
     "date": "2026-09-26",
@@ -27,7 +33,10 @@
     "btc_cny": 13036.91,
     "btc_qty": 0.02311808,
     "sp500_cny": 540.33,
-    "target_cny": 558139.53
+    "target_cny": 558139.53,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11136.74,
+    "profit_cny": 2440.5
   },
   {
     "date": "2026-09-27",
@@ -37,7 +46,10 @@
     "btc_cny": 13680.02,
     "btc_qty": 0.02392337,
     "sp500_cny": 540.33,
-    "target_cny": 496744.19
+    "target_cny": 496744.19,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11534.1,
+    "profit_cny": 2686.25
   },
   {
     "date": "2026-09-28",
@@ -47,7 +59,10 @@
     "btc_cny": 13345.87,
     "btc_qty": 0.02392337,
     "sp500_cny": 540.33,
-    "target_cny": 496744.19
+    "target_cny": 496744.19,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11554.09,
+    "profit_cny": 2332.11
   },
   {
     "date": "2026-09-29",
@@ -57,7 +72,10 @@
     "btc_cny": 13483.54,
     "btc_qty": 0.02392337,
     "sp500_cny": 560.38,
-    "target_cny": 444279.07
+    "target_cny": 444279.07,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11574.08,
+    "profit_cny": 2469.84
   },
   {
     "date": "2026-09-30",
@@ -67,7 +85,10 @@
     "btc_cny": 13482.28,
     "btc_qty": 0.02392337,
     "sp500_cny": 578.29,
-    "target_cny": 444279.07
+    "target_cny": 444279.07,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11594.07,
+    "profit_cny": 2466.5
   },
   {
     "date": "2026-10-01",
@@ -77,7 +98,10 @@
     "btc_cny": 13410.82,
     "btc_qty": 0.02392337,
     "sp500_cny": 597.51,
-    "target_cny": 444279.07
+    "target_cny": 444279.07,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11594.07,
+    "profit_cny": 2414.26
   },
   {
     "date": "2026-10-02",
@@ -87,7 +111,10 @@
     "btc_cny": 13739.62,
     "btc_qty": 0.02392337,
     "sp500_cny": 597.51,
-    "target_cny": 444279.07
+    "target_cny": 444279.07,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11594.07,
+    "profit_cny": 2743.06
   },
   {
     "date": "2026-10-03",
@@ -97,7 +124,10 @@
     "btc_cny": 13570.86,
     "btc_qty": 0.02392337,
     "sp500_cny": 597.51,
-    "target_cny": 444279.07
+    "target_cny": 444279.07,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11594.07,
+    "profit_cny": 2574.3
   },
   {
     "date": "2026-10-04",
@@ -107,7 +137,10 @@
     "btc_cny": 13717.95,
     "btc_qty": 0.02392337,
     "sp500_cny": 597.51,
-    "target_cny": 444279.07
+    "target_cny": 444279.07,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 11594.07,
+    "profit_cny": 2721.39
   },
   {
     "date": "2026-10-05",
@@ -117,7 +150,10 @@
     "btc_cny": 14416.75,
     "btc_qty": 0.02484565,
     "sp500_cny": 597.51,
-    "target_cny": 444279.07
+    "target_cny": 444279.07,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 12051.21,
+    "profit_cny": 2963.05
   },
   {
     "date": "2026-10-06",
@@ -127,7 +163,10 @@
     "btc_cny": 14391.79,
     "btc_qty": 0.02484565,
     "sp500_cny": 597.51,
-    "target_cny": 444279.07
+    "target_cny": 444279.07,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 12051.21,
+    "profit_cny": 2938.09
   },
   {
     "date": "2026-10-07",
@@ -137,7 +176,10 @@
     "btc_cny": 13953.09,
     "btc_qty": 0.02484565,
     "sp500_cny": 597.51,
-    "target_cny": 444279.07
+    "target_cny": 444279.07,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 12051.21,
+    "profit_cny": 2499.39
   },
   {
     "date": "2026-10-08",
@@ -147,16 +189,22 @@
     "btc_cny": 13777.7,
     "btc_qty": 0.02484565,
     "sp500_cny": 597.51,
-    "target_cny": 427534.88
+    "target_cny": 427534.88,
+    "fx_usd_cny": 6.712457,
+    "basis_cny": 12051.21,
+    "profit_cny": 2324.0
   },
   {
     "date": "2026-10-09",
-    "as_of": "2026-10-09T07:40:06+08:00",
-    "total_cny": 14266.59,
-    "progress_pct": 3.3369,
-    "btc_cny": 13650.9,
+    "as_of": "2026-10-09T08:45:57+08:00",
+    "total_cny": 14271.78,
+    "progress_pct": 3.3382,
+    "btc_cny": 13656.09,
     "btc_qty": 0.02484565,
     "sp500_cny": 615.69,
-    "target_cny": 427534.88
+    "target_cny": 427534.88,
+    "basis_cny": 12055.97,
+    "profit_cny": 2215.81,
+    "fx_usd_cny": 6.715255
   }
 ]

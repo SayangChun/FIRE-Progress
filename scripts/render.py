@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+import math
+
 START_MARK = "<!-- FIRE:START -->"
 END_MARK = "<!-- FIRE:END -->"
 
@@ -191,6 +193,160 @@ def curve_svg(history: list[dict], cfg) -> str:
   <text class="fg-muted" x="{pad_l}" y="{height - 12}" font-size="10">{points[0][0]}</text>
   <text class="fg-muted" x="{pad_l + plot_w}" y="{height - 12}" text-anchor="end" font-size="10">{points[-1][0]}</text>
   <text class="fg-muted" x="{last_x:.1f}" y="{last_y - 10:.1f}" text-anchor="end" font-size="11" font-weight="500">{points[-1][1]:.3f}%</text>
+</svg>
+"""
+
+
+# ---------------------------------------------------------------- 收益曲线 SVG
+#
+# 「投入与盈亏」的时序版本：两条线——累计投入（本金）与当前市值，
+# 两者之间的缺口就是累计盈亏。
+#
+# 为什么不只画盈亏一条线：单看盈亏分不清「数字涨了是因为赚了，还是因为又加仓了」。
+# 把本金一起画出来，读者能立刻分辨——曲线里的**阶梯**是加仓，**张口**才是收益。
+#
+# 纵轴**不从 0 起**：本金与市值都挤在 ¥11k–15k 这个窄区间，从 0 起会把缺口
+# 压成一条看不见的线。所以纵轴按数据范围自适应，README 的说明里必须写明这点，
+# 否则容易把「纵轴放大」误读成「涨幅很大」。
+
+
+def _nice_axis(lo: float, hi: float, max_ticks: int = 5) -> tuple[float, float, int]:
+    """把纵轴取整到「好看的刻度」。
+
+    不取整的话轴标会是 ¥15,402 / ¥14,239 这种读不出来的数字；
+    取整到 1 / 2 / 2.5 / 5 × 10^n 的档位后是 ¥11,000 / ¥12,000…，一眼能读。
+    区间数不固定（4~6 格），以能完整覆盖数据为准，避免裁掉首尾。
+    """
+    span = (hi - lo) or max(abs(hi) * 0.02, 1.0)
+    raw = span / max_ticks
+    mag = 10 ** math.floor(math.log10(raw))
+    step = next(m * mag for m in (1, 2, 2.5, 5, 10) if m * mag >= raw)
+    y_lo = math.floor(lo / step) * step
+    ticks = max(math.ceil((hi - y_lo) / step), 1)
+    return y_lo, y_lo + step * ticks, ticks
+
+
+def profit_svg(history: list[dict], cfg) -> str:
+    width, height = 680, 260
+    pad_l, pad_r, pad_t, pad_b = 62, 22, 46, 34
+
+    points: list[tuple[str, float, float]] = []
+    for row in history:
+        if not row.get("date"):
+            continue
+        basis = row.get("basis_cny")
+        total = row.get("total_cny")
+        if basis is None or total is None:
+            continue
+        points.append((row["date"], float(basis), float(total)))
+
+    if len(points) < 2:
+        return (
+            f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
+            f'width="{width}" height="{height}" role="img">'
+            f'<title>FIRE 收益曲线</title>'
+            f'<rect x="0" y="0" width="{width}" height="{height}" fill="none"/>'
+            f'<text x="{width / 2}" y="{height / 2}" text-anchor="middle" font-size="13" '
+            f'font-family="ui-sans-serif,system-ui,sans-serif" fill="#57606a">'
+            f"收益曲线数据积累中（至少需要 2 天同时记录了本金与市值）</text>"
+            f"</svg>"
+        )
+
+    points.sort(key=lambda item: item[0])
+
+    values = [v for _, _, v in points] + [b for _, b, _ in points]
+    y_lo, y_hi, n_ticks = _nice_axis(min(values), max(values))
+
+    plot_w = width - pad_l - pad_r
+    plot_h = height - pad_t - pad_b
+
+    def x_at(index: int) -> float:
+        return pad_l + plot_w * index / (len(points) - 1)
+
+    def y_at(value: float) -> float:
+        return pad_t + plot_h * (1 - (value - y_lo) / (y_hi - y_lo))
+
+    basis_pts = [(x_at(i), y_at(b)) for i, (_, b, _) in enumerate(points)]
+    value_pts = [(x_at(i), y_at(v)) for i, (_, _, v) in enumerate(points)]
+
+    def polyline(pts: list[tuple[float, float]]) -> str:
+        return " ".join(
+            f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(pts)
+        )
+
+    basis_path = polyline(basis_pts)
+    value_path = polyline(value_pts)
+    # 缺口 = 市值线正向走一遍，再沿投入线反向走回来，闭合成面
+    gap_path = (
+        polyline(value_pts)
+        + " "
+        + " ".join(f"L{x:.1f},{y:.1f}" for x, y in reversed(basis_pts))
+        + " Z"
+    )
+
+    basis_now, value_now = points[-1][1], points[-1][2]
+    profit = value_now - basis_now
+    gap_class = "gap-up" if profit >= 0 else "gap-down"
+    tone_class = "up" if profit >= 0 else "down"
+    sign = "+" if profit >= 0 else "−"
+
+    grid: list[str] = []
+    for i in range(n_ticks + 1):
+        value = y_hi - (y_hi - y_lo) * i / n_ticks
+        y = pad_t + plot_h * i / n_ticks
+        grid.append(
+            f'<line class="grid" x1="{pad_l}" y1="{y:.1f}" x2="{pad_l + plot_w}" y2="{y:.1f}"/>'
+        )
+        grid.append(
+            f'<text class="fg-muted" x="{pad_l - 8}" y="{y + 4:.1f}" text-anchor="end" '
+            f'font-size="10">¥{value:,.0f}</text>'
+        )
+
+    last_x, last_y = value_pts[-1]
+    last_bx, last_by = basis_pts[-1]
+
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="FIRE 收益曲线">
+  <title>FIRE 收益曲线</title>
+  <desc>从 {points[0][0]} 到 {points[-1][0]} 的累计投入与市值对比，最新本金 ¥{basis_now:,.2f}、市值 ¥{value_now:,.2f}、累计盈亏 {sign}¥{abs(profit):,.2f}。纵轴不从 0 开始。</desc>
+  <style>
+    .fg {{ fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
+    .fg-muted {{ fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
+    .grid {{ stroke: #d8dee4; stroke-width: 1; stroke-dasharray: 3 4; }}
+    .basis {{ fill: none; stroke: #8c959f; stroke-width: 1.6; stroke-dasharray: 5 4; stroke-linejoin: round; }}
+    .value {{ fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
+    .gap-up {{ fill: #1a7f37; fill-opacity: 0.13; }}
+    .gap-down {{ fill: #cf222e; fill-opacity: 0.13; }}
+    .up {{ fill: #1a7f37; }}
+    .down {{ fill: #cf222e; }}
+    .dot-value {{ fill: #d97706; }}
+    .dot-basis {{ fill: #8c959f; }}
+    @media (prefers-color-scheme: dark) {{
+      .fg {{ fill: #e6edf3; }}
+      .fg-muted {{ fill: #8b949e; }}
+      .grid {{ stroke: #30363d; }}
+      .basis {{ stroke: #6e7681; }}
+      .value {{ stroke: #f0b429; }}
+      .gap-up {{ fill: #3fb950; fill-opacity: 0.16; }}
+      .gap-down {{ fill: #f85149; fill-opacity: 0.16; }}
+      .up {{ fill: #3fb950; }}
+      .down {{ fill: #f85149; }}
+      .dot-value {{ fill: #f0b429; }}
+      .dot-basis {{ fill: #6e7681; }}
+    }}
+  </style>
+  <line class="basis" x1="{pad_l}" y1="20" x2="{pad_l + 18}" y2="20"/>
+  <text class="fg-muted" x="{pad_l + 24}" y="20" font-size="11" dominant-baseline="middle">累计投入</text>
+  <line class="value" x1="{pad_l + 104}" y1="20" x2="{pad_l + 122}" y2="20"/>
+  <text class="fg-muted" x="{pad_l + 128}" y="20" font-size="11" dominant-baseline="middle">当前市值</text>
+  <text class="{tone_class}" x="{pad_l + plot_w}" y="20" text-anchor="end" font-size="12" font-weight="600" dominant-baseline="middle">累计盈亏 {sign}¥{abs(profit):,.2f}</text>
+  {''.join(grid)}
+  <path d="{gap_path}" class="{gap_class}"/>
+  <path d="{basis_path}" class="basis"/>
+  <path d="{value_path}" class="value"/>
+  <circle class="dot-basis" cx="{last_bx:.1f}" cy="{last_by:.1f}" r="3"/>
+  <circle class="dot-value" cx="{last_x:.1f}" cy="{last_y:.1f}" r="3.5"/>
+  <text class="fg-muted" x="{pad_l}" y="{height - 12}" font-size="10">{points[0][0]}</text>
+  <text class="fg-muted" x="{pad_l + plot_w}" y="{height - 12}" text-anchor="end" font-size="10">{points[-1][0]}</text>
 </svg>
 """
 
@@ -426,6 +582,34 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             out.append(
                 "> 比特币本金按持仓备注中的「均价 $xx/BTC」推算，并按**当前汇率**折算成人民币，"
                 "与真实买入成本存在偏差；标普500本金取自 sp500-dca 的累计投入。"
+            )
+            out.append("")
+
+        curve_pts = sum(1 for r in history if r.get("basis_cny") is not None)
+        if cfg.display.get("show_profit_curve", True) and curve_pts >= 2:
+            first_day = next(r["date"] for r in history if r.get("basis_cny") is not None)
+            out.append("### 收益曲线")
+            out.append("")
+            out.append("![FIRE 收益曲线](reports/profit.svg)")
+            out.append("")
+            out.append(
+                "> 实线是**当前市值**，虚线是**累计投入本金**，两者之间的缺口就是累计盈亏。"
+            )
+            out.append(">")
+            out.append(
+                "> 曲线里的**阶梯**是加仓（本金跳升），**张口**才是收益——"
+                "只看盈亏一条线分不清这两件事。"
+            )
+            out.append(">")
+            out.append(
+                "> ⚠️ 纵轴**不从 0 起**。本金与市值都挤在一个很窄的区间里，"
+                "从 0 起缺口会被压成一条看不见的线；代价是图上看起来的斜率不代表实际涨跌幅。"
+            )
+            out.append(">")
+            out.append(
+                f"> 起点 **{first_day}**（项目开始）。已回填的历史点由两个持仓仓库的历史文件重建"
+                "（比特币按备注均价、标普500按逐日累计投入），其中比特币那部分统一按当前汇率折算，"
+                "所以早期本金的绝对值有误差、趋势可信；此后每天由 Actions 直接记录。"
             )
             out.append("")
 

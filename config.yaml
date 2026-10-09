@@ -186,6 +186,10 @@ display:
   show_progress_bar: true
   show_curve: true
   curve_days: 90
+  # 收益曲线（reports/profit.svg）：累计投入 vs 当前市值，缺口即累计盈亏。
+  # 数据来自 history.json 里的 basis_cny / profit_cny —— 必须逐日留档，
+  # 事后无法精确重建（比特币本金要历史汇率），所以当天不记就永久丢失。
+  show_profit_curve: true
   show_life_plan: true # 在 README 里展示月开销明细（FIRE 生活预算）
 
 # ------------------------------------------------------------

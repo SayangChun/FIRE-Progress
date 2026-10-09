@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 260" width="680" height="260" role="img" aria-label="FIRE 收益曲线">
+  <title>FIRE 收益曲线</title>
+  <desc>从 2026-09-24 到 2026-10-09 的累计投入与市值对比，最新本金 ¥12,055.97、市值 ¥14,271.78、累计盈亏 +¥2,215.81。纵轴不从 0 开始。</desc>
+  <style>
+    .fg { fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .fg-muted { fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .grid { stroke: #d8dee4; stroke-width: 1; stroke-dasharray: 3 4; }
+    .basis { fill: none; stroke: #8c959f; stroke-width: 1.6; stroke-dasharray: 5 4; stroke-linejoin: round; }
+    .value { fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .gap-up { fill: #1a7f37; fill-opacity: 0.13; }
+    .gap-down { fill: #cf222e; fill-opacity: 0.13; }
+    .up { fill: #1a7f37; }
+    .down { fill: #cf222e; }
+    .dot-value { fill: #d97706; }
+    .dot-basis { fill: #8c959f; }
+    @media (prefers-color-scheme: dark) {
+      .fg { fill: #e6edf3; }
+      .fg-muted { fill: #8b949e; }
+      .grid { stroke: #30363d; }
+      .basis { stroke: #6e7681; }
+      .value { stroke: #f0b429; }
+      .gap-up { fill: #3fb950; fill-opacity: 0.16; }
+      .gap-down { fill: #f85149; fill-opacity: 0.16; }
+      .up { fill: #3fb950; }
+      .down { fill: #f85149; }
+      .dot-value { fill: #f0b429; }
+      .dot-basis { fill: #6e7681; }
+    }
+  </style>
+  <line class="basis" x1="62" y1="20" x2="80" y2="20"/>
+  <text class="fg-muted" x="86" y="20" font-size="11" dominant-baseline="middle">累计投入</text>
+  <line class="value" x1="166" y1="20" x2="184" y2="20"/>
+  <text class="fg-muted" x="190" y="20" font-size="11" dominant-baseline="middle">当前市值</text>
+  <text class="up" x="658" y="20" text-anchor="end" font-size="12" font-weight="600" dominant-baseline="middle">累计盈亏 +¥2,215.81</text>
+  <line class="grid" x1="62" y1="46.0" x2="658" y2="46.0"/><text class="fg-muted" x="54" y="50.0" text-anchor="end" font-size="10">¥16,000</text><line class="grid" x1="62" y1="82.0" x2="658" y2="82.0"/><text class="fg-muted" x="54" y="86.0" text-anchor="end" font-size="10">¥15,000</text><line class="grid" x1="62" y1="118.0" x2="658" y2="118.0"/><text class="fg-muted" x="54" y="122.0" text-anchor="end" font-size="10">¥14,000</text><line class="grid" x1="62" y1="154.0" x2="658" y2="154.0"/><text class="fg-muted" x="54" y="158.0" text-anchor="end" font-size="10">¥13,000</text><line class="grid" x1="62" y1="190.0" x2="658" y2="190.0"/><text class="fg-muted" x="54" y="194.0" text-anchor="end" font-size="10">¥12,000</text><line class="grid" x1="62" y1="226.0" x2="658" y2="226.0"/><text class="fg-muted" x="54" y="230.0" text-anchor="end" font-size="10">¥11,000</text>
+  <path d="M62.0,134.7 L101.7,127.2 L141.5,133.2 L181.2,110.1 L220.9,122.1 L260.7,116.4 L300.4,115.8 L340.1,117.7 L379.9,105.9 L419.6,111.9 L459.3,106.6 L499.1,81.5 L538.8,82.4 L578.5,98.2 L618.3,104.5 L658.0,108.2 L658.0,188.0 L618.3,188.2 L578.5,188.2 L538.8,188.2 L499.1,188.2 L459.3,204.6 L419.6,204.6 L379.9,204.6 L340.1,204.6 L300.4,204.6 L260.7,205.3 L220.9,206.1 L181.2,206.8 L141.5,221.1 L101.7,221.1 L62.0,221.1 Z" class="gap-up"/>
+  <path d="M62.0,221.1 L101.7,221.1 L141.5,221.1 L181.2,206.8 L220.9,206.1 L260.7,205.3 L300.4,204.6 L340.1,204.6 L379.9,204.6 L419.6,204.6 L459.3,204.6 L499.1,188.2 L538.8,188.2 L578.5,188.2 L618.3,188.2 L658.0,188.0" class="basis"/>
+  <path d="M62.0,134.7 L101.7,127.2 L141.5,133.2 L181.2,110.1 L220.9,122.1 L260.7,116.4 L300.4,115.8 L340.1,117.7 L379.9,105.9 L419.6,111.9 L459.3,106.6 L499.1,81.5 L538.8,82.4 L578.5,98.2 L618.3,104.5 L658.0,108.2" class="value"/>
+  <circle class="dot-basis" cx="658.0" cy="188.0" r="3"/>
+  <circle class="dot-value" cx="658.0" cy="108.2" r="3.5"/>
+  <text class="fg-muted" x="62" y="248" font-size="10">2026-09-24</text>
+  <text class="fg-muted" x="658" y="248" text-anchor="end" font-size="10">2026-10-09</text>
+</svg>
