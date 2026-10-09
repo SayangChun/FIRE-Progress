@@ -575,14 +575,26 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     total = assets["total_cny"] or 1
     btc_share = btc["value_cny"] / total * 100 if assets["total_cny"] else 0.0
     sp_share = sp500["value_cny"] / total * 100 if assets["total_cny"] else 0.0
+    em = assets.get("emergency") or {}
+    em_value = float(em.get("value_cny") or 0.0)
+    em_share = em_value / total * 100 if assets["total_cny"] else 0.0
+    em_label = em.get("short_label") or "应急金"
     out.append(f"| 比特币 | {money(btc['value_cny'], cfg)} | {btc_share:.1f}% |")
     out.append(f"| 标普500基金 | {money(sp500['value_cny'], cfg)} | {sp_share:.1f}% |")
+    out.append(f"| {em_label} | {money(em_value, cfg)} | {em_share:.1f}% |")
     out.append(f"| **合计** | **{money(assets['total_cny'], cfg)}** | 100.0% |")
     out.append("")
+    if em and not em.get("started"):
+        out.append(
+            f"> {em_label}**尚未开始**：计划 {em.get('started_on') or '—'} 起每月存 "
+            f"{money(em.get('monthly_plan_cny') or 0.0, cfg)}，当前余额为 0。"
+        )
+        out.append("")
     out.append(
-        "> **口径**：只统计**长期投资仓位**——比特币与标普500基金，"
-        "**不含现金、存款与其他资产**。所以**卖出后进度下跌不一定是亏了**："
-        "如果钱变成了现金，那是口径边界，不是资产减少。详见下方「计入范围」。"
+        "> **口径**：统计**长期不动用的可投资资产**——比特币、标普500基金、"
+        "以及长期锁定的应急金（小荷包）；**日常现金与活期不计入**。"
+        "所以**卖出后进度下跌不一定是亏了**：如果钱变成了现金，那是口径边界，不是资产减少。"
+        "详见下方「计入范围」。"
     )
     out.append("")
 
@@ -738,8 +750,8 @@ def default_readme(block: str, cfg, monthly: float) -> str:
     rate = float(cfg.fire.withdrawal_rate)
     return f"""# FIRE-Progress
 
-> 我的 FIRE 进度看板。只统计**比特币**与**标普500基金**两项资产，
-> 由 GitHub Actions 自动更新。
+> 我的 FIRE 进度看板。统计三项**长期不动用**的资产——比特币、标普500基金、应急金（小荷包），
+> 由 GitHub Actions 自动更新。前两项读公开仓库，应急金手动维护在 `data/emergency.json`。
 
 {block}
 ## 计算口径
@@ -758,9 +770,13 @@ def default_readme(block: str, cfg, monthly: float) -> str:
 
 - ✅ [0.1BTC](https://github.com/{cfg.sources.btc.repo}) 仓库中的比特币持仓
 - ✅ [sp500-dca](https://github.com/{cfg.sources.sp500.repo}) 仓库中的标普500基金市值
-- ❌ 法币、现金、存款、其他币种、其他一切资产
+- ✅ 支付宝小荷包（应急金，每月 ¥200 长期不动；余额手动维护在 `data/emergency.json`）
+- ❌ 日常现金、活期存款、其他币种、其他一切资产
 
-**本看板统计的是「长期投资仓位」，不是「全部净资产」。** 现金、存款、货基等一概不计入。
+**纳入标准是「长期不动用」，不是「能不能变现」。**
+
+日常现金要参与周转、随花随有，所以不计入；小荷包虽然也是现金类，但它是**锁定的专项资金**，
+性质上更接近仓位而不是零钱。用「长期不动用」这条线来划，比用「是不是现金」更清楚。
 
 由此有一条要注意的推论：**卖出资产不会让进度失真，卖出后资金离开这个范围才会。**
 
@@ -773,8 +789,9 @@ def default_readme(block: str, cfg, monthly: float) -> str:
 
 > 看到进度下跌，先看钱去哪了：如果变成了现金，那是**口径边界**造成的，不是资产减少。
 >
-> 为什么不把现金计入：现金余额得手动维护，而本项目坚持**零密钥、零鉴权、全自动**。
-> 宁可把口径写清楚，也不引入一个需要人工更新、容易忘记的数字。
+> **应急金是这里唯一的例外**：它属于现金类，却计入——因为它长期不动。
+> 代价是它得**手动维护**（小荷包没有对外接口），是本项目唯一需要人工更新的数字，
+> 所以配了「超过 45 天没核对」的告警。其余两项全自动。
 
 ## 数据节奏
 

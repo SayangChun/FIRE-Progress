@@ -20,7 +20,12 @@ if str(ROOT) not in sys.path:
 from scripts import config as cfgmod  # noqa: E402
 from scripts import fire as firemod  # noqa: E402
 from scripts import render as rendermod  # noqa: E402
-from scripts.sources import btc_repo, price as price_src, sp500 as sp500_src  # noqa: E402
+from scripts.sources import (  # noqa: E402
+    btc_repo,
+    emergency as emergency_src,
+    price as price_src,
+    sp500 as sp500_src,
+)
 
 
 # ------------------------------------------------------------------ 工具函数
@@ -55,14 +60,16 @@ def load_fixture_json(name: str) -> dict:
 # ------------------------------------------------------------------ 数据抓取
 
 
-def fetch_all(cfg, mock: bool) -> tuple[dict, dict, dict]:
-    """返回 (price, btc, sp500)。单个来源失败不阻断整体。"""
+def fetch_all(cfg, mock: bool) -> tuple[dict, dict, dict, dict]:
+    """返回 (price, btc, sp500, emergency)。单个来源失败不阻断整体。"""
     if mock:
         print("[mock] 使用 tests/fixtures 下的样例数据")
         price = load_fixture_json("price.json")
         btc = btc_repo.fetch(cfg.sources.btc, csv_text=read_fixture("holdings.csv"))
         sp500 = load_fixture_json("sp500.json")
-        return price, btc, sp500
+        # 应急金是本地文件，mock 与否都读同一份真实数据（它是手动维护的，无网络可言）
+        emergency = emergency_src.fetch(cfg.sources.get("emergency", {}))
+        return price, btc, sp500, emergency
 
     price = price_src.resolve(cfg)
 
@@ -76,10 +83,15 @@ def fetch_all(cfg, mock: bool) -> tuple[dict, dict, dict]:
     else:
         sp500 = {"available": False, "warnings": ["标普500：已在配置中禁用"]}
 
-    return price, btc, sp500
+    if cfg.sources.get("emergency", {}).get("enabled", True):
+        emergency = emergency_src.fetch(cfg.sources.emergency)
+    else:
+        emergency = {"available": False, "warnings": ["应急金：已在配置中禁用"]}
+
+    return price, btc, sp500, emergency
 
 
-def apply_last_good(btc, sp500, previous: dict) -> tuple[dict, dict, list[str]]:
+def apply_last_good(btc, sp500, emergency, previous: dict) -> tuple[dict, dict, dict, list[str]]:
     """某个来源挂掉时沿用上次的可用值，并明确告警——绝不用 0 冒充持仓。
 
     注意：必须把「替换后的对象」显式返回，否则调用方拿到的仍是原来的变量。
@@ -123,7 +135,23 @@ def apply_last_good(btc, sp500, previous: dict) -> tuple[dict, dict, list[str]]:
         }
         notes.append("标普500 市值取自上次成功值")
 
-    return btc, sp500, notes
+    if not emergency.get("available") and prev_assets.get("emergency", {}).get("value_cny") is not None:
+        em = prev_assets["emergency"]
+        emergency = {
+            "available": True,
+            "label": em.get("label") or "应急金",
+            "short_label": em.get("short_label") or em.get("label") or "应急金",
+            "balance_cny": em.get("value_cny", 0.0),
+            "as_of": em.get("as_of"),
+            "stale_days": None,
+            "started": em.get("started", False),
+            "started_on": em.get("started_on"),
+            "monthly_plan_cny": em.get("monthly_plan_cny", 0.0),
+            "warnings": [f"{em.get('label') or '应急金'}：读取失败，沿用上次成功值"],
+        }
+        notes.append("应急金余额取自上次成功值")
+
+    return btc, sp500, emergency, notes
 
 
 # ------------------------------------------------------------------ 快照
@@ -143,6 +171,7 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
         "btc_qty": data["assets"]["btc"]["qty"],
         "sp500_cny": data["assets"]["sp500"]["value_cny"],
         "target_cny": data["fire"]["target_cny"],
+        "emergency_cny": (data["assets"].get("emergency") or {}).get("value_cny"),
         "basis_cny": basis.get("total_cny"),
         "profit_cny": basis.get("profit_cny"),
         # 比特币本金是「美元成本 × 当日汇率」，汇率不记下来事后无法审计
@@ -221,17 +250,19 @@ def main() -> int:
         history = []
 
     print("→ 抓取数据源…")
-    price, btc, sp500 = fetch_all(cfg, args.mock)
+    price, btc, sp500, emergency = fetch_all(cfg, args.mock)
     print(f"  BTC/USDT = {price['btc_usdt']:,.2f} ({price['btc_source']})")
     print(f"  USD/CNY  = {price['usd_cny']:.4f} ({price['fx_source']})")
     print(f"  → BTC/CNY = {price['btc_cny']:,.2f}")
     if btc.get("available"):
         print(f"  比特币持仓快照 = {btc.get('snapshot_date')}（{btc.get('stale_days')} 天前）")
 
-    btc, sp500, fallback_notes = apply_last_good(btc, sp500, previous)
+    btc, sp500, emergency, fallback_notes = apply_last_good(btc, sp500, emergency, previous)
 
     print("→ 计算 FIRE 进度…")
-    data = firemod.compute(cfg, price=price, btc=btc, sp500=sp500, history=history)
+    data = firemod.compute(
+        cfg, price=price, btc=btc, sp500=sp500, emergency=emergency, history=history
+    )
 
     # 兜底说明排在前面，并去重（同一告警可能从来源和兜底两处各来一次）
     seen: set[str] = set()
@@ -256,6 +287,9 @@ def main() -> int:
     print(f"  目标 = ¥{fire['target_cny']:,.2f}（{fire['monthly_expense']:.0f} × 12 ÷ {fire['withdrawal_rate']}）")
     print(f"  比特币 = {assets['btc']['qty']:.8f} → ¥{assets['btc']['value_cny']:,.2f}")
     print(f"  标普500 = ¥{assets['sp500']['value_cny']:,.2f}")
+    em = assets.get("emergency") or {}
+    em_note = "" if em.get("started") else f"（未开始，计划 {em.get('started_on')} 起）"
+    print(f"  {em.get('short_label') or '应急金'} = ¥{em.get('value_cny', 0.0):,.2f}{em_note}")
     print(f"  合计 = ¥{assets['total_cny']:,.2f}　完成度 = {assets['progress_pct']:.4f}%")
 
     material, reason = is_material(previous, data, cfg)

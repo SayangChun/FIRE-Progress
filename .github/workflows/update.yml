@@ -44,6 +44,8 @@ jobs:
         run: python tests/test_commit_gate.py
       - name: 生活规划口径回归测试
         run: python tests/test_life_plan.py
+      - name: 应急金口径回归测试
+        run: python tests/test_emergency.py
 
   update:
     needs: verify

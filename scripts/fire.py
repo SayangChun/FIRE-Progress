@@ -3,7 +3,7 @@
 口径（唯一权威定义，改口径只改这里 + config.yaml）：
 
     FIRE 目标资产 = 月开销 × 12 ÷ 提取率
-    当前资产      = 比特币市值 + 标普500基金市值
+    当前资产      = 比特币市值 + 标普500基金市值 + 应急金
     完成度        = 当前资产 ÷ FIRE 目标资产
 
 「月开销」默认由 life_plan（FIRE 生活规划）逐项推导而来，
@@ -11,9 +11,11 @@
 若 config.yaml 里手工填了 fire.monthly_expense，则以手工值为准
 （用于临时试算），并在结果里标记 override。
 
-只统计这两项资产，其他一律不计入。
+统计三项「长期不动用的可投资资产」：比特币、标普500基金、应急金（小荷包）。
+纳入标准是**长期不动用**，不是「能不能变现」——日常现金要参与周转，所以不计入。
 比特币持仓数量来自 0.1BTC 仓库（每周手动更新，存在延迟），
 标普500持仓来自 sp500-dca 仓库；估值用实时行情折算成人民币。
+应急金没有对外接口，余额来自仓库内手动维护的 data/emergency.json。
 """
 
 from __future__ import annotations
@@ -102,6 +104,7 @@ def compute(
     price: dict,
     btc: dict,
     sp500: dict,
+    emergency: dict | None = None,
     history: list[dict],
     as_of: str | None = None,
 ) -> dict:
@@ -115,7 +118,12 @@ def compute(
     sp500_value = float(sp500.get("market_value") or 0.0)
     sp500_invested = float(sp500.get("invested") or 0.0)
 
-    total = btc_value + sp500_value
+    # 应急金只进分子。FIRE 目标是「月开销 × 12 ÷ 提取率」，与资产无关——
+    # 加一项资产绝不能让目标变化，否则就是口径错误。
+    emergency = emergency or {}
+    emergency_value = float(emergency.get("balance_cny") or 0.0)
+
+    total = btc_value + sp500_value + emergency_value
     progress = total / target if target else 0.0
     remaining = max(target - total, 0.0)
 
@@ -171,6 +179,16 @@ def compute(
                 "latest_nav_date": sp500.get("latest_nav_date"),
                 "funds": sp500.get("funds", []),
             },
+            "emergency": {
+                "label": emergency.get("label") or "应急金",
+                "short_label": emergency.get("short_label") or emergency.get("label") or "应急金",
+                "value_cny": round(emergency_value, 2),
+                "as_of": emergency.get("as_of"),
+                "started": bool(emergency.get("started", False)),
+                "started_on": emergency.get("started_on"),
+                "stale_days": emergency.get("stale_days"),
+                "monthly_plan_cny": float(emergency.get("monthly_plan_cny") or 0.0),
+            },
         },
         "cost_basis": {
             "btc_cny": round(btc_basis, 2) if btc_basis is not None else None,
@@ -189,5 +207,5 @@ def compute(
             "btc": btc.get("available", False),
             "sp500": sp500.get("available", False),
         },
-        "warnings": collect_warnings(btc, sp500),
+        "warnings": collect_warnings(btc, sp500, emergency),
     }
