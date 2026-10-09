@@ -199,15 +199,17 @@ def curve_svg(history: list[dict], cfg) -> str:
 
 # ---------------------------------------------------------------- 收益曲线 SVG
 #
-# 「投入与盈亏」的时序版本：两条线——累计投入（本金）与当前市值，
-# 两者之间的缺口就是累计盈亏。
+# 「投入与盈亏」的时序版，两块面板共用一条时间轴：
+#   上面板：累计投入（本金）与当前市值，缺口即累计盈亏
+#   下面板：累计收益率（盈亏 ÷ 本金），锚定 0%
 #
-# 为什么不只画盈亏一条线：单看盈亏分不清「数字涨了是因为赚了，还是因为又加仓了」。
-# 把本金一起画出来，读者能立刻分辨——曲线里的**阶梯**是加仓，**张口**才是收益。
+# 为什么两块都要，而不是只画收益率：
+#   每次加仓都会让收益率**台阶式下降**——分母（本金）变大、分子（盈亏）不变。
+#   只画收益率会让人误以为「收益变差了」，配上本金/市值才看得出那是加仓。
+#   反过来，只看金额又看不出「赚了几个点」。上面板回答「多少钱」，下面板回答「几个点」。
 #
-# 纵轴**不从 0 起**：本金与市值都挤在 ¥11k–15k 这个窄区间，从 0 起会把缺口
-# 压成一条看不见的线。所以纵轴按数据范围自适应，README 的说明里必须写明这点，
-# 否则容易把「纵轴放大」误读成「涨幅很大」。
+# 下面板纵轴**含 0**：正负是收益率图的头号信息，锚定 0 才不会被误读。
+# 上面板纵轴**不从 0 起**：本金与市值挤在窄区间里，从 0 起缺口会被压成一条看不见的线。
 
 
 def _nice_axis(lo: float, hi: float, max_ticks: int = 5) -> tuple[float, float, int]:
@@ -215,7 +217,7 @@ def _nice_axis(lo: float, hi: float, max_ticks: int = 5) -> tuple[float, float, 
 
     不取整的话轴标会是 ¥15,402 / ¥14,239 这种读不出来的数字；
     取整到 1 / 2 / 2.5 / 5 × 10^n 的档位后是 ¥11,000 / ¥12,000…，一眼能读。
-    区间数不固定（4~6 格），以能完整覆盖数据为准，避免裁掉首尾。
+    区间数不固定，以能完整覆盖数据为准，避免裁掉首尾。
     """
     span = (hi - lo) or max(abs(hi) * 0.02, 1.0)
     raw = span / max_ticks
@@ -227,20 +229,27 @@ def _nice_axis(lo: float, hi: float, max_ticks: int = 5) -> tuple[float, float, 
 
 
 def profit_svg(history: list[dict], cfg) -> str:
-    width, height = 680, 260
-    pad_l, pad_r, pad_t, pad_b = 62, 22, 46, 34
+    width, height = 680, 392
+    pad_l, pad_r = 62, 22
+    plot_w = width - pad_l - pad_r
 
-    points: list[tuple[str, float, float]] = []
+    legend_y = 18
+    a_title_y, a_top, a_bottom = 42, 52, 188
+    b_title_y, b_top, b_bottom = 228, 238, 352
+    x_label_y = 374
+
+    rows: list[tuple[str, float, float, float]] = []
     for row in history:
         if not row.get("date"):
             continue
         basis = row.get("basis_cny")
         total = row.get("total_cny")
-        if basis is None or total is None:
+        if basis is None or total is None or float(basis) <= 0:
             continue
-        points.append((row["date"], float(basis), float(total)))
+        b, v = float(basis), float(total)
+        rows.append((row["date"], b, v, (v - b) / b * 100))
 
-    if len(points) < 2:
+    if len(rows) < 2:
         return (
             f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
             f'width="{width}" height="{height}" role="img">'
@@ -252,31 +261,27 @@ def profit_svg(history: list[dict], cfg) -> str:
             f"</svg>"
         )
 
-    points.sort(key=lambda item: item[0])
-
-    values = [v for _, _, v in points] + [b for _, b, _ in points]
-    y_lo, y_hi, n_ticks = _nice_axis(min(values), max(values))
-
-    plot_w = width - pad_l - pad_r
-    plot_h = height - pad_t - pad_b
+    rows.sort(key=lambda item: item[0])
+    n = len(rows)
 
     def x_at(index: int) -> float:
-        return pad_l + plot_w * index / (len(points) - 1)
-
-    def y_at(value: float) -> float:
-        return pad_t + plot_h * (1 - (value - y_lo) / (y_hi - y_lo))
-
-    basis_pts = [(x_at(i), y_at(b)) for i, (_, b, _) in enumerate(points)]
-    value_pts = [(x_at(i), y_at(v)) for i, (_, _, v) in enumerate(points)]
+        return pad_l + plot_w * index / (n - 1)
 
     def polyline(pts: list[tuple[float, float]]) -> str:
         return " ".join(
             f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(pts)
         )
 
-    basis_path = polyline(basis_pts)
-    value_path = polyline(value_pts)
-    # 缺口 = 市值线正向走一遍，再沿投入线反向走回来，闭合成面
+    # ---- 上面板：金额（本金 vs 市值）
+    amounts = [v for _, _, v, _ in rows] + [b for _, b, _, _ in rows]
+    a_lo, a_hi, a_ticks = _nice_axis(min(amounts), max(amounts), max_ticks=3)
+    a_h = a_bottom - a_top
+
+    def ay(value: float) -> float:
+        return a_top + a_h * (1 - (value - a_lo) / (a_hi - a_lo))
+
+    basis_pts = [(x_at(i), ay(b)) for i, (_, b, _, _) in enumerate(rows)]
+    value_pts = [(x_at(i), ay(v)) for i, (_, _, v, _) in enumerate(rows)]
     gap_path = (
         polyline(value_pts)
         + " "
@@ -284,16 +289,32 @@ def profit_svg(history: list[dict], cfg) -> str:
         + " Z"
     )
 
-    basis_now, value_now = points[-1][1], points[-1][2]
+    # ---- 下面板：收益率（%），纵轴含 0
+    rates = [r for _, _, _, r in rows]
+    b_lo, b_hi, b_ticks = _nice_axis(min(0.0, min(rates)), max(0.0, max(rates)), max_ticks=5)
+    b_h = b_bottom - b_top
+
+    def by(value: float) -> float:
+        return b_top + b_h * (1 - (value - b_lo) / (b_hi - b_lo))
+
+    rate_pts = [(x_at(i), by(r)) for i, (_, _, _, r) in enumerate(rows)]
+    zero_y = by(0.0)
+    rate_path = polyline(rate_pts)
+    rate_area = (
+        rate_path
+        + f" L{rate_pts[-1][0]:.1f},{zero_y:.1f} L{rate_pts[0][0]:.1f},{zero_y:.1f} Z"
+    )
+
+    basis_now, value_now, rate_now = rows[-1][1], rows[-1][2], rows[-1][3]
     profit = value_now - basis_now
     gap_class = "gap-up" if profit >= 0 else "gap-down"
-    tone_class = "up" if profit >= 0 else "down"
+    tone_class = "up" if rate_now >= 0 else "down"
     sign = "+" if profit >= 0 else "−"
 
     grid: list[str] = []
-    for i in range(n_ticks + 1):
-        value = y_hi - (y_hi - y_lo) * i / n_ticks
-        y = pad_t + plot_h * i / n_ticks
+    for i in range(a_ticks + 1):
+        value = a_hi - (a_hi - a_lo) * i / a_ticks
+        y = a_top + a_h * i / a_ticks
         grid.append(
             f'<line class="grid" x1="{pad_l}" y1="{y:.1f}" x2="{pad_l + plot_w}" y2="{y:.1f}"/>'
         )
@@ -301,52 +322,78 @@ def profit_svg(history: list[dict], cfg) -> str:
             f'<text class="fg-muted" x="{pad_l - 8}" y="{y + 4:.1f}" text-anchor="end" '
             f'font-size="10">¥{value:,.0f}</text>'
         )
+    for i in range(b_ticks + 1):
+        value = b_hi - (b_hi - b_lo) * i / b_ticks
+        y = b_top + b_h * i / b_ticks
+        grid.append(
+            f'<line class="grid" x1="{pad_l}" y1="{y:.1f}" x2="{pad_l + plot_w}" y2="{y:.1f}"/>'
+        )
+        grid.append(
+            f'<text class="fg-muted" x="{pad_l - 8}" y="{y + 4:.1f}" text-anchor="end" '
+            f'font-size="10">{value:.0f}%</text>'
+        )
 
     last_x, last_y = value_pts[-1]
     last_bx, last_by = basis_pts[-1]
+    last_rx, last_ry = rate_pts[-1]
 
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="FIRE 收益曲线">
   <title>FIRE 收益曲线</title>
-  <desc>从 {points[0][0]} 到 {points[-1][0]} 的累计投入与市值对比，最新本金 ¥{basis_now:,.2f}、市值 ¥{value_now:,.2f}、累计盈亏 {sign}¥{abs(profit):,.2f}。纵轴不从 0 开始。</desc>
+  <desc>从 {rows[0][0]} 到 {rows[-1][0]}：累计投入 ¥{basis_now:,.2f}、市值 ¥{value_now:,.2f}、累计盈亏 {sign}¥{abs(profit):,.2f}、累计收益率 {rate_now:+.2f}%。上面板为金额（纵轴不从 0 起），下面板为收益率（纵轴含 0）。</desc>
   <style>
     .fg {{ fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
     .fg-muted {{ fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
     .grid {{ stroke: #d8dee4; stroke-width: 1; stroke-dasharray: 3 4; }}
+    .zero {{ stroke: #8c959f; stroke-width: 1.2; }}
     .basis {{ fill: none; stroke: #8c959f; stroke-width: 1.6; stroke-dasharray: 5 4; stroke-linejoin: round; }}
     .value {{ fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
+    .rate {{ fill: none; stroke: #0969da; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
     .gap-up {{ fill: #1a7f37; fill-opacity: 0.13; }}
     .gap-down {{ fill: #cf222e; fill-opacity: 0.13; }}
+    .rate-up {{ fill: #1a7f37; fill-opacity: 0.13; }}
+    .rate-down {{ fill: #cf222e; fill-opacity: 0.13; }}
     .up {{ fill: #1a7f37; }}
     .down {{ fill: #cf222e; }}
     .dot-value {{ fill: #d97706; }}
     .dot-basis {{ fill: #8c959f; }}
+    .dot-rate {{ fill: #0969da; }}
     @media (prefers-color-scheme: dark) {{
       .fg {{ fill: #e6edf3; }}
       .fg-muted {{ fill: #8b949e; }}
       .grid {{ stroke: #30363d; }}
+      .zero {{ stroke: #6e7681; }}
       .basis {{ stroke: #6e7681; }}
       .value {{ stroke: #f0b429; }}
-      .gap-up {{ fill: #3fb950; fill-opacity: 0.16; }}
-      .gap-down {{ fill: #f85149; fill-opacity: 0.16; }}
+      .rate {{ stroke: #58a6ff; }}
+      .gap-up, .rate-up {{ fill: #3fb950; fill-opacity: 0.16; }}
+      .gap-down, .rate-down {{ fill: #f85149; fill-opacity: 0.16; }}
       .up {{ fill: #3fb950; }}
       .down {{ fill: #f85149; }}
       .dot-value {{ fill: #f0b429; }}
       .dot-basis {{ fill: #6e7681; }}
+      .dot-rate {{ fill: #58a6ff; }}
     }}
   </style>
-  <line class="basis" x1="{pad_l}" y1="20" x2="{pad_l + 18}" y2="20"/>
-  <text class="fg-muted" x="{pad_l + 24}" y="20" font-size="11" dominant-baseline="middle">累计投入</text>
-  <line class="value" x1="{pad_l + 104}" y1="20" x2="{pad_l + 122}" y2="20"/>
-  <text class="fg-muted" x="{pad_l + 128}" y="20" font-size="11" dominant-baseline="middle">当前市值</text>
-  <text class="{tone_class}" x="{pad_l + plot_w}" y="20" text-anchor="end" font-size="12" font-weight="600" dominant-baseline="middle">累计盈亏 {sign}¥{abs(profit):,.2f}</text>
-  {''.join(grid)}
+  <line class="basis" x1="{pad_l}" y1="{legend_y}" x2="{pad_l + 18}" y2="{legend_y}"/>
+  <text class="fg-muted" x="{pad_l + 24}" y="{legend_y}" font-size="11" dominant-baseline="middle">累计投入</text>
+  <line class="value" x1="{pad_l + 104}" y1="{legend_y}" x2="{pad_l + 122}" y2="{legend_y}"/>
+  <text class="fg-muted" x="{pad_l + 128}" y="{legend_y}" font-size="11" dominant-baseline="middle">当前市值</text>
+  <text class="{tone_class}" x="{pad_l + plot_w}" y="{legend_y}" text-anchor="end" font-size="13" font-weight="600" dominant-baseline="middle">累计收益率 {rate_now:+.2f}%</text>
+  <text class="fg-muted" x="{pad_l}" y="{a_title_y}" font-size="11" dominant-baseline="middle">金额（元）</text>
+  {''.join(grid[: (a_ticks + 1) * 2])}
   <path d="{gap_path}" class="{gap_class}"/>
-  <path d="{basis_path}" class="basis"/>
-  <path d="{value_path}" class="value"/>
+  <path d="{polyline(basis_pts)}" class="basis"/>
+  <path d="{polyline(value_pts)}" class="value"/>
   <circle class="dot-basis" cx="{last_bx:.1f}" cy="{last_by:.1f}" r="3"/>
   <circle class="dot-value" cx="{last_x:.1f}" cy="{last_y:.1f}" r="3.5"/>
-  <text class="fg-muted" x="{pad_l}" y="{height - 12}" font-size="10">{points[0][0]}</text>
-  <text class="fg-muted" x="{pad_l + plot_w}" y="{height - 12}" text-anchor="end" font-size="10">{points[-1][0]}</text>
+  <text class="fg-muted" x="{pad_l}" y="{b_title_y}" font-size="11" dominant-baseline="middle">累计收益率</text>
+  {''.join(grid[(a_ticks + 1) * 2 :])}
+  <path d="{rate_area}" class="{'rate-up' if rate_now >= 0 else 'rate-down'}"/>
+  <line class="zero" x1="{pad_l}" y1="{zero_y:.1f}" x2="{pad_l + plot_w}" y2="{zero_y:.1f}"/>
+  <path d="{rate_path}" class="rate"/>
+  <circle class="dot-rate" cx="{last_rx:.1f}" cy="{last_ry:.1f}" r="3.5"/>
+  <text class="fg-muted" x="{pad_l}" y="{x_label_y}" font-size="10">{rows[0][0]}</text>
+  <text class="fg-muted" x="{pad_l + plot_w}" y="{x_label_y}" text-anchor="end" font-size="10">{rows[-1][0]}</text>
 </svg>
 """
 
@@ -577,6 +624,10 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append(f"| 累计投入本金 | {money(basis['total_cny'], cfg)} |")
         out.append(f"| 当前市值 | {money(assets['total_cny'], cfg)} |")
         out.append(f"| 累计盈亏 | {money(basis['profit_cny'], cfg)} |")
+        basis_total = float(basis.get("total_cny") or 0)
+        profit_total = float(basis.get("profit_cny") or 0)
+        rate_txt = f"{profit_total / basis_total * 100:+.2f}%" if basis_total else "—"
+        out.append(f"| **累计收益率** | **{rate_txt}** |")
         out.append("")
         if basis.get("btc_estimated"):
             out.append(
@@ -593,17 +644,20 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             out.append("![FIRE 收益曲线](reports/profit.svg)")
             out.append("")
             out.append(
-                "> 实线是**当前市值**，虚线是**累计投入本金**，两者之间的缺口就是累计盈亏。"
+                "> **上面板**：累计投入（虚线）与当前市值（实线），缺口即累计盈亏。"
+                "**下面板**：累计收益率（盈亏 ÷ 本金），纵轴含 0。"
             )
             out.append(">")
             out.append(
-                "> 曲线里的**阶梯**是加仓（本金跳升），**张口**才是收益——"
-                "只看盈亏一条线分不清这两件事。"
+                "> 两张图要一起看：**每次加仓都会让收益率台阶式下降**——"
+                "分母（本金）变大、分子（盈亏）不变，那不是收益变差，是加仓。"
+                "上面板的台阶和下面板的台阶出现在同一天，可以对得上。"
             )
             out.append(">")
             out.append(
-                "> ⚠️ 纵轴**不从 0 起**。本金与市值都挤在一个很窄的区间里，"
-                "从 0 起缺口会被压成一条看不见的线；代价是图上看起来的斜率不代表实际涨跌幅。"
+                "> ⚠️ 上面板纵轴**不从 0 起**（本金与市值挤在窄区间里，"
+                "从 0 起缺口会被压成一条看不见的线），所以斜率不代表实际涨跌幅；"
+                "下面板含 0，正负可以放心读。"
             )
             out.append(">")
             out.append(

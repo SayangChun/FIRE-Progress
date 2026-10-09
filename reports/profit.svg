@@ -1,43 +1,58 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 260" width="680" height="260" role="img" aria-label="FIRE 收益曲线">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 392" width="680" height="392" role="img" aria-label="FIRE 收益曲线">
   <title>FIRE 收益曲线</title>
-  <desc>从 2026-09-24 到 2026-10-09 的累计投入与市值对比，最新本金 ¥12,055.97、市值 ¥14,271.78、累计盈亏 +¥2,215.81。纵轴不从 0 开始。</desc>
+  <desc>从 2026-09-24 到 2026-10-09：累计投入 ¥12,055.97、市值 ¥14,271.78、累计盈亏 +¥2,215.81、累计收益率 +18.38%。上面板为金额（纵轴不从 0 起），下面板为收益率（纵轴含 0）。</desc>
   <style>
     .fg { fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
     .fg-muted { fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
     .grid { stroke: #d8dee4; stroke-width: 1; stroke-dasharray: 3 4; }
+    .zero { stroke: #8c959f; stroke-width: 1.2; }
     .basis { fill: none; stroke: #8c959f; stroke-width: 1.6; stroke-dasharray: 5 4; stroke-linejoin: round; }
     .value { fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .rate { fill: none; stroke: #0969da; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
     .gap-up { fill: #1a7f37; fill-opacity: 0.13; }
     .gap-down { fill: #cf222e; fill-opacity: 0.13; }
+    .rate-up { fill: #1a7f37; fill-opacity: 0.13; }
+    .rate-down { fill: #cf222e; fill-opacity: 0.13; }
     .up { fill: #1a7f37; }
     .down { fill: #cf222e; }
     .dot-value { fill: #d97706; }
     .dot-basis { fill: #8c959f; }
+    .dot-rate { fill: #0969da; }
     @media (prefers-color-scheme: dark) {
       .fg { fill: #e6edf3; }
       .fg-muted { fill: #8b949e; }
       .grid { stroke: #30363d; }
+      .zero { stroke: #6e7681; }
       .basis { stroke: #6e7681; }
       .value { stroke: #f0b429; }
-      .gap-up { fill: #3fb950; fill-opacity: 0.16; }
-      .gap-down { fill: #f85149; fill-opacity: 0.16; }
+      .rate { stroke: #58a6ff; }
+      .gap-up, .rate-up { fill: #3fb950; fill-opacity: 0.16; }
+      .gap-down, .rate-down { fill: #f85149; fill-opacity: 0.16; }
       .up { fill: #3fb950; }
       .down { fill: #f85149; }
       .dot-value { fill: #f0b429; }
       .dot-basis { fill: #6e7681; }
+      .dot-rate { fill: #58a6ff; }
     }
   </style>
-  <line class="basis" x1="62" y1="20" x2="80" y2="20"/>
-  <text class="fg-muted" x="86" y="20" font-size="11" dominant-baseline="middle">累计投入</text>
-  <line class="value" x1="166" y1="20" x2="184" y2="20"/>
-  <text class="fg-muted" x="190" y="20" font-size="11" dominant-baseline="middle">当前市值</text>
-  <text class="up" x="658" y="20" text-anchor="end" font-size="12" font-weight="600" dominant-baseline="middle">累计盈亏 +¥2,215.81</text>
-  <line class="grid" x1="62" y1="46.0" x2="658" y2="46.0"/><text class="fg-muted" x="54" y="50.0" text-anchor="end" font-size="10">¥16,000</text><line class="grid" x1="62" y1="82.0" x2="658" y2="82.0"/><text class="fg-muted" x="54" y="86.0" text-anchor="end" font-size="10">¥15,000</text><line class="grid" x1="62" y1="118.0" x2="658" y2="118.0"/><text class="fg-muted" x="54" y="122.0" text-anchor="end" font-size="10">¥14,000</text><line class="grid" x1="62" y1="154.0" x2="658" y2="154.0"/><text class="fg-muted" x="54" y="158.0" text-anchor="end" font-size="10">¥13,000</text><line class="grid" x1="62" y1="190.0" x2="658" y2="190.0"/><text class="fg-muted" x="54" y="194.0" text-anchor="end" font-size="10">¥12,000</text><line class="grid" x1="62" y1="226.0" x2="658" y2="226.0"/><text class="fg-muted" x="54" y="230.0" text-anchor="end" font-size="10">¥11,000</text>
-  <path d="M62.0,134.7 L101.7,127.2 L141.5,133.2 L181.2,110.1 L220.9,122.1 L260.7,116.4 L300.4,115.8 L340.1,117.7 L379.9,105.9 L419.6,111.9 L459.3,106.6 L499.1,81.5 L538.8,82.4 L578.5,98.2 L618.3,104.5 L658.0,108.2 L658.0,188.0 L618.3,188.2 L578.5,188.2 L538.8,188.2 L499.1,188.2 L459.3,204.6 L419.6,204.6 L379.9,204.6 L340.1,204.6 L300.4,204.6 L260.7,205.3 L220.9,206.1 L181.2,206.8 L141.5,221.1 L101.7,221.1 L62.0,221.1 Z" class="gap-up"/>
-  <path d="M62.0,221.1 L101.7,221.1 L141.5,221.1 L181.2,206.8 L220.9,206.1 L260.7,205.3 L300.4,204.6 L340.1,204.6 L379.9,204.6 L419.6,204.6 L459.3,204.6 L499.1,188.2 L538.8,188.2 L578.5,188.2 L618.3,188.2 L658.0,188.0" class="basis"/>
-  <path d="M62.0,134.7 L101.7,127.2 L141.5,133.2 L181.2,110.1 L220.9,122.1 L260.7,116.4 L300.4,115.8 L340.1,117.7 L379.9,105.9 L419.6,111.9 L459.3,106.6 L499.1,81.5 L538.8,82.4 L578.5,98.2 L618.3,104.5 L658.0,108.2" class="value"/>
-  <circle class="dot-basis" cx="658.0" cy="188.0" r="3"/>
-  <circle class="dot-value" cx="658.0" cy="108.2" r="3.5"/>
-  <text class="fg-muted" x="62" y="248" font-size="10">2026-09-24</text>
-  <text class="fg-muted" x="658" y="248" text-anchor="end" font-size="10">2026-10-09</text>
+  <line class="basis" x1="62" y1="18" x2="80" y2="18"/>
+  <text class="fg-muted" x="86" y="18" font-size="11" dominant-baseline="middle">累计投入</text>
+  <line class="value" x1="166" y1="18" x2="184" y2="18"/>
+  <text class="fg-muted" x="190" y="18" font-size="11" dominant-baseline="middle">当前市值</text>
+  <text class="up" x="658" y="18" text-anchor="end" font-size="13" font-weight="600" dominant-baseline="middle">累计收益率 +18.38%</text>
+  <text class="fg-muted" x="62" y="42" font-size="11" dominant-baseline="middle">金额（元）</text>
+  <line class="grid" x1="62" y1="52.0" x2="658" y2="52.0"/><text class="fg-muted" x="54" y="56.0" text-anchor="end" font-size="10">¥16,000</text><line class="grid" x1="62" y1="97.3" x2="658" y2="97.3"/><text class="fg-muted" x="54" y="101.3" text-anchor="end" font-size="10">¥14,000</text><line class="grid" x1="62" y1="142.7" x2="658" y2="142.7"/><text class="fg-muted" x="54" y="146.7" text-anchor="end" font-size="10">¥12,000</text><line class="grid" x1="62" y1="188.0" x2="658" y2="188.0"/><text class="fg-muted" x="54" y="192.0" text-anchor="end" font-size="10">¥10,000</text>
+  <path d="M62.0,107.9 L101.7,103.1 L141.5,106.9 L181.2,92.3 L220.9,99.9 L260.7,96.3 L300.4,96.0 L340.1,97.1 L379.9,89.7 L419.6,93.5 L459.3,90.2 L499.1,74.3 L538.8,74.9 L578.5,84.9 L618.3,88.8 L658.0,91.2 L658.0,141.4 L618.3,141.5 L578.5,141.5 L538.8,141.5 L499.1,141.5 L459.3,151.9 L419.6,151.9 L379.9,151.9 L340.1,151.9 L300.4,151.9 L260.7,152.3 L220.9,152.8 L181.2,153.2 L141.5,162.2 L101.7,162.2 L62.0,162.2 Z" class="gap-up"/>
+  <path d="M62.0,162.2 L101.7,162.2 L141.5,162.2 L181.2,153.2 L220.9,152.8 L260.7,152.3 L300.4,151.9 L340.1,151.9 L379.9,151.9 L419.6,151.9 L459.3,151.9 L499.1,141.5 L538.8,141.5 L578.5,141.5 L618.3,141.5 L658.0,141.4" class="basis"/>
+  <path d="M62.0,107.9 L101.7,103.1 L141.5,106.9 L181.2,92.3 L220.9,99.9 L260.7,96.3 L300.4,96.0 L340.1,97.1 L379.9,89.7 L419.6,93.5 L459.3,90.2 L499.1,74.3 L538.8,74.9 L578.5,84.9 L618.3,88.8 L658.0,91.2" class="value"/>
+  <circle class="dot-basis" cx="658.0" cy="141.4" r="3"/>
+  <circle class="dot-value" cx="658.0" cy="91.2" r="3.5"/>
+  <text class="fg-muted" x="62" y="228" font-size="11" dominant-baseline="middle">累计收益率</text>
+  <line class="grid" x1="62" y1="238.0" x2="658" y2="238.0"/><text class="fg-muted" x="54" y="242.0" text-anchor="end" font-size="10">25%</text><line class="grid" x1="62" y1="260.8" x2="658" y2="260.8"/><text class="fg-muted" x="54" y="264.8" text-anchor="end" font-size="10">20%</text><line class="grid" x1="62" y1="283.6" x2="658" y2="283.6"/><text class="fg-muted" x="54" y="287.6" text-anchor="end" font-size="10">15%</text><line class="grid" x1="62" y1="306.4" x2="658" y2="306.4"/><text class="fg-muted" x="54" y="310.4" text-anchor="end" font-size="10">10%</text><line class="grid" x1="62" y1="329.2" x2="658" y2="329.2"/><text class="fg-muted" x="54" y="333.2" text-anchor="end" font-size="10">5%</text><line class="grid" x1="62" y1="352.0" x2="658" y2="352.0"/><text class="fg-muted" x="54" y="356.0" text-anchor="end" font-size="10">0%</text>
+  <path d="M62.0,253.8 L101.7,245.2 L141.5,252.1 L181.2,245.8 L220.9,260.0 L260.7,254.7 L300.4,255.0 L340.1,257.0 L379.9,244.1 L419.6,250.8 L459.3,245.0 L499.1,239.9 L538.8,240.8 L578.5,257.4 L618.3,264.1 L658.0,268.2 L658.0,352.0 L62.0,352.0 Z" class="rate-up"/>
+  <line class="zero" x1="62" y1="352.0" x2="658" y2="352.0"/>
+  <path d="M62.0,253.8 L101.7,245.2 L141.5,252.1 L181.2,245.8 L220.9,260.0 L260.7,254.7 L300.4,255.0 L340.1,257.0 L379.9,244.1 L419.6,250.8 L459.3,245.0 L499.1,239.9 L538.8,240.8 L578.5,257.4 L618.3,264.1 L658.0,268.2" class="rate"/>
+  <circle class="dot-rate" cx="658.0" cy="268.2" r="3.5"/>
+  <text class="fg-muted" x="62" y="374" font-size="10">2026-09-24</text>
+  <text class="fg-muted" x="658" y="374" text-anchor="end" font-size="10">2026-10-09</text>
 </svg>
