@@ -2,11 +2,11 @@
   "as_of": "2026-10-13T04:09:02+08:00",
   "as_of_date": "2026-10-13",
   "fire": {
-    "monthly_expense": 1532.0,
+    "monthly_expense": 1507.0,
     "withdrawal_rate": 0.043,
-    "annual_expense": 18384.0,
-    "target_cny": 427534.88,
-    "target_with_one_off": 442534.88,
+    "annual_expense": 18084.0,
+    "target_cny": 420558.14,
+    "target_with_one_off": 435558.14,
     "monthly_override": false
   },
   "life_plan": {
@@ -18,9 +18,9 @@
     "household": 1,
     "lifestyle": "极简",
     "headline": "牡丹江 · 单人 · 租房 · 极简",
-    "monthly_expense": 1532.0,
-    "annual_expense": 18384.0,
-    "target_cny": 427534.88,
+    "monthly_expense": 1507.0,
+    "annual_expense": 18084.0,
+    "target_cny": 420558.14,
     "groups": [
       {
         "group": "住房与水电燃气",
@@ -91,8 +91,8 @@
             "key": "food",
             "group": "日常开销",
             "label": "食品",
-            "monthly": 319.0,
-            "note": "偏紧档 ¥319（约 ¥11/天，16:8 两餐）。挂面为主食、鸡蛋+豆腐作主力蛋白、猪肉约 2.5kg/月；蔬菜靠早市+10月冬储；含少量乳制品与水果。构成见规划书 §6.5"
+            "monthly": 300.0,
+            "note": "偏紧档 ¥300（约 ¥10/天，16:8 两餐）。挂面为主食、鸡蛋+豆腐作主力蛋白、猪肉约 2.5kg/月；蔬菜靠早市+10月冬储；含少量乳制品与水果。⚠️ 2026-10-13 由 ¥319 下调：他确认自己有【线上批量采购便宜货源】的能力 → 购物篮不变、单价下降，降幅落在主食、油盐调味、乳制品、零食等【耐储可囤】的品类；蔬菜水果仍走早市，线上帮不上。构成见规划书 §6.5"
           },
           {
             "key": "drinking_water",
@@ -105,8 +105,8 @@
             "key": "supplies",
             "group": "日常开销",
             "label": "日用品",
-            "monthly": 28.0,
-            "note": "极限档 ¥28：香皂替代洗发水与沐浴露、洗衣皂替代洗衣液、只买卷纸不买抽纸、小苏打+白醋替代专用清洁剂。含洗护、纸品、清洁、垃圾袋与杂项摊销。理发已改为自理，不再计入"
+            "monthly": 22.0,
+            "note": "极限档 ¥22：香皂替代洗发水与沐浴露、洗衣皂替代洗衣液、小苏打+白醋替代专用清洁剂。含洗护、清洁、垃圾袋与杂项摊销。理发已改为自理，不再计入。⚠️ 2026-10-13 由 ¥28 下调：纸巾部分（原 ¥6/月）不再占用本预算，本项只剩非纸品部分"
           },
           {
             "key": "transport",
@@ -137,7 +137,7 @@
             "note": "2026-09-29 拆细后确认：无域名、无代理订阅、无视频音乐会员、无云存储、付费 AI 为 ¥0、娱乐与外食为 ¥0。仅保留快递与零星小额支出。⚠️ 若实际有代理订阅需加回 ¥10-30"
           }
         ],
-        "subtotal": 557.0
+        "subtotal": 532.0
       },
       {
         "group": "医疗与保障",
@@ -207,14 +207,14 @@
       }
     ],
     "one_off_total": 15000.0,
-    "target_with_one_off": 442534.88,
+    "target_with_one_off": 435558.14,
     "override": false
   },
   "assets": {
     "total_cny": 14883.3,
-    "progress": 0.03481188704999508,
-    "progress_pct": 3.4812,
-    "remaining_cny": 412651.59,
+    "progress": 0.03538939015301423,
+    "progress_pct": 3.5389,
+    "remaining_cny": 405674.84,
     "btc": {
       "qty": 0.02553981,
       "price_cny": 556606.18,
@@ -283,7 +283,7 @@
     "btc_estimated": true,
     "sp500_cny": 659.67,
     "total_cny": 12423.56,
-    "profit_cny": 2459.73
+    "profit_cny": 2459.74
   },
   "price": {
     "btc_usdt": 83071.78,
@@ -294,9 +294,9 @@
     "fetched_at": "2026-10-12T20:09:01+00:00"
   },
   "projection": {
-    "daily_gain_cny": 77.6033,
-    "days_to_target": 5317,
-    "eta": "2041-05-04",
+    "daily_gain_cny": 70.9621,
+    "days_to_target": 5716,
+    "eta": "2042-06-07",
     "window_days": 30,
     "reason": null
   },
