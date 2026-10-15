@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-15T15:04:12+08:00",
+  "as_of": "2026-10-15T18:00:55+08:00",
   "as_of_date": "2026-10-15",
   "fire": {
     "monthly_expense": 1507.0,
@@ -211,14 +211,14 @@
     "override": false
   },
   "assets": {
-    "total_cny": 14559.58,
-    "progress": 0.034619658231963286,
-    "progress_pct": 3.462,
-    "remaining_cny": 405998.56,
+    "total_cny": 14627.45,
+    "progress": 0.03478103658591183,
+    "progress_pct": 3.4781,
+    "remaining_cny": 405930.69,
     "btc": {
       "qty": 0.02553981,
-      "price_cny": 542392.8,
-      "value_cny": 13852.61,
+      "price_cny": 545050.18,
+      "value_cny": 13920.48,
       "snapshot_date": "2026-10-11",
       "stale_days": 4,
       "positions": [
@@ -266,16 +266,6 @@
           "latest_nav": 1.7065
         }
       ]
-    },
-    "emergency": {
-      "label": "支付宝小荷包",
-      "short_label": "应急金",
-      "value_cny": 0.0,
-      "as_of": "2026-10-09",
-      "started": false,
-      "started_on": "2026-11-01",
-      "stale_days": null,
-      "monthly_plan_cny": 200.0
     }
   },
   "cost_basis": {
@@ -283,20 +273,20 @@
     "btc_estimated": true,
     "sp500_cny": 699.65,
     "total_cny": 12474.41,
-    "profit_cny": 2085.17
+    "profit_cny": 2153.04
   },
   "price": {
-    "btc_usdt": 80875.76,
+    "btc_usdt": 81272.0,
     "usd_cny": 6.706494,
-    "btc_cny": 542392.8,
-    "btc_source": "binance:data-api.binance.vision",
+    "btc_cny": 545050.18,
+    "btc_source": "binance:api.binance.com",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-10-15T07:04:12+00:00"
+    "fetched_at": "2026-10-15T18:00:50+08:00"
   },
   "projection": {
-    "daily_gain_cny": 54.579,
-    "days_to_target": 7438,
-    "eta": "2047-02-25",
+    "daily_gain_cny": 48.7886,
+    "days_to_target": 8320,
+    "eta": "2049-07-26",
     "window_days": 30,
     "reason": null
   },
