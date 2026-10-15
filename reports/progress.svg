@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 92" width="680" height="92" role="img" aria-label="FIRE 完成度 3.491%">
-  <title>FIRE 完成度 3.491%</title>
-  <desc>当前资产 ¥14,681.18，FIRE 目标 ¥420,558.14，完成度 3.491%，距离目标还差 ¥405,876.96。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 92" width="680" height="92" role="img" aria-label="FIRE 完成度 3.462%">
+  <title>FIRE 完成度 3.462%</title>
+  <desc>当前资产 ¥14,559.58，FIRE 目标 ¥420,558.14，完成度 3.462%，距离目标还差 ¥405,998.56。</desc>
   <style>
     .fg { fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
     .fg-muted { fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -14,9 +14,9 @@
     }
   </style>
   <text class="fg-muted" x="0" y="18" font-size="12">FIRE 完成度</text>
-  <text class="fg" x="680" y="20" text-anchor="end" font-size="19" font-weight="600">3.491%</text>
+  <text class="fg" x="680" y="20" text-anchor="end" font-size="19" font-weight="600">3.462%</text>
   <rect class="track" x="0" y="40" width="680" height="14" rx="7.0"/>
-  <rect class="fill" x="0" y="40" width="23.7" height="14" rx="7.0"/>
-  <text class="fg-muted" x="0" y="82" font-size="11">已积累 ¥14,681.18</text>
-  <text class="fg-muted" x="680" y="82" text-anchor="end" font-size="11">目标 ¥420,558.14 · 还差 ¥405,876.96</text>
+  <rect class="fill" x="0" y="40" width="23.5" height="14" rx="7.0"/>
+  <text class="fg-muted" x="0" y="82" font-size="11">已积累 ¥14,559.58</text>
+  <text class="fg-muted" x="680" y="82" text-anchor="end" font-size="11">目标 ¥420,558.14 · 还差 ¥405,998.56</text>
 </svg>
