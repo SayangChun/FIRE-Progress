@@ -525,6 +525,106 @@ def _life_plan_block(data: dict, cfg) -> str:
     return "\n".join(out)
 
 
+def _passive_income_block(data: dict, cfg) -> str:
+    """每小时被动收入 = 当前持仓 × 预期年化回报 ÷ 8760。
+
+    这一节的重点不是那个数字，而是它的边界，两句话必须跟着数字一起出现：
+      1. 它是**假设**推出来的——换一组假设，加权年化能从 0.1% 摆到 24%；
+      2. 它和提取率**不是一回事**——预期回报是「平均能涨多少」，
+         提取率是「能安全花多少」，把前者当后者用会在第一个熊市击穿本金。
+    否则读者只会记住那个偏大的数。
+    """
+    pi = data.get("passive_income")
+    if not pi or not pi.get("assets"):
+        return ""
+
+    rows = pi["assets"]
+    hourly = pi["hourly_cny"]
+    rate = pi["weighted_rate"] or 0.0
+
+    out: list[str] = []
+    out.append("### 每小时被动收入")
+    out.append("")
+    out.append("| 资产 | 市值 | 权重 | 预期年化 | 每小时 |")
+    out.append("| --- | ---: | ---: | ---: | ---: |")
+    for row in rows:
+        out.append(
+            f"| {row['label']} | {money(row['value_cny'], cfg)} | "
+            f"{row['weight'] * 100:.1f}% | {row['rate'] * 100:.1f}% | "
+            f"{money(row['hourly_cny'], cfg, decimals=3)} |"
+        )
+    out.append(
+        f"| **合计** | **{money(pi['total_value_cny'], cfg)}** | 100.0% | "
+        f"**{rate * 100:.1f}%** | **{money(hourly, cfg, decimals=3)}** |"
+    )
+    out.append("")
+    out.append(
+        f"换算：每小时 **{money(hourly, cfg, decimals=2)}** · "
+        f"每天 **{money(pi['daily_cny'], cfg)}** · "
+        f"每月 **{money(pi['monthly_cny'], cfg)}** · "
+        f"每年 **{money(pi['annual_cny'], cfg)}**"
+    )
+    out.append("")
+    if pi.get("coverage") is not None:
+        out.append(
+            f"> 按当前持仓，这笔被动收入相当于月开销的 **{pi['coverage'] * 100:.1f}%**"
+            f"（月开销 {money(pi['monthly_expense'], cfg)}）。"
+        )
+        out.append("")
+
+    out.append(
+        "> **这不是承诺，是按假设推出来的数。** "
+        f"加权年化 {rate * 100:.1f}% 是两项资产按**市值**加权的结果，"
+        "假设本身写在 `config.yaml` 的 `expected_return` 段——"
+        "改它不会影响 FIRE 目标（目标只看月开销与提取率）。"
+    )
+    out.append(">")
+
+    low_desc = "、".join(
+        f"{r['label']} {r['rate_low'] * 100:.0f}%" for r in rows if r.get("rate_low") is not None
+    )
+    high_desc = "、".join(
+        f"{r['label']} {r['rate_high'] * 100:.0f}%" for r in rows if r.get("rate_high") is not None
+    )
+    if pi.get("hourly_low_cny") is not None and pi.get("hourly_high_cny") is not None:
+        # 权重要现算，不能写死——仓位结构一变，这句解释就跟着错。
+        top = max(rows, key=lambda r: r["weight"])
+        if top["weight"] >= 0.8:
+            why = (
+                f"跨度这么离谱，是因为 **{top['weight'] * 100:.0f}% 的仓位压在{top['label']}上**——"
+                "这个数字的软肋在权重，不在回报率本身。"
+            )
+        else:
+            why = (
+                "跨度这么离谱，是因为两项资产的回报率假设本身就宽——"
+                "比特币没有可锚定的现金流，任何长期回报率都是猜的。"
+            )
+        out.append(
+            f"> **区间有多大**：换成悲观值（{low_desc}），每小时是 "
+            f"{money(pi['hourly_low_cny'], cfg, decimals=3)}；"
+            f"换成乐观值（{high_desc}），是 "
+            f"{money(pi['hourly_high_cny'], cfg, decimals=3)}。{why}"
+        )
+        out.append(">")
+
+    out.append(
+        f"> ⚠️ **别把 {rate * 100:.1f}% 当成「可以花掉的钱」。** "
+        "预期年化回报 ≠ 可持续提取率：按 FIRE 的 "
+        f"{pi['withdrawal_rate'] * 100:.1f}% 提取率口径，"
+        f"同样这笔资产每小时只有 {money(pi['hourly_at_withdrawal_cny'], cfg, decimals=3)}、"
+        f"每月 {money(pi['monthly_at_withdrawal_cny'], cfg)}。"
+    )
+    out.append(">")
+    out.append(
+        "> 差额不是保守，是为波动和「先亏后赚」的**序列风险**留的余量："
+        "平均回报为正、但路径上先腰斩一次，用平均回报算支出就会在中途卖掉筹码。"
+        "比特币单年 ±50% 是常态，所以两个数要一起看——"
+        "上面那个是「资产平均在长多快」，下面那个是「能安全取出多少」。"
+    )
+    out.append("")
+    return "\n".join(out)
+
+
 def render_block(data: dict, cfg, history: list[dict]) -> str:
     fire = data["fire"]
     assets = data["assets"]
@@ -580,6 +680,11 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append(f"| 💰 当前资产 | {money(assets['total_cny'], cfg)} |")
     out.append(f"| 📈 完成度 | **{pct:.3f}%** |")
     out.append(f"| ⏳ 距离目标 | {money(assets['remaining_cny'], cfg)} |")
+    pi = data.get("passive_income")
+    if pi:
+        out.append(
+            f"| ⏱️ 每小时被动收入（按预期年化） | {money(pi['hourly_cny'], cfg, decimals=2)} |"
+        )
     out.append("")
 
     if cfg.display.get("show_life_plan", True):
@@ -688,6 +793,14 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                 "所以早期本金的绝对值有误差、趋势可信；此后每天由 Actions 直接记录。"
             )
             out.append("")
+
+    # 被动收入与线性外推都是「往前看」的内容，放在一起。
+    # 被动收入在**前**：它是当前持仓的直接推论，比外推更硬；
+    # 外推依赖「近期增速会延续」这个更弱的假设。
+    pi_block = _passive_income_block(data, cfg)
+    if pi_block:
+        out.append(pi_block.strip())
+        out.append("")
 
     proj = data.get("projection")
     if proj:

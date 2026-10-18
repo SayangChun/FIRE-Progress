@@ -40,6 +40,99 @@ def target_cny(monthly_expense: float, withdrawal_rate: float) -> float:
     return monthly_expense * 12 / withdrawal_rate
 
 
+# 一年的小时数。用 365 天而不是 365.25：这是个展示口径，差 0.07% 无意义。
+HOURS_PER_YEAR = 365 * 24
+
+
+def passive_income(
+    cfg,
+    *,
+    btc_value: float,
+    sp500_value: float,
+    monthly_expense: float,
+) -> dict | None:
+    """按预期年化回报估算「每小时被动收入」。
+
+    这是**假设性测算**，不是预测：它假设资产按一个恒定的年化回报连续复利增长，
+    而现实里回报是波动的，且波动本身会吃掉一部分复利（波动拖累）。
+
+    ⚠️ 必须和 FIRE 的提取率分开看，两者回答的不是同一个问题：
+      - 预期年化回报 = 资产「平均」能涨多少（含亏损年份，是个算术平均）
+      - 提取率 4.3%  = 每年能安全取出多少而不至于提前耗尽本金
+    前者远高于后者是正常的。把前者当后者用，会在第一个熊市就击穿本金——
+    所以结果里同时给出按提取率口径的那个数，供对照。
+
+    口径全部来自 config.yaml 的 expected_return 段；缺失则返回 None（不猜默认值）。
+    """
+    spec = cfg.get("expected_return") or {}
+    if spec.get("btc") is None or spec.get("sp500") is None:
+        return None
+
+    total = float(btc_value) + float(sp500_value)
+
+    rows: list[dict] = []
+    for key, label, value, rate, low, high in (
+        ("btc", "比特币", btc_value, spec.get("btc"), spec.get("btc_low"), spec.get("btc_high")),
+        ("sp500", "标普500基金", sp500_value, spec.get("sp500"), spec.get("sp500_low"), spec.get("sp500_high")),
+    ):
+        value, rate = float(value), float(rate)
+        rows.append(
+            {
+                "key": key,
+                "label": label,
+                "value_cny": round(value, 2),
+                "weight": value / total if total else 0.0,
+                "rate": rate,
+                "annual_cny": round(value * rate, 2),
+                "hourly_cny": value * rate / HOURS_PER_YEAR,
+                "rate_low": None if low is None else float(low),
+                "rate_high": None if high is None else float(high),
+            }
+        )
+
+    annual = sum(float(r["annual_cny"]) for r in rows)
+    hourly = annual / HOURS_PER_YEAR
+    monthly = annual / 12
+
+    def weighted(pick) -> float | None:
+        """按市值加权求一个比率；任一端缺值就整体返回 None，不拿默认值凑。"""
+        if total <= 0:
+            return 0.0
+        acc = 0.0
+        for row in rows:
+            rate = pick(row)
+            if rate is None:
+                return None
+            acc += float(row["value_cny"]) * float(rate)
+        return acc / total
+
+    rate_low = weighted(lambda r: r["rate_low"])
+    rate_high = weighted(lambda r: r["rate_high"])
+
+    withdrawal = float(cfg.fire.get("withdrawal_rate") or 0.0)
+
+    return {
+        "hours_per_year": HOURS_PER_YEAR,
+        "total_value_cny": round(total, 2),
+        "weighted_rate": weighted(lambda r: r["rate"]),
+        "annual_cny": round(annual, 2),
+        "monthly_cny": round(monthly, 2),
+        "daily_cny": annual / 365,
+        "hourly_cny": hourly,
+        "rate_low": rate_low,
+        "rate_high": rate_high,
+        "hourly_low_cny": None if rate_low is None else total * rate_low / HOURS_PER_YEAR,
+        "hourly_high_cny": None if rate_high is None else total * rate_high / HOURS_PER_YEAR,
+        "monthly_expense": round(float(monthly_expense), 2),
+        "coverage": (monthly / float(monthly_expense)) if monthly_expense else None,
+        # 对照：同样这笔钱，按 FIRE 提取率能「安全取出」多少
+        "withdrawal_rate": withdrawal,
+        "monthly_at_withdrawal_cny": round(total * withdrawal / 12, 2),
+        "hourly_at_withdrawal_cny": total * withdrawal / HOURS_PER_YEAR,
+        "assets": rows,
+    }
+
+
 def collect_warnings(*results: dict) -> list[str]:
     warnings: list[str] = []
     for result in results:
@@ -181,6 +274,11 @@ def compute(
             "profit_cny": round(total - total_basis, 2) if total_basis is not None else None,
         },
         "price": price,
+        "passive_income": (
+            passive_income(cfg, btc_value=btc_value, sp500_value=sp500_value, monthly_expense=monthly)
+            if cfg.display.get("show_passive_income", True)
+            else None
+        ),
         "projection": (
             projection(history, remaining, int(cfg.display.get("projection_window_days", 30)))
             if cfg.display.get("show_projection")
