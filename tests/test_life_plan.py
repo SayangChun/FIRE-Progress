@@ -6,10 +6,12 @@ FIRE 目标就会悄悄跑偏，而看板上完全看不出来。
 
 这里把几条关键性质钉住：
   1. 月开销 == 逐项相加（不是另一个地方写死的数字）
-  2. FIRE 目标 == 月开销 × 12 ÷ 提取率
+  2. FIRE 目标 == 组合需覆盖 × 12 ÷ 提取率
+     （组合需覆盖 = 月开销 − 兼职净收入；兼职关闭时退化为月开销）
   3. 一次性支出**不进**月开销（这是最容易算错的一条）
   4. 切换方案后月开销随之变化
   5. profile 写错时直接报错，不静默回落
+  6. 兼职关闭时必须精确退回传统 FIRE 口径（两种定义可对比，不能混在一起）
 
 运行：python tests/test_life_plan.py
 """
@@ -83,11 +85,24 @@ check("月开销 == 分组小计之和", abs(monthly - group_sum) < 0.01, f"{mon
 resolved, plan = lifeplan_mod.resolve_monthly(cfg)
 check("resolve_monthly 返回与 monthly_total 一致", abs(resolved - monthly) < 0.01)
 
-expected_target = monthly * 12 / RATE
+expected_target = plan["net_monthly_expense"] * 12 / RATE
 check(
-    "FIRE 目标 == 月开销 × 12 ÷ 提取率",
+    "FIRE 目标 == 组合需覆盖 × 12 ÷ 提取率",
     abs(plan["target_cny"] - expected_target) < 0.01,
     f"{plan['target_cny']} vs {expected_target:.2f}",
+)
+check(
+    "组合需覆盖 = 月开销 − 兼职净收入",
+    abs(
+        plan["net_monthly_expense"]
+        - (monthly - (plan.get("labor_income") or {}).get("net_monthly_cny", 0.0))
+    )
+    < 0.01,
+)
+check(
+    "组合需覆盖严格小于月开销（兼职已生效）",
+    plan["net_monthly_expense"] < monthly,
+    f'{plan["net_monthly_expense"]} vs {monthly}',
 )
 
 # ---------------------------------------------------------------- 3. 一次性支出
@@ -137,11 +152,28 @@ if len(profile_names) >= 2:
         alt = variant(**{"life_plan.profile": name})
         _, alt_plan = lifeplan_mod.resolve_monthly(alt)
         check(
-            f"{name} 的目标与自身月开销自洽",
-            abs(alt_plan["target_cny"] - totals[name] * 12 / RATE) < 0.01,
+            f"{name} 的目标与自身净月开销自洽",
+            abs(alt_plan["target_cny"] - alt_plan["net_monthly_expense"] * 12 / RATE) < 0.01,
         )
 else:
     print("  skip 只定义了一个方案，跳过切换测试")
+
+# ---------------------------------------------------------------- 4b. 兼职开关
+print()
+print("兼职开关：关闭后必须精确退回传统 FIRE 口径")
+no_labor = variant(**{"fire.labor_income.enabled": False})
+_, nl_plan = lifeplan_mod.resolve_monthly(no_labor)
+check(
+    "兼职关闭 -> 组合需覆盖 == 月开销",
+    abs(nl_plan["net_monthly_expense"] - monthly) < 0.01,
+    f'{nl_plan["net_monthly_expense"]} vs {monthly}',
+)
+check(
+    "兼职关闭 -> 目标退回「月开销 × 12 ÷ 提取率」",
+    abs(nl_plan["target_cny"] - monthly * 12 / RATE) < 0.01,
+    f'{nl_plan["target_cny"]} vs {monthly * 12 / RATE:.2f}',
+)
+check("兼职关闭 -> labor_income 为 None", nl_plan.get("labor_income") is None)
 
 # ---------------------------------------------------------------- 5. 错误处理
 print()
@@ -172,9 +204,11 @@ check(
     "覆盖时仍保留逐项推导值",
     abs(ov_plan.get("derived_monthly_expense", 0) - monthly) < 0.01,
 )
+net_labor = (ov_plan.get("labor_income") or {}).get("net_monthly_cny", 0.0)
 check(
-    "覆盖后目标按覆盖值重算",
-    abs(ov_plan["target_cny"] - 3000.0 * 12 / RATE) < 0.01,
+    "覆盖后目标按（覆盖值 − 兼职净收入）重算",
+    abs(ov_plan["target_cny"] - (3000.0 - net_labor) * 12 / RATE) < 0.01,
+    f'{ov_plan["target_cny"]} vs {(3000.0 - net_labor) * 12 / RATE:.2f}',
 )
 
 # 正式配置里应保持 null，确保口径来自逐项预算而不是某个写死的数字

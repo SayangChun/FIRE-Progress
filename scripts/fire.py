@@ -2,7 +2,8 @@
 
 口径（唯一权威定义，改口径只改这里 + config.yaml）：
 
-    FIRE 目标资产 = 月开销 × 12 ÷ 提取率
+    FIRE 目标资产 = 组合需覆盖月开销 × 12 ÷ 提取率
+    组合需覆盖    = 月开销 − 兼职净收入
     当前资产      = 比特币市值 + 标普500基金市值
     完成度        = 当前资产 ÷ FIRE 目标资产
 
@@ -10,6 +11,10 @@
 每一项都在 config.yaml 里标注了依据，见 scripts/lifeplan.py。
 若 config.yaml 里手工填了 fire.monthly_expense，则以手工值为准
 （用于临时试算），并在结果里标记 override。
+
+「兼职净收入」对应咖啡师 FIRE（fire.labor_income）：FIRE 之后仍做
+低压力、可随时停的兼职，收入覆盖一部分开销，资产不必覆盖全部。
+未启用时该项为 0，公式退化为传统的「月开销 × 12 ÷ 提取率」。
 
 统计两项「长期不动用的可投资资产」：比特币、标普500基金。
 纳入标准是**长期不动用**，不是「能不能变现」——日常现金要参与周转，所以不计入。
@@ -201,7 +206,10 @@ def compute(
 ) -> dict:
     monthly, plan_summary = lifeplan_mod.resolve_monthly(cfg)
     rate = float(cfg.fire.withdrawal_rate)
-    target = target_cny(monthly, rate)
+    # 目标按「组合需覆盖的月开销」算：咖啡师 FIRE 下兼职收入先抵扣一部分。
+    # plan_summary 为 None（life_plan 未启用）时退回全部月开销，行为与旧口径一致。
+    net_monthly = (plan_summary or {}).get("net_monthly_expense", monthly)
+    target = target_cny(net_monthly, rate)
 
     btc_qty = float(btc.get("total_btc") or 0.0)
     btc_value = btc_qty * float(price["btc_cny"])
@@ -237,6 +245,9 @@ def compute(
         "as_of_date": now.strftime("%Y-%m-%d"),
         "fire": {
             "monthly_expense": monthly,
+            # 组合需要覆盖的月开销（已扣兼职净收入）；没配兼职时等于 monthly_expense
+            "net_monthly_expense": net_monthly,
+            "labor_income": (plan_summary or {}).get("labor_income"),
             "withdrawal_rate": rate,
             "annual_expense": monthly * 12,
             "target_cny": round(target, 2),

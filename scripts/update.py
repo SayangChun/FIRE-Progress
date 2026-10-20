@@ -255,9 +255,18 @@ def main() -> int:
             print(f"    {group['group']}：¥{group['subtotal']:,.2f}")
         note = "（手工覆盖）" if plan.get("override") else "（逐项推导）"
         print(f"    月开销合计 = ¥{plan['monthly_expense']:,.2f}{note}")
+        labor = plan.get("labor_income")
+        if labor:
+            print(
+                f"    兼职净收入 = ¥{labor['net_monthly_cny']:,.2f}"
+                f"（毛 ¥{labor['gross_monthly_cny']:,.2f}"
+                f" − 消耗 ¥{labor['cost_monthly_cny']:,.2f}）"
+            )
+            print(f"    组合需覆盖 = ¥{plan['net_monthly_expense']:,.2f}")
         if plan.get("one_off_total"):
             print(f"    一次性支出 = ¥{plan['one_off_total']:,.2f}（不计入月开销）")
-    print(f"  目标 = ¥{fire['target_cny']:,.2f}（{fire['monthly_expense']:.0f} × 12 ÷ {fire['withdrawal_rate']}）")
+    base = fire.get("net_monthly_expense", fire["monthly_expense"])
+    print(f"  目标 = ¥{fire['target_cny']:,.2f}（{base:.0f} × 12 ÷ {fire['withdrawal_rate']}）")
     print(f"  比特币 = {assets['btc']['qty']:.8f} → ¥{assets['btc']['value_cny']:,.2f}")
     print(f"  标普500 = ¥{assets['sp500']['value_cny']:,.2f}")
     print(f"  合计 = ¥{assets['total_cny']:,.2f}　完成度 = {assets['progress_pct']:.4f}%")
@@ -298,7 +307,9 @@ def main() -> int:
     if rendermod.START_MARK in existing:
         merged_readme = rendermod.merge_readme(existing, block)
     else:
-        merged_readme = rendermod.default_readme(block, cfg, fire["monthly_expense"])
+        merged_readme = rendermod.default_readme(
+            block, cfg, fire["monthly_expense"], fire["net_monthly_expense"]
+        )
     readme_path.write_text(merged_readme, encoding="utf-8")
     print("→ 已更新 README.md")
 

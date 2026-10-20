@@ -44,6 +44,8 @@ jobs:
         run: python tests/test_commit_gate.py
       - name: 生活规划口径回归测试
         run: python tests/test_life_plan.py
+      - name: 兼职收入口径回归测试
+        run: python tests/test_labor_income.py
       - name: 分子口径回归测试
         run: python tests/test_fire_core.py
       - name: 被动收入口径回归测试

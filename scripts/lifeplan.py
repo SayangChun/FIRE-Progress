@@ -2,11 +2,17 @@
 
 口径（唯一权威定义，与 fire.py 配合）：
 
-    FIRE 目标资产 = 月开销 × 12 ÷ 提取率
+    FIRE 目标资产 = 组合需覆盖月开销 × 12 ÷ 提取率
     月开销        = Σ life_plan.profiles[profile].items[].monthly
+    组合需覆盖    = 月开销 − 兼职净收入
 
 「月开销」不再是一个拍脑袋的数字，而是逐项相加得到，每一项都在
 config.yaml 里标注了依据。这样改任何一项都会自动传导到 FIRE 目标。
+
+「兼职净收入」对应咖啡师 FIRE（fire.labor_income，2026-10-20 起）：
+FIRE 之后仍做低压力、可随时停的兼职，收入覆盖一部分开销，
+所以资产不必覆盖全部开销。净收入为 0 时公式退化为传统 FIRE
+「月开销 × 12 ÷ 提取率」——两种口径共用同一套代码。
 
 为什么一次性支出不进月开销
 --------------------------
@@ -142,6 +148,116 @@ def one_off_total(cfg) -> float:
     return round(sum(r["amount"] for r in one_off(cfg)), 2)
 
 
+# 月工时按 52 周 ÷ 12 折算，不按「每月 4 周」——
+# 后者会把年工时少算约 8%（48 周 vs 52 周），让兼职收入系统性偏低。
+WEEKS_PER_YEAR = 52
+MONTHS_PER_YEAR = 12
+
+_LABOR_REQUIRED = (
+    "hourly_wage",
+    "hours_per_week",
+    "work_days_per_week",
+    "transport_per_day",
+)
+
+
+def labor_income(cfg) -> dict | None:
+    """把兼职换算成「每月净收入」。labor_income.enabled 为 false 时返回 None。
+
+    净收入 = 毛收入 − 工作增量消耗
+
+    ⚠️ 只扣**因为工作才产生**的增量，不扣本来就要花的钱：
+      - 交通：往返通勤，真增量
+      - 餐食：在外吃饭比在家做贵出来的**差额**，不是一顿饭的全价
+        （家里那顿的成本已经在 life_plan 的「食品」里，全额扣是重复计算）
+      - 装备：防滑鞋等按年摊销
+    这个区分是整段计算里最容易错的地方。扣多了会让目标虚高，
+    等于拿「上班多花的钱」把「本来就要花的钱」又算了一遍。
+    """
+    spec = ((cfg.get("fire") or {}).get("labor_income")) or {}
+    if not spec.get("enabled"):
+        return None
+
+    for field in _LABOR_REQUIRED:
+        if spec.get(field) is None:
+            raise LifePlanError(
+                f"fire.labor_income 缺少字段 {field!r}"
+                "（enabled 为 true 时不能省略，否则净收入会静默算成 0）"
+            )
+
+    wage = float(spec["hourly_wage"])
+    hours_week = float(spec["hours_per_week"])
+    days_week = float(spec["work_days_per_week"])
+    transport_day = float(spec["transport_per_day"])
+    meal = float(spec.get("meal_increment_monthly") or 0.0)
+    gear = float(spec.get("gear_monthly") or 0.0)
+    commute_day = float(spec.get("commute_hours_per_day") or 0.0)
+
+    for name, value in (
+        ("hourly_wage", wage),
+        ("hours_per_week", hours_week),
+        ("work_days_per_week", days_week),
+    ):
+        if value <= 0:
+            raise LifePlanError(f"fire.labor_income.{name} 必须为正数，当前 {value}")
+
+    hours_month = hours_week * WEEKS_PER_YEAR / MONTHS_PER_YEAR
+    days_month = days_week * WEEKS_PER_YEAR / MONTHS_PER_YEAR
+    gross = hours_month * wage
+    transport = days_month * transport_day
+    cost = transport + meal + gear
+    net = gross - cost
+
+    if net <= 0:
+        raise LifePlanError(
+            f"fire.labor_income 算出的月净收入为 {net:.2f} 元（≤0）："
+            "兼职收入抵不上通勤与在外吃饭的增量消耗，这份工在财务上是倒贴的"
+        )
+
+    hours_day = hours_week / days_week
+    occupied = days_month * (hours_day + commute_day)
+
+    return {
+        "enabled": True,
+        "label": str(spec.get("label") or "兼职"),
+        "hourly_wage": round(wage, 2),
+        "hours_per_week": round(hours_week, 2),
+        "hours_per_day": round(hours_day, 2),
+        "hours_per_month": round(hours_month, 2),
+        "work_days_per_month": round(days_month, 2),
+        "gross_monthly_cny": round(gross, 2),
+        "transport_cny": round(transport, 2),
+        "meal_cny": round(meal, 2),
+        "gear_cny": round(gear, 2),
+        "cost_monthly_cny": round(cost, 2),
+        "net_monthly_cny": round(net, 2),
+        # 净时薪按纯工作时间算；等效时薪把通勤也计进去——后者才是真实代价
+        "net_hourly_cny": round(net / hours_month, 2),
+        "commute_hours_per_day": round(commute_day, 2),
+        "occupied_hours_per_month": round(occupied, 2),
+        "effective_hourly_cny": round(net / occupied, 2) if occupied else None,
+        "note": str(spec.get("note") or ""),
+    }
+
+
+def _net_after_labor(monthly: float, labor: dict | None) -> float:
+    """组合需要覆盖的月开销 = 月开销 − 兼职净收入。
+
+    ⚠️ 结果 ≤ 0 时直接报错，不 clamp 到 0：
+    「兼职收入 ≥ 月开销」意味着不用攒钱就能 FIRE，实务上几乎一定是
+    时薪或工时填错了。静默算出一个目标 0 比报错危险得多。
+    """
+    net_labor = float(labor["net_monthly_cny"]) if labor else 0.0
+    net = monthly - net_labor
+    if net <= 0:
+        raise LifePlanError(
+            f"兼职净收入 {net_labor:,.2f} ≥ 月开销 {monthly:,.2f}："
+            "组合需覆盖为 0，意味着不用攒钱就能 FIRE。"
+            "先核对 fire.labor_income 的时薪与工时。"
+        )
+    return round(net, 2)
+
+
 def _target(monthly: float, rate: float) -> float:
     return monthly * 12 / rate
 
@@ -152,7 +268,9 @@ def summary(cfg) -> dict:
     rate = float(cfg.fire.withdrawal_rate)
     monthly = monthly_total(cfg)
     extra = one_off_total(cfg)
-    target = _target(monthly, rate)
+    labor = labor_income(cfg)
+    net_monthly = _net_after_labor(monthly, labor)
+    target = _target(net_monthly, rate)
 
     return {
         "enabled": True,
@@ -164,6 +282,9 @@ def summary(cfg) -> dict:
         "lifestyle": prof.get("lifestyle"),
         "headline": prof.get("headline") or "",
         "monthly_expense": monthly,
+        # 组合需要覆盖的月开销：月开销 − 兼职净收入。没配兼职时等于月开销。
+        "net_monthly_expense": net_monthly,
+        "labor_income": labor,
         "annual_expense": round(monthly * 12, 2),
         "target_cny": round(target, 2),
         "groups": by_group(cfg),
@@ -195,16 +316,17 @@ def resolve_monthly(cfg) -> tuple[float, dict | None]:
 
         rate = float(cfg.fire.withdrawal_rate)
         monthly = float(override)
+        net_monthly = _net_after_labor(monthly, data.get("labor_income"))
+        target = _target(net_monthly, rate)
         data = dict(data)
         data.update(
             {
                 "derived_monthly_expense": data["monthly_expense"],
                 "monthly_expense": monthly,
+                "net_monthly_expense": net_monthly,
                 "annual_expense": round(monthly * 12, 2),
-                "target_cny": round(_target(monthly, rate), 2),
-                "target_with_one_off": round(
-                    _target(monthly, rate) + data["one_off_total"], 2
-                ),
+                "target_cny": round(target, 2),
+                "target_with_one_off": round(target + data["one_off_total"], 2),
                 "override": True,
             }
         )

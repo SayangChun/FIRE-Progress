@@ -486,6 +486,44 @@ def _life_plan_block(data: dict, cfg) -> str:
             )
         out.append("")
 
+    labor = plan.get("labor_income")
+    if labor:
+        out.append(f"**兼职收入** · {labor['label']}")
+        out.append("")
+        out.append(
+            f"{labor['hourly_wage']} 元/小时 × 每周 {labor['hours_per_week']:.0f} 小时"
+            f" = {labor['hours_per_month']:.1f} 小时/月"
+            f"（{labor['work_days_per_month']:.1f} 个工作日）"
+        )
+        out.append("")
+        out.append("| 项目 | 金额 |")
+        out.append("| --- | ---: |")
+        out.append(f"| 毛收入 | {money(labor['gross_monthly_cny'], cfg)} |")
+        out.append(f"| 减：交通（往返公交） | −{money(labor['transport_cny'], cfg)} |")
+        out.append(f"| 减：餐食增量 | −{money(labor['meal_cny'], cfg)} |")
+        out.append(f"| 减：装备摊销 | −{money(labor['gear_cny'], cfg)} |")
+        out.append(f"| **净收入** | **{money(labor['net_monthly_cny'], cfg)}** |")
+        out.append("")
+        out.append(
+            f"> 组合需要覆盖：{money(plan['monthly_expense'], cfg)} − "
+            f"{money(labor['net_monthly_cny'], cfg)} = "
+            f"**{money(plan['net_monthly_expense'], cfg)}/月**。"
+        )
+        out.append(">")
+        out.append(
+            "> 只扣**因为工作才产生**的增量：餐食算的是「在外吃比在家做贵出来的差额」，"
+            "不是一顿饭的全价——家里那顿的成本已经在「食品」里，全额扣等于把生活费算两遍。"
+        )
+        if labor.get("effective_hourly_cny"):
+            out.append(">")
+            out.append(
+                f"> 往返通勤 {labor['commute_hours_per_day']:.1f} 小时没算钱，但要算时间："
+                f"实际占用 {labor['occupied_hours_per_month']:.1f} 小时/月，"
+                f"**等效时薪 {money(labor['effective_hourly_cny'], cfg)}**"
+                f"（名义净时薪 {money(labor['net_hourly_cny'], cfg)}）。"
+            )
+        out.append("")
+
     if plan.get("override"):
         out.append(
             f"> ⚠️ 当前为**手工覆盖值**（`fire.monthly_expense`），"
@@ -503,8 +541,13 @@ def _life_plan_block(data: dict, cfg) -> str:
         out.append(f"| **合计** | **{money(plan['one_off_total'], cfg)}** |")
         out.append("")
 
+    formula = (
+        "`FIRE 目标 = (月开销 − 兼职净收入) × 12 ÷ 提取率`"
+        if labor
+        else "`FIRE 目标 = 月开销 × 12 ÷ 提取率`"
+    )
     out.append(
-        "> `月开销 = 上表逐项相加`，`FIRE 目标 = 月开销 × 12 ÷ 提取率`。"
+        f"> `月开销 = 上表逐项相加`，{formula}。"
         "每项金额的依据见 [config.yaml](config.yaml) 与 "
         "[docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。"
     )
@@ -669,7 +712,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("")
         out.append(
             "> 完成度 = 当前资产 ÷ FIRE 目标。**分子看行情，分母看口径**——"
-            "月开销或提取率一调整，这个百分比就会跟着变，"
+            "月开销、提取率或兼职收入一调整，这个百分比就会跟着变，"
             "所以它变了不一定代表资产涨跌。"
         )
         out.append("")
@@ -677,6 +720,10 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append("| 指标 | 数值 |")
     out.append("| --- | ---: |")
     out.append(f"| 🎯 FIRE 目标资产 | {money(fire['target_cny'], cfg)} |")
+    labor = fire.get("labor_income")
+    if labor:
+        out.append(f"| ☕ 兼职净收入（月） | {money(labor['net_monthly_cny'], cfg)} |")
+        out.append(f"| 🧾 组合需覆盖（月） | {money(fire['net_monthly_expense'], cfg)} |")
     out.append(f"| 💰 当前资产 | {money(assets['total_cny'], cfg)} |")
     out.append(f"| 📈 完成度 | **{pct:.3f}%** |")
     out.append(f"| ⏳ 距离目标 | {money(assets['remaining_cny'], cfg)} |")
@@ -853,8 +900,12 @@ def merge_readme(existing: str, block: str) -> str:
     return existing.rstrip() + "\n\n" + block
 
 
-def default_readme(block: str, cfg, monthly: float) -> str:
+def default_readme(
+    block: str, cfg, monthly: float, net_monthly: float | None = None
+) -> str:
     rate = float(cfg.fire.withdrawal_rate)
+    # 组合需覆盖 = 月开销 − 兼职净收入。没传就退回全部月开销，与旧口径一致。
+    net = monthly if net_monthly is None else net_monthly
     return f"""# FIRE-Progress
 
 > 我的 FIRE 进度看板。统计两项**长期不动用**的资产——比特币、标普500基金，
@@ -866,10 +917,12 @@ def default_readme(block: str, cfg, monthly: float) -> str:
 | 参数 | 取值 |
 | --- | ---: |
 | 月开销 | ¥{monthly:,.0f} |
+| 组合需覆盖（月开销 − 兼职净收入） | ¥{net:,.0f} |
 | 提取率 | {rate * 100:.1f}% |
-| **FIRE 目标资产** | **¥{monthly * 12 / rate:,.2f}** |
+| **FIRE 目标资产** | **¥{net * 12 / rate:,.2f}** |
 
-公式：`FIRE 目标 = 月开销 × 12 ÷ 提取率`，`完成度 = 当前资产 ÷ FIRE 目标`。
+公式：`FIRE 目标 = 组合需覆盖 × 12 ÷ 提取率`，`完成度 = 当前资产 ÷ FIRE 目标`。
+组合需覆盖 = 月开销 − 兼职净收入（咖啡师 FIRE，见 `fire.labor_income`；关闭该项即退回传统 FIRE）。
 月开销由 [config.yaml](config.yaml) 的 `life_plan` 逐项推导，见
 [docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。
 

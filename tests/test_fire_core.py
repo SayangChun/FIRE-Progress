@@ -5,7 +5,8 @@
   1. **分子只由两项资产构成**：比特币市值 + 标普500基金市值。
      2026-10-15 移除了应急金（支付宝小荷包）——如果哪天有人又加回一项资产，
      这条会立刻失败，提醒他重新确认口径，而不是让看板悄悄改变含义。
-  2. **资产变化绝不影响 FIRE 目标**（分母）。目标是「月开销 × 12 ÷ 提取率」，
+  2. **资产变化绝不影响 FIRE 目标**（分母）。目标是「组合需覆盖 × 12 ÷ 提取率」
+     （组合需覆盖 = 月开销 − 兼职净收入，见 fire.labor_income），
      与持有多少资产无关。加一项资产让目标跟着变，是口径错误里最隐蔽的一种。
   3. 缺数据（拿不到比特币或基金）时绝不按 0 冒充——那会让进度凭空倒退。
 
@@ -23,8 +24,9 @@ from scripts import fire as firemod  # noqa: E402
 from scripts import lifeplan as lifeplan_mod  # noqa: E402
 
 cfg = cfgmod.load()
-MONTHLY, _ = lifeplan_mod.resolve_monthly(cfg)
-TARGET = MONTHLY * 12 / float(cfg.fire.withdrawal_rate)
+MONTHLY, PLAN = lifeplan_mod.resolve_monthly(cfg)
+NET_MONTHLY = PLAN["net_monthly_expense"]
+TARGET = NET_MONTHLY * 12 / float(cfg.fire.withdrawal_rate)
 RATE = float(cfg.fire.withdrawal_rate)
 
 failures: list[str] = []
@@ -66,12 +68,21 @@ ok("assets 只有 btc / sp500 两个资产块",
    sorted(k for k in data["assets"] if k in ("btc", "sp500", "emergency")) == ["btc", "sp500"])
 
 print()
-print("FIRE 目标只由月开销与提取率决定，与资产无关")
+print("FIRE 目标只由净月开销与提取率决定，与资产无关")
 ok(
-    "目标 == 月开销 × 12 ÷ 提取率",
+    "目标 == 组合需覆盖 × 12 ÷ 提取率",
     abs(data["fire"]["target_cny"] - TARGET) < 0.01,
     f'{data["fire"]["target_cny"]} vs {TARGET}',
 )
+ok(
+    "fire.net_monthly_expense == 月开销 − 兼职净收入",
+    abs(
+        data["fire"]["net_monthly_expense"]
+        - (MONTHLY - (data["fire"].get("labor_income") or {}).get("net_monthly_cny", 0.0))
+    )
+    < 0.01,
+)
+ok("兼职收入确实降低了目标", data["fire"]["target_cny"] < MONTHLY * 12 / RATE)
 # 把资产翻 100 倍，目标必须一动不动
 rich = firemod.compute(
     cfg,

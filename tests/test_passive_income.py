@@ -26,7 +26,8 @@ from scripts import fire as firemod  # noqa: E402
 from scripts import lifeplan as lifeplan_mod  # noqa: E402
 
 cfg = cfgmod.load()
-MONTHLY, _ = lifeplan_mod.resolve_monthly(cfg)
+MONTHLY, PLAN = lifeplan_mod.resolve_monthly(cfg)
+NET_MONTHLY = PLAN["net_monthly_expense"]
 SPEC = cfg.get("expected_return") or {}
 
 failures: list[str] = []
@@ -83,8 +84,8 @@ ok("一年小时数写死为 8760", pi["hours_per_year"] == 8760, str(pi["hours_
 
 print()
 print("被动收入绝不影响 FIRE 目标")
-target = MONTHLY * 12 / float(cfg.fire.withdrawal_rate)
-ok("目标 == 月开销 × 12 ÷ 提取率", close(data["fire"]["target_cny"], target, 0.01))
+target = NET_MONTHLY * 12 / float(cfg.fire.withdrawal_rate)
+ok("目标 == 组合需覆盖 × 12 ÷ 提取率", close(data["fire"]["target_cny"], target, 0.01))
 # 把预期回报改到荒唐的 500%，目标必须一动不动
 loud = cfgmod.Config(
     {**cfg, "expected_return": {"btc": 5.0, "sp500": 5.0, "btc_low": 0, "sp500_low": 0,
