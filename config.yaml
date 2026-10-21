@@ -127,9 +127,10 @@ life_plan:
         - {key: home_visit, group: 日常开销, label: 探亲与返乡交通, monthly: 100, note: "每年 1-2 次往返，单次火车往返约 ¥1000，折算 ≈ ¥100/月。牡丹江是铁路枢纽（哈牡、牡佳高铁交汇），往返便利"}
         - {key: clothing, group: 日常开销, label: 衣物, monthly: 30, note: "按年摊销，含冬装更新。东北冬装单价高但更新慢"}
         - {key: misc, group: 日常开销, label: 杂项（快递与小额）, monthly: 5, note: "2026-09-29 拆细后确认：无域名、无代理订阅、无视频音乐会员、无云存储、付费 AI 为 ¥0、娱乐与外食为 ¥0。仅保留快递与零星小额支出。⚠️ 若实际有代理订阅需加回 ¥10-30"}
-        - {key: resident_medical, group: 医疗与保障, label: 城乡居民医保, monthly: 33, note: "¥400/年，2026 年国家统一标准。不交社保后这是唯一的兜底医保"}
-        - {key: huiminbao, group: 医疗与保障, label: 惠民保, monthly: 13, note: "龙江惠民保升级版 ¥150/年，黑龙江省统一。以当年实际保费为准"}
-        - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 80, note: "居民医保报销比例低于职工医保，门诊与小额自付需自己留出。不建议压缩"}
+        # 2026-10-21：移除「城乡居民医保 ¥33」与「惠民保 ¥13」——他决定不参加任何医保 / 社保。
+        # 注意：惠民保的投保前提就是「参加黑龙江省基本医保」，所以两项是绑定的，
+        # 不是「保留惠民保、只砍居民医保」这种组合。
+        - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 80, note: "门诊与小病自付。⚠️ 已无任何医保：住院费用 100% 自付，本项 ¥80/月只够小病，唯一防线是规划书 §5.4 的专项应急金（¥50k–100k）。不建议压缩"}
         - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 137, note: "按月留一笔机动钱，应付物价波动与临时支出；经确认不下调，这是安全垫，不建议压缩"}
 
     # 对照方案：同样在牡丹江租房，但生活档次放宽到常规
@@ -157,10 +158,8 @@ life_plan:
         - {key: home_visit, group: 日常开销, label: 探亲与返乡交通, monthly: 100, note: "每年 1-2 次往返"}
         - {key: clothing, group: 日常开销, label: 衣物, monthly: 100, note: "按年摊销"}
         - {key: misc, group: 日常开销, label: 娱乐与杂项, monthly: 150, note: "含每年一次短途旅行的摊销"}
-        - {key: resident_medical, group: 医疗与保障, label: 城乡居民医保, monthly: 33, note: "¥400/年，2026 年国家统一标准"}
-        - {key: huiminbao, group: 医疗与保障, label: 惠民保, monthly: 13, note: "龙江惠民保升级版 ¥150/年"}
-        - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 120, note: "门诊与小额自付"}
-        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 187, note: "按月留一笔机动钱；此项同时用于把合计取整到 ¥2800"}
+        - {key: medical_buffer, group: 医疗与保障, label: 医疗自付预留, monthly: 120, note: "门诊与小病自付。⚠️ 对照方案同样不参加任何医保（2026-10-21 决定）"}
+        - {key: buffer, group: 风险缓冲, label: 应急与物价缓冲, monthly: 187, note: "按月留一笔机动钱。⚠️ 移除医保两项后本方案合计为 ¥2,754（原按 ¥2,800 设计）"}
 
   # 一次性支出：不进入「月开销 × 12 ÷ 提取率」，单独加总。
   # 它们只在 FIRE 落地的那一年发生一次。
