@@ -511,15 +511,15 @@ def _life_plan_block(data: dict, cfg) -> str:
         )
         out.append(">")
         out.append(
-            "> 只扣**因为工作才产生**的增量：餐食算的是「在外吃比在家做贵出来的差额」，"
-            "不是一顿饭的全价——家里那顿的成本已经在「食品」里，全额扣等于把生活费算两遍。"
+            "> 只扣上班多出来的开销：餐食算的是「在外面吃比在家做贵多少」，不是整顿饭钱，"
+            "家里那顿已经算在食品里，全额扣等于把生活费算两遍。"
         )
         if labor.get("effective_hourly_cny"):
             out.append(">")
             out.append(
-                f"> 往返通勤 {labor['commute_hours_per_day']:.1f} 小时没算钱，但要算时间："
-                f"实际占用 {labor['occupied_hours_per_month']:.1f} 小时/月，"
-                f"**等效时薪 {money(labor['effective_hourly_cny'], cfg)}**"
+                f"> 通勤 {labor['commute_hours_per_day']:.1f} 小时不算工资，但要占时间："
+                f"每月实际占用 {labor['occupied_hours_per_month']:.1f} 小时，"
+                f"等效时薪 {money(labor['effective_hourly_cny'], cfg)}"
                 f"（名义净时薪 {money(labor['net_hourly_cny'], cfg)}）。"
             )
         out.append("")
@@ -547,20 +547,18 @@ def _life_plan_block(data: dict, cfg) -> str:
         else "`FIRE 目标 = 月开销 × 12 ÷ 提取率`"
     )
     out.append(
-        f"> `月开销 = 上表逐项相加`，{formula}。"
-        "每项金额的依据见 [config.yaml](config.yaml) 与 "
+        f"> 月开销 = 上面各项相加；{formula}。"
+        "每项的依据见 [config.yaml](config.yaml) 和 "
         "[docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。"
     )
     out.append(">")
     out.append(
-        "> 一次性支出**不摊进月开销**——它不产生永续现金流，"
-        "摊进去会同时虚增月开销与 FIRE 目标。"
+        "> 一次性支出不摊进月开销：它不产生持续现金流，摊进去会同时抬高月开销和目标。"
     )
     if plan.get("target_with_one_off"):
         out.append(">")
         out.append(
-            f"> 含一次性支出的资金需求：**{money(plan['target_with_one_off'], cfg)}**"
-            f"（= FIRE 目标 + 一次性支出）。"
+            f"> 加上一次性支出，总共需要 **{money(plan['target_with_one_off'], cfg)}**。"
         )
     out.append("")
     out.append("</details>")
@@ -613,13 +611,12 @@ def _passive_income_block(data: dict, cfg) -> str:
             f"> 按当前持仓，这笔被动收入相当于月开销的 **{pi['coverage'] * 100:.1f}%**"
             f"（月开销 {money(pi['monthly_expense'], cfg)}）。"
         )
-        out.append("")
+        out.append(">")
 
     out.append(
-        "> **这不是承诺，是按假设推出来的数。** "
-        f"加权年化 {rate * 100:.1f}% 是两项资产按**市值**加权的结果，"
-        "假设本身写在 `config.yaml` 的 `expected_return` 段——"
-        "改它不会影响 FIRE 目标（目标只看月开销与提取率）。"
+        "> 这是按假设算出来的数，不是承诺。"
+        f"加权年化 {rate * 100:.1f}% 由两项资产按市值加权得到，假设写在 "
+        "`config.yaml` 的 `expected_return` 段，改它不影响 FIRE 目标。"
     )
     out.append(">")
 
@@ -634,35 +631,31 @@ def _passive_income_block(data: dict, cfg) -> str:
         top = max(rows, key=lambda r: r["weight"])
         if top["weight"] >= 0.8:
             why = (
-                f"跨度这么离谱，是因为 **{top['weight'] * 100:.0f}% 的仓位压在{top['label']}上**——"
-                "这个数字的软肋在权重，不在回报率本身。"
+                f"因为 **{top['weight'] * 100:.0f}% 的仓位压在{top['label']}上**，"
+                "这个数字的软肋是权重，不是回报率。"
             )
         else:
             why = (
-                "跨度这么离谱，是因为两项资产的回报率假设本身就宽——"
-                "比特币没有可锚定的现金流，任何长期回报率都是猜的。"
+                "因为两项资产的回报率假设本身就宽：比特币没有可锚定的现金流，"
+                "长期回报率只能猜。"
             )
         out.append(
-            f"> **区间有多大**：换成悲观值（{low_desc}），每小时是 "
-            f"{money(pi['hourly_low_cny'], cfg, decimals=3)}；"
-            f"换成乐观值（{high_desc}），是 "
+            f"> 区间很宽：悲观（{low_desc}）每小时 "
+            f"{money(pi['hourly_low_cny'], cfg, decimals=3)}，乐观（{high_desc}）"
             f"{money(pi['hourly_high_cny'], cfg, decimals=3)}。{why}"
         )
         out.append(">")
 
     out.append(
-        f"> ⚠️ **别把 {rate * 100:.1f}% 当成「可以花掉的钱」。** "
-        "预期年化回报 ≠ 可持续提取率：按 FIRE 的 "
-        f"{pi['withdrawal_rate'] * 100:.1f}% 提取率口径，"
-        f"同样这笔资产每小时只有 {money(pi['hourly_at_withdrawal_cny'], cfg, decimals=3)}、"
+        f"> 也别把 {rate * 100:.1f}% 当成能花的钱。预期回报是「平均能涨多少」，"
+        f"提取率是「能安全花多少」：按 {pi['withdrawal_rate'] * 100:.1f}% 提取率算，"
+        f"同样这笔资产每小时 {money(pi['hourly_at_withdrawal_cny'], cfg, decimals=3)}、"
         f"每月 {money(pi['monthly_at_withdrawal_cny'], cfg)}。"
     )
     out.append(">")
     out.append(
-        "> 差额不是保守，是为波动和「先亏后赚」的**序列风险**留的余量："
-        "平均回报为正、但路径上先腰斩一次，用平均回报算支出就会在中途卖掉筹码。"
-        "比特币单年 ±50% 是常态，所以两个数要一起看——"
-        "上面那个是「资产平均在长多快」，下面那个是「能安全取出多少」。"
+        "> 差额是给波动留的：平均回报为正，但路径上先腰斩一次，"
+        "按平均回报安排支出就会在中途卖掉筹码。比特币单年 ±50% 是常态，两个数要一起看。"
     )
     out.append("")
     return "\n".join(out)
@@ -698,12 +691,12 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("![FIRE 进度曲线](reports/curve.svg)")
         out.append("")
         out.append(
-            "> 曲线是**每日完成度快照**，按 `data/history.json` 里当天记录的原值连线，不回填、不重算。"
+            "> 每个点是当天的完成度原值，按 `data/history.json` 连线，不回填、不重算。"
         )
         out.append(">")
         out.append(
-            "> 图中竖虚线处是**口径调整**——FIRE 目标（分母）变了，不是资产变了，"
-            "所以曲线会出现台阶。每天的目标值都记在 `data/history.json` 里，这个台阶可追溯，不是数据错误。"
+            "> 竖虚线是口径调整日：那天 FIRE 目标变了，曲线因此出现台阶。"
+            "目标值逐日记在 `data/history.json` 里，可以查到。"
         )
         out.append("")
 
@@ -711,9 +704,8 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("![FIRE 完成度](reports/progress.svg)")
         out.append("")
         out.append(
-            "> 完成度 = 当前资产 ÷ FIRE 目标。**分子看行情，分母看口径**——"
-            "月开销、提取率或兼职收入一调整，这个百分比就会跟着变，"
-            "所以它变了不一定代表资产涨跌。"
+            "> 完成度 = 当前资产 ÷ FIRE 目标。资产随行情走，目标随口径走；"
+            "月开销、提取率或兼职收入改一项，百分比就会变，未必是资产涨跌。"
         )
         out.append("")
 
@@ -752,10 +744,8 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append(f"| **合计** | **{money(assets['total_cny'], cfg)}** | 100.0% |")
     out.append("")
     out.append(
-        "> **口径**：统计**长期不动用的可投资资产**——比特币与标普500基金；"
-        "**日常现金与活期不计入**。"
-        "所以**卖出后进度下跌不一定是亏了**：如果钱变成了现金，那是口径边界，不是资产减少。"
-        "详见下方「计入范围」。"
+        "> 只算长期不动用的钱：比特币和标普500基金。日常现金和活期不算。"
+        "所以卖出后进度下跌未必是亏了，可能只是钱变成了现金，详见下方「计入范围」。"
     )
     out.append("")
 
@@ -804,8 +794,8 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("")
         if basis.get("btc_estimated"):
             out.append(
-                "> 比特币本金按持仓备注中的「均价 $xx/BTC」推算，并按**当前汇率**折算成人民币，"
-                "与真实买入成本存在偏差；标普500本金取自 sp500-dca 的累计投入。"
+                "> 比特币本金按持仓备注的「均价 $xx/BTC」推算，用当前汇率折成人民币，"
+                "和真实买入成本有偏差；标普500本金取 sp500-dca 的累计投入。"
             )
             out.append("")
 
@@ -817,27 +807,24 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             out.append("![FIRE 收益曲线](reports/profit.svg)")
             out.append("")
             out.append(
-                "> **上面板**：累计投入（虚线）与当前市值（实线），缺口即累计盈亏。"
-                "**下面板**：累计收益率（盈亏 ÷ 本金），纵轴含 0。"
+                "> 上面板：累计投入（虚线）和市值（实线），缺口就是盈亏。"
+                "下面板：累计收益率，纵轴含 0。"
             )
             out.append(">")
             out.append(
-                "> 两张图要一起看：**加仓会机械性拉低收益率**——分母（本金）变大、分子（盈亏）不变。"
-                "所以收益率下降不一定是亏了，也可能只是又投了一笔；"
-                "反过来，收益率上升也可能只是市场涨得比加仓快。"
-                "上面板能看到本金在哪天跳升，用来解释下面板的变化。"
+                "> 加仓会让收益率下降，因为本金变大、盈亏不变。所以收益率掉了不一定是亏，"
+                "可能只是又投了一笔。上面板能看出本金哪天跳升。"
             )
             out.append(">")
             out.append(
-                "> ⚠️ 上面板纵轴**不从 0 起**（本金与市值挤在窄区间里，"
-                "从 0 起缺口会被压成一条看不见的线），所以斜率不代表实际涨跌幅；"
-                "下面板含 0，正负可以放心读。"
+                "> 上面板纵轴不从 0 起，否则缺口会被压成一条线，斜率也不代表涨跌幅。"
+                "下面板含 0，正负可以直接读。"
             )
             out.append(">")
             out.append(
-                f"> 起点 **{first_day}**（项目开始）。已回填的历史点由两个持仓仓库的历史文件重建"
-                "（比特币按备注均价、标普500按逐日累计投入），其中比特币那部分统一按当前汇率折算，"
-                "所以早期本金的绝对值有误差、趋势可信；此后每天由 Actions 直接记录。"
+                f"> 起点 {first_day}。早期数据由两个持仓仓库的历史文件重建，"
+                "比特币统一按当前汇率折算，绝对值和真实本金有误差，趋势可信；"
+                "之后每天由 Actions 记录。"
             )
             out.append("")
 
@@ -866,8 +853,9 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                 f"线性外推，{horizon}后达到目标（{proj['eta']}）。"
             )
             out.append("")
-            out.append("> 这是线性外推，不是预测。它把近期的增速直接铺到未来，")
-            out.append("> 而实际增速会随行情、定投额度与生活开销的变化而改变。")
+            out.append(
+                "> 线性外推不是预测：它假设近期增速会一直持续，实际会随行情、定投额度和开销变化。"
+            )
             if days >= 3650:
                 out.append(">")
                 out.append("> 在这个尺度上外推结果已无参考意义——真正决定进度的是月定投额，不是等待。")
@@ -908,8 +896,8 @@ def default_readme(
     net = monthly if net_monthly is None else net_monthly
     return f"""# FIRE-Progress
 
-> 我的 FIRE 进度看板。统计两项**长期不动用**的资产——比特币、标普500基金，
-> 由 GitHub Actions 自动更新。两项都读公开仓库，无需任何密钥。
+> 我的 FIRE 进度看板。只统计两项长期不动用的资产：比特币、标普500基金。
+> 数据从两个公开仓库读取，由 GitHub Actions 每小时更新，不需要任何密钥。
 
 {block}
 ## 计算口径
@@ -922,8 +910,8 @@ def default_readme(
 | **FIRE 目标资产** | **¥{net * 12 / rate:,.2f}** |
 
 公式：`FIRE 目标 = 组合需覆盖 × 12 ÷ 提取率`，`完成度 = 当前资产 ÷ FIRE 目标`。
-组合需覆盖 = 月开销 − 兼职净收入（咖啡师 FIRE，见 `fire.labor_income`；关闭该项即退回传统 FIRE）。
-月开销由 [config.yaml](config.yaml) 的 `life_plan` 逐项推导，见
+组合需覆盖 = 月开销 − 兼职净收入（咖啡师 FIRE，见 `fire.labor_income`；关掉就退回传统 FIRE）。
+月开销由 [config.yaml](config.yaml) 的 `life_plan` 逐项推导，依据见
 [docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。
 
 ## 计入范围
@@ -932,30 +920,25 @@ def default_readme(
 - ✅ [sp500-dca](https://github.com/{cfg.sources.sp500.repo}) 仓库中的标普500基金市值
 - ❌ 日常现金、活期存款、其他币种、其他一切资产
 
-**纳入标准是「长期不动用」，不是「能不能变现」。**
+划线的标准是「长期不动用」，不是「能不能变现」。日常现金要随时周转，所以不算。
 
-日常现金要参与周转、随花随有，所以不计入。用「长期不动用」这条线来划，
-比用「是不是现金」更清楚。
-
-由此有一条要注意的推论：**卖出资产不会让进度失真，卖出后资金离开这个范围才会。**
+由此有个推论：卖出资产不会让进度失真，卖出后钱离开这个范围才会。
 
 | 情形 | 进度 | 是否真实 |
 | --- | --- | --- |
 | 工资入金 / 买入 | ↑ | 真实增长 |
 | 池内互换（卖 BTC 买标普500） | → 不变 | 正常 |
 | 卖出后把钱花掉 | ↓ | 真实减少 |
-| 卖出后变成现金放着 | ↓ | **假信号**——资产并没少，只是换了形式 |
+| 卖出后变成现金放着 | ↓ | 假信号：资产没少，只是换了形式 |
 
-> 看到进度下跌，先看钱去哪了：如果变成了现金，那是**口径边界**造成的，不是资产减少。
->
-> 两项资产都是**全自动**读取的公开仓库，本项目没有任何需要人工更新的数字。
+> 看到进度下跌，先看钱去哪了。变成现金的话，那是口径边界，不是资产减少。
 
 ## 数据节奏
 
-- **比特币持仓**：在 [0.1BTC](https://github.com/{cfg.sources.btc.repo}) 仓库中**每周手动更新一次**，
-  因此持仓数量存在延迟，**不是实时数据**；但估值会按最新行情实时折算。
-- **标普500基金**：QDII 净值通常 T+1 晚间披露，周末与节假日不产生净值，
-  因此看板可能连续 2~3 天没有新提交，属正常现象。
+- **比特币持仓**：在 [0.1BTC](https://github.com/{cfg.sources.btc.repo}) 仓库里**每周手动更新一次**，
+  数量有延迟，不是实时数据；市值仍按最新行情折算。
+- **标普500基金**：QDII 净值通常 T+1 晚间披露，周末和节假日没有净值，
+  看板可能连续 2~3 天没有新提交，属正常。
 
 ---
 
