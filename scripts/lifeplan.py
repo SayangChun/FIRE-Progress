@@ -29,7 +29,7 @@ FIRE 之后仍做低压力、可随时停的兼职，收入覆盖一部分开销
 from __future__ import annotations
 
 # 分组展示顺序；未列出的分组排在后面
-GROUP_ORDER = ["住房与水电燃气", "日常开销", "医疗与保障", "风险缓冲"]
+GROUP_ORDER = ["住房与水电燃气", "日常开销", "医疗与应急"]
 
 _REQUIRED_ITEM_FIELDS = ("key", "label", "monthly")
 
