@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-25T01:54:14+08:00",
+  "as_of": "2026-10-25T04:22:14+08:00",
   "as_of_date": "2026-10-25",
   "fire": {
     "monthly_expense": 1461.0,
@@ -233,14 +233,14 @@
     "override": false
   },
   "assets": {
-    "total_cny": 14994.69,
-    "progress": 0.06265269947515929,
-    "progress_pct": 6.2653,
-    "remaining_cny": 224335.55,
+    "total_cny": 15044.4,
+    "progress": 0.0628604378087412,
+    "progress_pct": 6.286,
+    "remaining_cny": 224285.83,
     "btc": {
       "qty": 0.02638879,
-      "price_cny": 536688.69,
-      "value_cny": 14162.57,
+      "price_cny": 538572.75,
+      "value_cny": 14212.28,
       "snapshot_date": "2026-10-18",
       "stale_days": 6,
       "positions": [
@@ -295,42 +295,42 @@
     "btc_estimated": true,
     "sp500_cny": 839.58,
     "total_cny": 13043.18,
-    "profit_cny": 1951.51
+    "profit_cny": 2001.23
   },
   "price": {
-    "btc_usdt": 80284.16,
+    "btc_usdt": 80566.0,
     "usd_cny": 6.684864,
-    "btc_cny": 536688.69,
+    "btc_cny": 538572.75,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-10-24T17:54:13+00:00"
+    "fetched_at": "2026-10-24T20:22:14+00:00"
   },
   "passive_income": {
     "hours_per_year": 8760,
-    "total_value_cny": 14994.69,
-    "weighted_rate": 0.1166703791482049,
-    "annual_cny": 1749.44,
-    "monthly_cny": 145.79,
-    "daily_cny": 4.792986301369863,
-    "hourly_cny": 0.19970776255707764,
-    "rate_low": 0.0016648298896536275,
-    "rate_high": 0.24112098835416432,
+    "total_value_cny": 15044.4,
+    "weighted_rate": 0.11668131840959628,
+    "annual_cny": 1755.4,
+    "monthly_cny": 146.28,
+    "daily_cny": 4.8093150684931505,
+    "hourly_cny": 0.2003881278538813,
+    "rate_low": 0.0016593280350845217,
+    "rate_high": 0.24115019731239365,
     "hourly_low_cny": 0.00284972602739726,
-    "hourly_high_cny": 0.41273211187214615,
+    "hourly_high_cny": 0.4141507762557078,
     "monthly_expense": 1461.0,
-    "coverage": 0.09978553502167464,
+    "coverage": 0.10012548482774355,
     "withdrawal_rate": 0.043,
-    "monthly_at_withdrawal_cny": 53.73,
-    "hourly_at_withdrawal_cny": 0.07360404804095426,
+    "monthly_at_withdrawal_cny": 53.91,
+    "hourly_at_withdrawal_cny": 0.07384809789695407,
     "assets": [
       {
         "key": "btc",
         "label": "比特币",
-        "value_cny": 14162.57,
-        "weight": 0.944505670344879,
+        "value_cny": 14212.28,
+        "weight": 0.9446890654971826,
         "rate": 0.12,
-        "annual_cny": 1699.51,
-        "hourly_cny": 0.19400774158609727,
+        "annual_cny": 1705.47,
+        "hourly_cny": 0.19468881095167812,
         "rate_low": 0.0,
         "rate_high": 0.25
       },
@@ -338,7 +338,7 @@
         "key": "sp500",
         "label": "标普500基金",
         "value_cny": 832.12,
-        "weight": 0.05549432965512092,
+        "weight": 0.05531093450281739,
         "rate": 0.06,
         "annual_cny": 49.93,
         "hourly_cny": 0.00569945205479452,
@@ -348,9 +348,9 @@
     ]
   },
   "projection": {
-    "daily_gain_cny": 42.4117,
-    "days_to_target": 5289,
-    "eta": "2041-04-18",
+    "daily_gain_cny": 41.6563,
+    "days_to_target": 5384,
+    "eta": "2041-07-22",
     "window_days": 30,
     "reason": null
   },
