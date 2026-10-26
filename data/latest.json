@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-26T11:37:12+08:00",
+  "as_of": "2026-10-26T16:47:25+08:00",
   "as_of_date": "2026-10-26",
   "fire": {
     "monthly_expense": 1461.0,
@@ -134,7 +134,7 @@
             "group": "日常开销",
             "label": "食品",
             "monthly": 300.0,
-            "note": "偏紧档 ¥300（约 ¥10/天，16:8 两餐）。挂面为主食、鸡蛋+豆腐作主力蛋白、猪肉约 2.5kg/月；蔬菜靠早市+10月冬储；含少量乳制品与水果。⚠️ 2026-10-13 由 ¥319 下调：他确认自己有【线上批量采购便宜货源】的能力 → 购物篮不变、单价下降，降幅落在主食、油盐调味、乳制品、零食等【耐储可囤】的品类；蔬菜水果仍走早市，线上帮不上。构成见规划书 §6.5"
+            "note": "偏紧档 ¥300，实付约 ¥284（余 ¥16）。⚠️ 2026-10-26 改为【线上为主】：16:8 两餐、不炒菜、全部一锅煮。面包 ¥0.40/包、牛奶 ¥0.625/袋、挂面 ¥0（券价，均约零售价 20%）；生鲜走多多买菜。购物篮：面包 60 包 + 牛奶 60 袋 + 挂面 6kg + 鸡蛋 120 个 + 北豆腐 4.5kg + 西红柿 4.5kg + 韭菜 3.6kg + 大白菜 6kg + 橙子 6kg。逐项清单与营养评估见规划书 §4.2–4.3，品类汇总见 §6.5。⚠️ 券价部分脆弱：面包/奶/挂面回到零售价，食品会跳到约 ¥400"
           },
           {
             "key": "drinking_water",
@@ -233,14 +233,14 @@
     "override": false
   },
   "assets": {
-    "total_cny": 15327.57,
-    "progress": 0.07442250113420126,
-    "progress_pct": 7.4423,
-    "remaining_cny": 190625.91,
+    "total_cny": 15442.84,
+    "progress": 0.07498218821860134,
+    "progress_pct": 7.4982,
+    "remaining_cny": 190510.65,
     "btc": {
       "qty": 0.02724339,
-      "price_cny": 532072.32,
-      "value_cny": 14495.45,
+      "price_cny": 536303.42,
+      "value_cny": 14610.72,
       "snapshot_date": "2026-10-25",
       "stale_days": 1,
       "positions": [
@@ -295,42 +295,42 @@
     "btc_estimated": true,
     "sp500_cny": 839.58,
     "total_cny": 13496.03,
-    "profit_cny": 1831.54
+    "profit_cny": 1946.81
   },
   "price": {
-    "btc_usdt": 79682.01,
+    "btc_usdt": 80315.65,
     "usd_cny": 6.677446,
-    "btc_cny": 532072.32,
+    "btc_cny": 536303.42,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-10-26T03:37:12+00:00"
+    "fetched_at": "2026-10-26T08:47:25+00:00"
   },
   "passive_income": {
     "hours_per_year": 8760,
-    "total_value_cny": 15327.57,
-    "weighted_rate": 0.11674262557522536,
-    "annual_cny": 1789.38,
-    "monthly_cny": 149.12,
-    "daily_cny": 4.90241095890411,
-    "hourly_cny": 0.20426712328767124,
-    "rate_low": 0.00162867264270447,
-    "rate_high": 0.2413136851985643,
+    "total_value_cny": 15442.84,
+    "weighted_rate": 0.11676694331570857,
+    "annual_cny": 1803.22,
+    "monthly_cny": 150.27,
+    "daily_cny": 4.940328767123288,
+    "hourly_cny": 0.20584703196347032,
+    "rate_low": 0.001616515794998453,
+    "rate_high": 0.24137853014689467,
     "hourly_low_cny": 0.00284972602739726,
-    "hourly_high_cny": 0.42223211187214615,
+    "hourly_high_cny": 0.4255217808219178,
     "monthly_expense": 1461.0,
-    "coverage": 0.10206365503080082,
+    "coverage": 0.10285306867442393,
     "withdrawal_rate": 0.043,
-    "monthly_at_withdrawal_cny": 54.92,
-    "hourly_at_withdrawal_cny": 0.07523809018772676,
+    "monthly_at_withdrawal_cny": 55.34,
+    "hourly_at_withdrawal_cny": 0.07580391082921614,
     "assets": [
       {
         "key": "btc",
         "label": "比特币",
-        "value_cny": 14495.45,
-        "weight": 0.9457109119098509,
+        "value_cny": 14610.72,
+        "weight": 0.9461161401667182,
         "rate": 0.12,
-        "annual_cny": 1739.45,
-        "hourly_cny": 0.19856785920499725,
+        "annual_cny": 1753.29,
+        "hourly_cny": 0.20014689355333976,
         "rate_low": 0.0,
         "rate_high": 0.25
       },
@@ -338,7 +338,7 @@
         "key": "sp500",
         "label": "标普500基金",
         "value_cny": 832.12,
-        "weight": 0.054289088090149,
+        "weight": 0.05388385983328177,
         "rate": 0.06,
         "annual_cny": 49.93,
         "hourly_cny": 0.00569945205479452,
@@ -348,9 +348,9 @@
     ]
   },
   "projection": {
-    "daily_gain_cny": 61.2877,
-    "days_to_target": 3110,
-    "eta": "2035-05-02",
+    "daily_gain_cny": 58.3443,
+    "days_to_target": 3265,
+    "eta": "2035-10-04",
     "window_days": 30,
     "reason": null
   },
