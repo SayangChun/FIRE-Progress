@@ -273,7 +273,9 @@ config.yaml/life_plan ──► Σ items ──► 月开销 1750 ──► × 1
 
 1. **一律折算成人民币**。BTC 用「USDT 价 × USD/CNY」换算，避免依赖离岸人民币盘口。
 2. **进度历史自己存**。`data/history.json` 按天去重保存
-   `{date, total_cny, progress_pct, btc_cny, sp500_cny}`，曲线与外推都基于它。
+   `{date, total_cny, progress_pct, btc_cny, sp500_cny, ndx100_cny, target_cny, basis_cny, profit_cny, fx_usd_cny}`，
+   曲线与外推都基于它。**每天的分项必须当天记**——比特币本金要历史汇率、纳指要当天净值，
+   事后无法精确重建。
    不能直接复用 `sp500-dca` 的 timeline，那是纯基金口径；也不能复用 `0.1BTC` 的曲线，
    那是纯比特币数量口径（且不折算人民币）。
 3. **成本是估算，且要标注**。比特币成本从备注均价推算（见 §2.1），标普500成本取仓库的
@@ -283,13 +285,13 @@ config.yaml/life_plan ──► Σ items ──► 月开销 1750 ──► × 1
    - README 里固定附注「这是线性外推，不是预测」；
    - 可通过 `display.show_projection: false` 整个关掉。
 5. **每小时被动收入 = 当前市值 × 预期年化回报 ÷ 8760**（`fire.passive_income()`）。
-   加权年化按**市值**加权，不是两项算术平均——95% 仓位压在比特币上时，两个算法差 5 个百分点。
+   加权年化按**市值**加权，不是各资产算术平均——73% 仓位压在比特币上时，两种算法差 2.4 个百分点。
    三条硬约束：
    - **它绝不参与 FIRE 目标**。目标只看月开销与提取率；把回报率 500% 塞进去，目标一动不动
      （`tests/test_passive_income.py` 钉住了这条）。
    - **必须同时给出「提取率口径」的对照数**。预期回报是「平均能涨多少」，
      提取率是「能安全花多少」，前者远高于后者是正常的；只给前者会让人以为现在就能靠它生活。
-   - **必须给出悲观/乐观区间**。当前假设下加权年化 11.7%，换成两端是 0.1% 与 24.2%——
+   - **必须给出悲观/乐观区间**。当前假设下加权年化 10.4%，换成两端是 0.8% 与 20.7%——
      这个跨度说明它是个量级参考，不是能拿去做预算的数。
    假设放在 `config.yaml` 的 `expected_return` 段，缺项时返回 `None`（不猜默认值）。
 
@@ -306,8 +308,9 @@ verify  ──►  用 tests/fixtures 的样例数据跑一遍（不联网）
              + 跑提交门控的回归测试（22 项）
              + 跑生活规划口径的回归测试（31 项）
              + 跑兼职收入口径的回归测试（26 项）
-             + 跑分子口径的回归测试（15 项）
+             + 跑分子口径的回归测试（19 项）
              + 跑被动收入口径的回归测试（20 项）
+             + 跑两段式口径的回归测试（20 项）
              ↓ 全部通过才继续
 update  ──►  读持仓仓库 + 抓行情 → 重算 → 写 README/曲线 → git commit & push
 ```
@@ -431,6 +434,7 @@ FIRE-Progress/
 │   └── sources/
 │       ├── btc_repo.py          # 读取 0.1BTC 仓库的 holdings.csv
 │       ├── sp500.py             # 读取 sp500-dca 仓库的 portfolio.json
+│       ├── ndx100.py            # 抓东方财富 pingzhongdata 净值，算纳指100 市值
 │       └── price.py             # BTC 价格 + USD/CNY 汇率
 ├── data/
 │   ├── history.json             # 按天的进度快照（曲线数据源）
@@ -442,10 +446,11 @@ FIRE-Progress/
 ├── tests/
 │   ├── fixtures/                # 样例数据，供 --mock 使用
 │   ├── test_commit_gate.py      # 提交门控的回归测试（22 项）
-│   ├── test_fire_core.py        # 分子口径的回归测试（17 项，2026-10-15 替代 test_emergency.py）
+│   ├── test_fire_core.py        # 分子口径的回归测试（19 项，2026-10-15 替代 test_emergency.py）
 │   ├── test_labor_income.py     # 兼职收入口径的回归测试（26 项，2026-10-20 新增）
 │   ├── test_life_plan.py        # 生活规划口径的回归测试（31 项）
-│   └── test_passive_income.py   # 被动收入口径的回归测试（20 项）
+│   ├── test_passive_income.py   # 被动收入口径的回归测试（20 项）
+│   └── test_two_phase.py        # 两段式口径的回归测试（20 项，2026-10-27 新增）
 └── .github/workflows/update.yml
 ```
 

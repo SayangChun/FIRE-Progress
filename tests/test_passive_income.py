@@ -3,8 +3,8 @@
 这个数字很容易被算错，而算错了在看板上完全看不出来（就是个 ¥0.xx）。
 钉住这几条：
 
-  1. 加权年化是**按市值加权**，不是两项算术平均。95% 仓位在比特币上时，
-     两个算法差 5 个百分点，但显示上都像「11% 左右」。
+  1. 加权年化是**按市值加权**，不是各资产算术平均。仓位越集中，两种算法差得越远，
+     但显示上都像「10% 左右」，所以必须用测试钉住。
   2. 每小时 = 总市值 × 加权年化 ÷ 8760，四条时间尺度互相自洽
      （每小时 × 24 = 每天，× 365 = 每年，÷ 12 = 每月）。
   3. 它**绝不能**影响 FIRE 目标。目标只由月开销与提取率决定。
@@ -52,7 +52,7 @@ SP500 = {"available": True, "market_value": 700.0, "invested": 700.0, "profit": 
 BTC_VALUE = 0.025 * PRICE["btc_cny"]  # 13,750
 TOTAL = BTC_VALUE + 700.0
 
-print("加权年化按市值加权，不是两项算术平均")
+print("加权年化按市值加权，不是各资产算术平均")
 data = firemod.compute(cfg, price=PRICE, btc=BTC, sp500=SP500, history=[])
 pi = data["passive_income"]
 ok("passive_income 已生成", pi is not None)
@@ -67,7 +67,7 @@ ok(
 )
 naive = (float(SPEC["btc"]) + float(SPEC["sp500"])) / 2
 ok(
-    "加权值不等于两项算术平均（权重必须真的起作用）",
+    "加权值不等于各资产算术平均（权重必须真的起作用）",
     not close(pi["weighted_rate"], naive, 1e-9),
     f'加权 {pi["weighted_rate"]:.4f} vs 平均 {naive:.4f}',
 )

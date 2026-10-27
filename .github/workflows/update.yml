@@ -50,6 +50,8 @@ jobs:
         run: python tests/test_fire_core.py
       - name: 被动收入口径回归测试
         run: python tests/test_passive_income.py
+      - name: 两段式口径回归测试
+        run: python tests/test_two_phase.py
 
   update:
     needs: verify
