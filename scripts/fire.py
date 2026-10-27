@@ -16,10 +16,12 @@
 低压力、可随时停的兼职，收入覆盖一部分开销，资产不必覆盖全部。
 未启用时该项为 0，公式退化为传统的「月开销 × 12 ÷ 提取率」。
 
-统计两项「长期不动用的可投资资产」：比特币、标普500基金。
+统计三项「长期不动用的可投资资产」：比特币、标普500基金、纳指100基金。
 纳入标准是**长期不动用**，不是「能不能变现」——日常现金要参与周转，所以不计入。
 比特币持仓数量来自 0.1BTC 仓库（每周手动更新，存在延迟），
-标普500持仓来自 sp500-dca 仓库；估值用实时行情折算成人民币。
+标普500持仓来自 sp500-dca 仓库；纳指100 的份额写在 config.yaml，
+净值抓东方财富公开接口（2026-10-27 加入，已停止定投）。
+估值统一折算成人民币。
 """
 
 from __future__ import annotations
@@ -56,6 +58,7 @@ def passive_income(
     btc_value: float,
     sp500_value: float,
     monthly_expense: float,
+    ndx_value: float = 0.0,
 ) -> dict | None:
     """按预期年化回报估算「每小时被动收入」。
 
@@ -74,13 +77,31 @@ def passive_income(
     if spec.get("btc") is None or spec.get("sp500") is None:
         return None
 
-    total = float(btc_value) + float(sp500_value)
+    # 纳指100：只有实际持有、且配了回报假设时才纳入加权。
+    # 缺假设就跳过这一项，而不是拿 0 或别的资产的值凑——
+    # 拿错值会让「每小时被动收入」凭空变化，而看板上看不出来。
+    include_ndx = float(ndx_value) > 0 and spec.get("ndx100") is not None
 
-    rows: list[dict] = []
-    for key, label, value, rate, low, high in (
+    total = float(btc_value) + float(sp500_value) + (float(ndx_value) if include_ndx else 0.0)
+
+    specs = [
         ("btc", "比特币", btc_value, spec.get("btc"), spec.get("btc_low"), spec.get("btc_high")),
         ("sp500", "标普500基金", sp500_value, spec.get("sp500"), spec.get("sp500_low"), spec.get("sp500_high")),
-    ):
+    ]
+    if include_ndx:
+        specs.append(
+            (
+                "ndx100",
+                "纳指100基金",
+                ndx_value,
+                spec.get("ndx100"),
+                spec.get("ndx100_low"),
+                spec.get("ndx100_high"),
+            )
+        )
+
+    rows: list[dict] = []
+    for key, label, value, rate, low, high in specs:
         value, rate = float(value), float(rate)
         rows.append(
             {
@@ -294,30 +315,41 @@ def two_phase(cfg, *, capital: float, annual_net_expense: float) -> dict | None:
     }
 
 
-def allocation_split(cfg, btc_value: float, sp500_value: float) -> dict | None:
-    """比特币 / 标普500 的市值占比，用于展示配置失衡程度。
+def allocation_split(
+    cfg, btc_value: float, sp500_value: float, ndx_value: float = 0.0
+) -> dict | None:
+    """比特币 / 标普500 / 纳指100 的市值占比，用于展示配置失衡程度。
 
-    ⚠️ 只读展示，**不改变分子构成**。分子仍然是这两项之和，
+    ⚠️ 只读展示，**不改变分子构成**。分子仍然是这三项之和，
     加资产不能让目标变化（tests/test_fire_core.py 钉死）。
+
+    ⚠️ `in_range` 只按**标普500**判断，纳指100 不计入「稳」的部分——
+    纳指与标普500 相关性 0.9 以上，都是美股成长敞口，只是纳指更偏科技。
+    所以 `non_btc_pct` 是「非比特币敞口」，不等于「稳健资产」。
     """
     spec = cfg.get("asset_allocation") or {}
     if not spec.get("enabled", False):
         return None
 
-    total = float(btc_value) + float(sp500_value)
+    total = float(btc_value) + float(sp500_value) + float(ndx_value)
     if total <= 0:
         return None
 
     rng = list(spec.get("sp500_target_range") or [])
     low = rng[0] if len(rng) > 0 else None
     high = rng[1] if len(rng) > 1 else None
-    pct = float(sp500_value) / total
+
+    btc_pct = float(btc_value) / total
+    sp_pct = float(sp500_value) / total
+    ndx_pct = float(ndx_value) / total
 
     return {
-        "btc_pct": round(1.0 - pct, 4),
-        "sp500_pct": round(pct, 4),
+        "btc_pct": round(btc_pct, 4),
+        "sp500_pct": round(sp_pct, 4),
+        "ndx100_pct": round(ndx_pct, 4),
+        "non_btc_pct": round(sp_pct + ndx_pct, 4),
         "sp500_target_range": [low, high],
-        "in_range": bool(low is not None and high is not None and low <= pct <= high),
+        "in_range": bool(low is not None and high is not None and low <= sp_pct <= high),
         "note": spec.get("note"),
     }
 
@@ -329,6 +361,7 @@ def compute(
     btc: dict,
     sp500: dict,
     history: list[dict],
+    ndx100: dict | None = None,
     as_of: str | None = None,
 ) -> dict:
     monthly, plan_summary = lifeplan_mod.resolve_monthly(cfg)
@@ -344,7 +377,13 @@ def compute(
     sp500_value = float(sp500.get("market_value") or 0.0)
     sp500_invested = float(sp500.get("invested") or 0.0)
 
-    total = btc_value + sp500_value
+    # 纳指100（2026-10-27 加入）：三只场外 QDII，已停止定投，份额固定。
+    # 不传时按 0 处理，行为与加入前完全一致——mock 数据与旧调用点不受影响。
+    ndx100 = ndx100 or {}
+    ndx_value = float(ndx100.get("market_value") or 0.0)
+    ndx_invested = float(ndx100.get("invested") or 0.0)
+
+    total = btc_value + sp500_value + ndx_value
     progress = total / target if target else 0.0
     remaining = max(target - total, 0.0)
 
@@ -361,7 +400,10 @@ def compute(
         float(btc_cost_usd) * float(price["usd_cny"]) if btc_cost_usd is not None else None
     )
 
-    parts = [p for p in (btc_basis, sp500_basis) if p is not None]
+    # 纳指100：成本由 config 的 shares × cost_nav 直接算出，无需外部来源
+    ndx_basis = ndx_invested if ndx_invested > 0 else None
+
+    parts = [p for p in (btc_basis, sp500_basis, ndx_basis) if p is not None]
     total_basis = sum(parts) if parts else None
 
     now = _now(cfg.automation.get("timezone", "Asia/Shanghai"))
@@ -386,7 +428,7 @@ def compute(
         # 只回答「够不够撑到回北京那天」，见 docs/FIRE-ROADMAP.md。
         "two_phase": two_phase(cfg, capital=total, annual_net_expense=net_monthly * 12),
         # 资产占比：只用于展示失衡程度，不改变分子构成
-        "allocation": allocation_split(cfg, btc_value, sp500_value),
+        "allocation": allocation_split(cfg, btc_value, sp500_value, ndx_value),
         "assets": {
             "total_cny": round(total, 2),
             "progress": progress,
@@ -408,17 +450,32 @@ def compute(
                 "latest_nav_date": sp500.get("latest_nav_date"),
                 "funds": sp500.get("funds", []),
             },
+            "ndx100": {
+                "value_cny": round(ndx_value, 2),
+                "invested_cny": round(ndx_invested, 2),
+                "profit_cny": round(ndx100.get("profit") or 0.0, 2),
+                "return_rate": ndx100.get("return_rate"),
+                "latest_nav_date": ndx100.get("latest_nav_date"),
+                "funds": ndx100.get("funds", []),
+            },
         },
         "cost_basis": {
             "btc_cny": round(btc_basis, 2) if btc_basis is not None else None,
             "btc_estimated": btc_basis is not None,
             "sp500_cny": round(sp500_basis, 2),
+            "ndx100_cny": round(ndx_basis, 2) if ndx_basis is not None else None,
             "total_cny": round(total_basis, 2) if total_basis is not None else None,
             "profit_cny": round(total - total_basis, 2) if total_basis is not None else None,
         },
         "price": price,
         "passive_income": (
-            passive_income(cfg, btc_value=btc_value, sp500_value=sp500_value, monthly_expense=monthly)
+            passive_income(
+                cfg,
+                btc_value=btc_value,
+                sp500_value=sp500_value,
+                ndx_value=ndx_value,
+                monthly_expense=monthly,
+            )
             if cfg.display.get("show_passive_income", True)
             else None
         ),

@@ -163,6 +163,11 @@ def curve_svg(history: list[dict], cfg) -> str:
         )
 
     note = "竖虚线处为口径调整（FIRE 目标变化），不是资产变动。" if marks else ""
+    # 分子（资产构成）变化不会被自动标注——那会在曲线上留一个无标记的跳升，
+    # 看起来像一天赚了钱。人工说明写在 config 的 display.capital_change_note。
+    extra = str(cfg.display.get("capital_change_note") or "").strip()
+    if extra:
+        note = f"{note} {extra}".strip()
 
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="FIRE 进度曲线">
   <title>FIRE 进度曲线</title>
@@ -615,7 +620,7 @@ def _passive_income_block(data: dict, cfg) -> str:
 
     out.append(
         "> 这是按假设算出来的数，不是承诺。"
-        f"加权年化 {rate * 100:.1f}% 由两项资产按市值加权得到，假设写在 "
+        f"加权年化 {rate * 100:.1f}% 由各资产按市值加权得到，假设写在 "
         "`config.yaml` 的 `expected_return` 段，改它不影响 FIRE 目标。"
     )
     out.append(">")
@@ -636,7 +641,7 @@ def _passive_income_block(data: dict, cfg) -> str:
             )
         else:
             why = (
-                "因为两项资产的回报率假设本身就宽：比特币没有可锚定的现金流，"
+                "因为各资产的回报率假设本身就宽：比特币没有可锚定的现金流，"
                 "长期回报率只能猜。"
             )
         out.append(
@@ -666,6 +671,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     assets = data["assets"]
     btc = assets["btc"]
     sp500 = assets["sp500"]
+    ndx100 = assets.get("ndx100") or {}
     pct = assets["progress_pct"]
     masked = cfg.privacy.get("mode") == "masked"
 
@@ -698,6 +704,13 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             "> 竖虚线是口径调整日：那天 FIRE 目标变了，曲线因此出现台阶。"
             "目标值逐日记在 `data/history.json` 里，可以查到。"
         )
+        cap_note = str(cfg.display.get("capital_change_note") or "").strip()
+        if cap_note:
+            out.append(">")
+            out.append(
+                f"> ⚠️ **分子口径也有过变化**，但不会画竖线（竖线只标分母）：{cap_note}"
+                "纳入后分子变大、进度跳升，那不是资产增长。"
+            )
         out.append("")
 
     if cfg.display.get("show_progress_bar", True):
@@ -739,12 +752,15 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     total = assets["total_cny"] or 1
     btc_share = btc["value_cny"] / total * 100 if assets["total_cny"] else 0.0
     sp_share = sp500["value_cny"] / total * 100 if assets["total_cny"] else 0.0
+    ndx_share = ndx100.get("value_cny", 0.0) / total * 100 if assets["total_cny"] else 0.0
     out.append(f"| 比特币 | {money(btc['value_cny'], cfg)} | {btc_share:.1f}% |")
     out.append(f"| 标普500基金 | {money(sp500['value_cny'], cfg)} | {sp_share:.1f}% |")
+    if ndx100.get("value_cny"):
+        out.append(f"| 纳指100基金 | {money(ndx100['value_cny'], cfg)} | {ndx_share:.1f}% |")
     out.append(f"| **合计** | **{money(assets['total_cny'], cfg)}** | 100.0% |")
     out.append("")
     out.append(
-        "> 只算长期不动用的钱：比特币和标普500基金。日常现金和活期不算。"
+        "> 只算长期不动用的钱：比特币、标普500基金、纳指100基金。日常现金和活期不算。"
         "所以卖出后进度下跌未必是亏了，可能只是钱变成了现金，详见下方「计入范围」。"
     )
     out.append("")
@@ -773,6 +789,26 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             out.append(
                 f"| {fund['short_name']} | {money(fund['market_value'], cfg)} | "
                 f"{money(fund['invested'], cfg)} | {fund['shares']:.2f} | {fund['latest_nav']:.4f} |"
+            )
+        out.append("")
+        out.append("</details>")
+        out.append("")
+
+    if ndx100.get("funds"):
+        out.append("<details>")
+        out.append(
+            f"<summary>纳指100基金持仓明细（净值日 {ndx100.get('latest_nav_date') or '—'}，"
+            "份额固定，已停止定投）</summary>"
+        )
+        out.append("")
+        out.append("| 基金 | 市值 | 累计投入 | 持有份额 | 最新净值 |")
+        out.append("| --- | ---: | ---: | ---: | ---: |")
+        for fund in ndx100["funds"]:
+            out.append(
+                f"| {fund.get('short_name') or fund.get('code')} | "
+                f"{money(fund['market_value'], cfg)} | "
+                f"{money(fund['invested'], cfg)} | {fund['shares']:.2f} | "
+                f"{fund['latest_nav']:.4f} |"
             )
         out.append("")
         out.append("</details>")
@@ -871,7 +907,8 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append(
         f"<sub>数据源："
         f"[{cfg.sources.btc.repo}](https://github.com/{cfg.sources.btc.repo})（比特币持仓，每周手动更新）、"
-        f"[{cfg.sources.sp500.repo}](https://github.com/{cfg.sources.sp500.repo})（基金持仓）· "
+        f"[{cfg.sources.sp500.repo}](https://github.com/{cfg.sources.sp500.repo})（标普500 持仓）、"
+        f"东方财富（纳指100 净值，份额固定）· "
         f"行情：{data['price']['btc_source']} · 汇率：{data['price']['fx_source']}</sub>"
     )
     out.append("")
@@ -896,8 +933,8 @@ def default_readme(
     net = monthly if net_monthly is None else net_monthly
     return f"""# FIRE-Progress
 
-> 我的 FIRE 进度看板。只统计两项长期不动用的资产：比特币、标普500基金。
-> 数据从两个公开仓库读取，由 GitHub Actions 每小时更新，不需要任何密钥。
+> 我的 FIRE 进度看板。只统计三项长期不动用的资产：比特币、标普500基金、纳指100基金。
+> 持仓来自两个公开仓库 + 东方财富的公开净值接口，由 GitHub Actions 每小时更新，不需要任何密钥。
 
 {block}
 ## 计算口径

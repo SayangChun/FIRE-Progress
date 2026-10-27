@@ -22,6 +22,7 @@ from scripts import fire as firemod  # noqa: E402
 from scripts import render as rendermod  # noqa: E402
 from scripts.sources import (  # noqa: E402
     btc_repo,
+    ndx100 as ndx100_src,
     price as price_src,
     sp500 as sp500_src,
 )
@@ -59,14 +60,15 @@ def load_fixture_json(name: str) -> dict:
 # ------------------------------------------------------------------ 数据抓取
 
 
-def fetch_all(cfg, mock: bool) -> tuple[dict, dict, dict]:
-    """返回 (price, btc, sp500)。单个来源失败不阻断整体。"""
+def fetch_all(cfg, mock: bool) -> tuple[dict, dict, dict, dict]:
+    """返回 (price, btc, sp500, ndx100)。单个来源失败不阻断整体。"""
     if mock:
         print("[mock] 使用 tests/fixtures 下的样例数据")
         price = load_fixture_json("price.json")
         btc = btc_repo.fetch(cfg.sources.btc, csv_text=read_fixture("holdings.csv"))
         sp500 = load_fixture_json("sp500.json")
-        return price, btc, sp500
+        ndx100 = load_fixture_json("ndx100.json")
+        return price, btc, sp500, ndx100
 
     price = price_src.resolve(cfg)
 
@@ -80,10 +82,17 @@ def fetch_all(cfg, mock: bool) -> tuple[dict, dict, dict]:
     else:
         sp500 = {"available": False, "warnings": ["标普500：已在配置中禁用"]}
 
-    return price, btc, sp500
+    if cfg.sources.get("ndx100", {}).get("enabled", True):
+        ndx100 = ndx100_src.fetch(cfg.sources.ndx100)
+    else:
+        ndx100 = {"available": False, "warnings": ["纳指100：已在配置中禁用"]}
+
+    return price, btc, sp500, ndx100
 
 
-def apply_last_good(btc, sp500, previous: dict) -> tuple[dict, dict, list[str]]:
+def apply_last_good(
+    btc, sp500, ndx100, previous: dict
+) -> tuple[dict, dict, dict, list[str]]:
     """某个来源挂掉时沿用上次的可用值，并明确告警——绝不用 0 冒充持仓。
 
     注意：必须把「替换后的对象」显式返回，否则调用方拿到的仍是原来的变量。
@@ -127,7 +136,21 @@ def apply_last_good(btc, sp500, previous: dict) -> tuple[dict, dict, list[str]]:
         }
         notes.append("标普500 市值取自上次成功值")
 
-    return btc, sp500, notes
+    if not ndx100.get("available") and prev_assets.get("ndx100", {}).get("value_cny") is not None:
+        nd = prev_assets["ndx100"]
+        ndx100 = {
+            "available": True,
+            "market_value": nd.get("value_cny", 0.0),
+            "invested": nd.get("invested_cny", 0.0),
+            "profit": nd.get("profit_cny", 0.0),
+            "return_rate": nd.get("return_rate"),
+            "latest_nav_date": nd.get("latest_nav_date"),
+            "funds": nd.get("funds", []),
+            "warnings": ["纳指100：读取失败，沿用上次成功值"],
+        }
+        notes.append("纳指100 市值取自上次成功值")
+
+    return btc, sp500, ndx100, notes
 
 
 # ------------------------------------------------------------------ 快照
@@ -146,6 +169,9 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
         "btc_cny": data["assets"]["btc"]["value_cny"],
         "btc_qty": data["assets"]["btc"]["qty"],
         "sp500_cny": data["assets"]["sp500"]["value_cny"],
+        # 纳指100（2026-10-27 加入）：逐日留档，否则事后无法拆出它的贡献。
+        # 旧记录没有这个字段，读的时候要容忍缺失（用 .get）。
+        "ndx100_cny": (data["assets"].get("ndx100") or {}).get("value_cny"),
         "target_cny": data["fire"]["target_cny"],
         "basis_cny": basis.get("total_cny"),
         "profit_cny": basis.get("profit_cny"),
@@ -225,17 +251,19 @@ def main() -> int:
         history = []
 
     print("→ 抓取数据源…")
-    price, btc, sp500 = fetch_all(cfg, args.mock)
+    price, btc, sp500, ndx100 = fetch_all(cfg, args.mock)
     print(f"  BTC/USDT = {price['btc_usdt']:,.2f} ({price['btc_source']})")
     print(f"  USD/CNY  = {price['usd_cny']:.4f} ({price['fx_source']})")
     print(f"  → BTC/CNY = {price['btc_cny']:,.2f}")
     if btc.get("available"):
         print(f"  比特币持仓快照 = {btc.get('snapshot_date')}（{btc.get('stale_days')} 天前）")
 
-    btc, sp500, fallback_notes = apply_last_good(btc, sp500, previous)
+    btc, sp500, ndx100, fallback_notes = apply_last_good(btc, sp500, ndx100, previous)
 
     print("→ 计算 FIRE 进度…")
-    data = firemod.compute(cfg, price=price, btc=btc, sp500=sp500, history=history)
+    data = firemod.compute(
+        cfg, price=price, btc=btc, sp500=sp500, ndx100=ndx100, history=history
+    )
 
     # 兜底说明排在前面，并去重（同一告警可能从来源和兜底两处各来一次）
     seen: set[str] = set()
@@ -269,6 +297,8 @@ def main() -> int:
     print(f"  目标 = ¥{fire['target_cny']:,.2f}（{base:.0f} × 12 ÷ {fire['withdrawal_rate']}）")
     print(f"  比特币 = {assets['btc']['qty']:.8f} → ¥{assets['btc']['value_cny']:,.2f}")
     print(f"  标普500 = ¥{assets['sp500']['value_cny']:,.2f}")
+    if assets.get("ndx100"):
+        print(f"  纳指100 = ¥{assets['ndx100']['value_cny']:,.2f}")
     print(f"  合计 = ¥{assets['total_cny']:,.2f}　完成度 = {assets['progress_pct']:.4f}%")
 
     material, reason = is_material(previous, data, cfg)

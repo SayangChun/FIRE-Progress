@@ -1,0 +1,44 @@
+{
+  "available": true,
+  "market_value": 4425.42,
+  "invested": 4177.22,
+  "profit": 248.2,
+  "return_rate": 0.059414,
+  "latest_nav_date": "2026-10-23",
+  "funds": [
+    {
+      "code": "018043",
+      "short_name": "天弘纳斯达克100指数发起(QDII)A",
+      "shares": 1330.28,
+      "latest_nav": 1.9815,
+      "nav_date": "2026-10-23",
+      "market_value": 2635.95,
+      "invested": 2317.08,
+      "profit": 318.87,
+      "return_rate": 0.13762
+    },
+    {
+      "code": "160213",
+      "short_name": "国泰纳斯达克100指数",
+      "shares": 287.06,
+      "latest_nav": 4.348,
+      "nav_date": "2026-10-23",
+      "market_value": 1248.14,
+      "invested": 1300.01,
+      "profit": -51.87,
+      "return_rate": -0.0399
+    },
+    {
+      "code": "040046",
+      "short_name": "华安纳斯达克100ETF联接(QDII)A",
+      "shares": 68.0,
+      "latest_nav": 7.9608,
+      "nav_date": "2026-10-23",
+      "market_value": 541.33,
+      "invested": 560.13,
+      "profit": -18.8,
+      "return_rate": -0.03356
+    }
+  ],
+  "warnings": []
+}
