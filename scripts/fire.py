@@ -24,6 +24,7 @@
 
 from __future__ import annotations
 
+import math
 from datetime import datetime, timedelta, timezone
 
 from scripts import lifeplan as lifeplan_mod
@@ -195,6 +196,132 @@ def projection(
     }
 
 
+def capital_for_years(annual_expense: float, years: float, rate: float) -> float:
+    """年金现值：给定年支出与年数，需要多少本金才够花完。
+
+    「花完」不是「耗尽到 0」——它是「刚好在第 years 年末用完」，
+    这正是两段式阶段 A 需要的口径：不需要永续，只需要撑到退出条件。
+
+    rate 为 0 时退化为简单乘法（不做贴现）。
+    """
+    if years <= 0 or annual_expense <= 0:
+        return 0.0
+    if rate <= 0:
+        return annual_expense * years
+    return annual_expense * (1 - (1 + rate) ** -years) / rate
+
+
+def years_from_capital(capital: float, annual_expense: float, rate: float) -> float | None:
+    """反过来：给定本金，按年支出能撑多少年。
+
+    返回 None 表示**永续**（本金产生的收益已经覆盖支出，不会耗尽）。
+    返回 0 表示立刻就撑不住（本金或支出非正）。
+
+    推导：A(t) = P(1+r)^t − (D/r)((1+r)^t − 1)，
+    令 A(t)=0 得 (1+r)^t = k/(k−P)，其中 k = D/r。
+    当 P ≥ k 时无解（资产单调不减），即永续。
+    """
+    if annual_expense <= 0:
+        return None  # 没有净支出，永远花不完
+    if capital <= 0:
+        return 0.0
+    if rate <= 0:
+        return capital / annual_expense
+    k = annual_expense / rate
+    if capital >= k:
+        return None  # 永续
+    return math.log(k / (k - capital)) / math.log(1 + rate)
+
+
+def critical_rate(annual_expense: float, capital: float) -> float | None:
+    """永续所需的临界收益率 = 年净支出 ÷ 本金。
+
+    低于提取率 → 保守假设下就成立；高于权益类长期实际回报 → 那是在赌。
+    见 docs/FIRE-LIFE-PLAN.md §7.5。
+    """
+    if capital <= 0 or annual_expense <= 0:
+        return None
+    return annual_expense / capital
+
+
+def two_phase(cfg, *, capital: float, annual_net_expense: float) -> dict | None:
+    """两段式口径：这笔钱能撑多久（不是「够不够永续」）。
+
+    背景见 docs/FIRE-ROADMAP.md。核心区别：
+      - FIRE 目标（fire.target_cny）= 永续口径，回答「还要攒多少」，用于进度条
+      - 本函数                    = 有期限口径，回答「能撑多久」，用于决策
+
+    ⚠️ 本函数**不改变 FIRE 目标**。加资产不能让目标变化，这条在
+    tests/test_fire_core.py 里钉死了；这里只读取实时市值做推演。
+    """
+    spec = cfg.get("timeline") or {}
+    if not spec:
+        return None
+
+    rate = float(cfg.fire.get("withdrawal_rate") or 0.0)
+    years = years_from_capital(capital, annual_net_expense, rate)
+    start_age = spec.get("start_age")
+
+    horizon = []
+    for n in (5, 10, 15, 20, 30, 40):
+        horizon.append(
+            {
+                "years": n,
+                "capital_cny": round(capital_for_years(annual_net_expense, n, rate), 2),
+                "covered": capital >= capital_for_years(annual_net_expense, n, rate),
+            }
+        )
+
+    return {
+        "capital_cny": round(capital, 2),
+        "annual_net_expense_cny": round(annual_net_expense, 2),
+        "rate": rate,
+        # None = 永续
+        "years": None if years is None else round(years, 1),
+        "perpetual": years is None,
+        "exhaust_age": (
+            None if years is None or start_age is None else round(float(start_age) + years, 1)
+        ),
+        "critical_rate": (
+            None
+            if critical_rate(annual_net_expense, capital) is None
+            else round(critical_rate(annual_net_expense, capital), 4)
+        ),
+        "graduation": spec.get("graduation"),
+        "start_age": start_age,
+        "monthly_contribution": spec.get("monthly_contribution"),
+        "horizon": horizon,
+    }
+
+
+def allocation_split(cfg, btc_value: float, sp500_value: float) -> dict | None:
+    """比特币 / 标普500 的市值占比，用于展示配置失衡程度。
+
+    ⚠️ 只读展示，**不改变分子构成**。分子仍然是这两项之和，
+    加资产不能让目标变化（tests/test_fire_core.py 钉死）。
+    """
+    spec = cfg.get("asset_allocation") or {}
+    if not spec.get("enabled", False):
+        return None
+
+    total = float(btc_value) + float(sp500_value)
+    if total <= 0:
+        return None
+
+    rng = list(spec.get("sp500_target_range") or [])
+    low = rng[0] if len(rng) > 0 else None
+    high = rng[1] if len(rng) > 1 else None
+    pct = float(sp500_value) / total
+
+    return {
+        "btc_pct": round(1.0 - pct, 4),
+        "sp500_pct": round(pct, 4),
+        "sp500_target_range": [low, high],
+        "in_range": bool(low is not None and high is not None and low <= pct <= high),
+        "note": spec.get("note"),
+    }
+
+
 def compute(
     cfg,
     *,
@@ -255,6 +382,11 @@ def compute(
             "monthly_override": bool((plan_summary or {}).get("override")),
         },
         "life_plan": plan_summary,
+        # 两段式推演：这笔钱能撑多久。**不参与上面的 target_cny 计算**，
+        # 只回答「够不够撑到回北京那天」，见 docs/FIRE-ROADMAP.md。
+        "two_phase": two_phase(cfg, capital=total, annual_net_expense=net_monthly * 12),
+        # 资产占比：只用于展示失衡程度，不改变分子构成
+        "allocation": allocation_split(cfg, btc_value, sp500_value),
         "assets": {
             "total_cny": round(total, 2),
             "progress": progress,
