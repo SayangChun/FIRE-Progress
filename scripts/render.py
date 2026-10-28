@@ -645,7 +645,7 @@ def _passive_income_block(data: dict, cfg) -> str:
                 "长期回报率只能猜。"
             )
         out.append(
-            f"> 区间很宽：悲观（{low_desc}）每小时 "
+            f"> 区间跨度大：悲观（{low_desc}）每小时 "
             f"{money(pi['hourly_low_cny'], cfg, decimals=3)}，乐观（{high_desc}）"
             f"{money(pi['hourly_high_cny'], cfg, decimals=3)}。{why}"
         )
