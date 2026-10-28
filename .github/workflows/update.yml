@@ -52,6 +52,8 @@ jobs:
         run: python tests/test_passive_income.py
       - name: 两段式口径回归测试
         run: python tests/test_two_phase.py
+      - name: 静态页冒烟测试
+        run: python tests/test_site.py
 
   update:
     needs: verify
@@ -81,3 +83,24 @@ jobs:
           fi
           git commit -m "chore(data): 更新 FIRE 进度 $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
           git push
+
+      # 静态页给手机浏览器看。复用上面刚更新的 data/ 与 reports/，
+      # 不额外取数，所以页面数字和 README 一定一致。
+      - name: 生成静态页
+        run: python -m scripts.site --out "$RUNNER_TEMP/site"
+
+      # 推到独立的 gh-pages 分支：不污染 main 的提交历史，
+      # 也不会触发上面那个 push 工作流（它只监听 main）。
+      # 每次都 force push 一个单提交分支，所以分支不会越堆越长。
+      - name: 部署到 GitHub Pages
+        run: |
+          cd "$RUNNER_TEMP/site"
+          git init -q -b gh-pages
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -qm "site: $(TZ=Asia/Shanghai date '+%Y-%m-%d %H:%M')"
+          git push -q -f \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

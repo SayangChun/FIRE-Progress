@@ -23,3 +23,6 @@ Thumbs.db
 # 本地临时产物
 /tmp/
 *.log
+
+# 静态页生成结果（CI 里生成后推到 gh-pages 分支，不入 main）
+/site/
