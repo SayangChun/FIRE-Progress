@@ -22,6 +22,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: fire-progress
@@ -104,3 +105,26 @@ jobs:
             "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # gh-pages 分支出现后，GitHub 不一定会自动开启 Pages（实测 has_pages 仍是 false）。
+      # 这里补一次幂等的检查：已经开了就直接跳过，没开就尝试用 token 开。
+      # token 没有 admin 权限时会 403，所以 continue-on-error——失败了去设置里点一次即可，
+      # 不要让整个更新任务跟着红。
+      - name: 确保 Pages 已开启
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/pages"
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" "$api")
+          if [ "$code" = "200" ]; then
+            echo "Pages 已开启"
+            exit 0
+          fi
+          echo "尝试开启 Pages（source: gh-pages）…"
+          curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d '{"source":{"branch":"gh-pages","path":"/"}}' "$api" | head -20
