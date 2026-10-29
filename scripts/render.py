@@ -22,6 +22,17 @@ def money(value, cfg, *, decimals: int = 2, symbol: str | None = None) -> str:
     return f"{symbol}{value:,.{decimals}f}"
 
 
+def _horizon(days) -> str:
+    """把天数说成人话。None 表示算不出来。"""
+    if days is None:
+        return "—"
+    if days < 365:
+        return f"约 {days} 天"
+    if days < 3650:
+        return f"约 {days / 365:.1f} 年"
+    return "超过 10 年"
+
+
 # ---------------------------------------------------------------- 进度条 SVG
 #
 # 为什么不用「█░▎」拼文本进度条：
@@ -864,7 +875,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             )
             out.append("")
 
-    # 被动收入与线性外推都是「往前看」的内容，放在一起。
+    # 被动收入与外推都是「往前看」的内容，放在一起。
     # 被动收入在**前**：它是当前持仓的直接推论，比外推更硬；
     # 外推依赖「近期增速会延续」这个更弱的假设。
     pi_block = _passive_income_block(data, cfg)
@@ -874,32 +885,38 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
 
     proj = data.get("projection")
     if proj:
-        out.append("### 线性外推")
+        out.append("### 外推")
         out.append("")
         days = proj.get("days_to_target")
-        if days:
-            if days < 365:
-                horizon = f"**约 {days} 天**"
-            elif days < 3650:
-                horizon = f"**约 {days / 365:.1f} 年**"
-            else:
-                horizon = "**超过 10 年**"
+        if days is not None:
+            scen = proj.get("scenarios") or {}
+            low = scen.get("low") or {}
+            base_sc = scen.get("base") or {}
+            high = scen.get("high") or {}
             out.append(
-                f"按真实定投额线性外推：比特币 **{money(proj['btc_cny_per_day'], cfg)}/天**"
-                f"（{proj['btc_usdt_per_day']:g} USDT × {proj['usd_cny']:.4f}）"
-                f" + 标普500 **{money(proj['sp500_cny_per_day'], cfg)}/天**"
-                f" = 合计 **{money(proj['daily_cny'], cfg)}/天**"
-                f"（月 {money(proj['monthly_cny'], cfg)}），{horizon}后达到目标（{proj['eta']}）。"
+                f"按「定投 + 资产增值」外推：日投 **{money(proj['daily_cny'], cfg)}**"
+                f"（月 {money(proj['monthly_cny'], cfg)}，比特币 {proj['btc_usdt_per_day']:g} USDT"
+                f" + 标普500 {money(proj['sp500_cny_per_day'], cfg)}），"
+                f"叠加当前持仓按加权预期年化 **{proj['weighted_rate'] * 100:.2f}%** 增长，"
+                f"**{_horizon(days)}**后达到目标（{proj['eta']}）。"
             )
             out.append("")
             out.append(
-                "> 只算投入，不算涨跌：假设定投不中断、价格不变。所以这个数是「还要投多久」，"
-                "不是「多久能涨到」——行情好会更快，行情差会更慢。"
+                f"> 区间：悲观{_horizon(low.get('days'))}"
+                f"（加权 {low.get('rate', 0) * 100:.2f}%）"
+                f" · 基准{_horizon(base_sc.get('days'))}"
+                f" · 乐观{_horizon(high.get('days'))}"
+                f"（加权 {high.get('rate', 0) * 100:.2f}%）。"
             )
             out.append(">")
             out.append(
-                "> 不用近 30 天增速的原因：那段增速由行情主导，涨得快不等于进度快，"
-                "跌的时候甚至会被推成「永远达不到」。定投额才是自己能控制的变量。"
+                "> 这不再是线性外推：定投按天累加，已有持仓按年化复利。差距全部来自收益率假设——"
+                "比特币占七成时，「平均收益率」对这个组合没有实际意义，路径才重要，上沿只能当参考。"
+            )
+            out.append(">")
+            out.append(
+                "> 定投额用真实值、不用近 30 天增速：那段增速由行情主导，"
+                "涨得快不等于进度快，跌的时候还会被推成「永远达不到」。"
             )
             if days >= 3650:
                 out.append(">")

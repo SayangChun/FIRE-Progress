@@ -167,17 +167,47 @@ def collect_warnings(*results: dict) -> list[str]:
     return warnings
 
 
+def _days_to_target(
+    remaining: float, start: float, daily: float, annual: float
+) -> float | None:
+    """解「多久后达到目标」：目标 = A(1+r)^n + C·((1+r)^n − 1)/r。
+
+    反解 n = ln((剩余 + C/r) / (起点 + C/r)) / ln(1+r)，按日复利。
+    年化 ≤ 0 时退化为纯定投（不猜测负收益下的路径，那没有意义）。
+    """
+    if daily <= 0:
+        return None
+    if annual <= 0:
+        return remaining / daily
+    rd = (1 + annual) ** (1 / 365) - 1
+    if rd <= 0:
+        return remaining / daily
+    num = remaining + daily / rd
+    den = start + daily / rd
+    if den <= 0 or num <= den:
+        return 0.0
+    return math.log(num / den) / math.log(1 + rd)
+
+
 def projection(
-    remaining: float, usd_cny: float, contribution: dict | None
+    remaining: float,
+    usd_cny: float,
+    contribution: dict | None,
+    assets: dict | None = None,
+    expected_return: dict | None = None,
 ) -> dict | None:
-    """按真实定投额线性外推达成时间。
+    """按「真实定投额 + 资产增值」外推达成时间。
 
-    不用历史增速：历史增速由行情主导——涨得快不等于进度快，跌的时候
-    按历史增速外推还会得出「永远达不到」的荒谬结论。定投额是自己能控制的
-    输入，用它外推才稳定，也才能回答「我还得投多久」。
+    两个输入缺一不可：
+      - **定投额**（contribution）：自己能控制的变量，不会被行情扭曲。
+        只用历史增速的问题是——涨得快不等于进度快，跌的时候还会推出
+        「永远达不到」的荒谬结论。
+      - **资产增值**（assets × expected_return）：已有持仓也会长，
+        只算买入会系统性低估速度。加权方式与「每小时被动收入」一致，
+        按当前市值权重。
 
-    这仍是「线性外推」，不是预测——它假设定投不中断、价格不变，
-    所以结论是「还要投多久」，不是「多久能涨到」。展示时必须标注清楚。
+    这是「外推」，不是预测：它假设定投不中断、收益率恒定。
+    比特币占七成时，「平均收益率」本身就很不可靠，所以同时给出悲观/基准/乐观三档。
     """
     if remaining <= 0:
         return None
@@ -220,9 +250,44 @@ def projection(
     if daily <= 0:
         return {**base, "days_to_target": None, "eta": None, "reason": "定投额为 0，无法外推"}
 
-    days = int(remaining / daily)
-    eta = _now().date() + timedelta(days=days)
-    return {**base, "days_to_target": days, "eta": eta.isoformat(), "reason": None}
+    # 按当前市值权重加权预期年化，与「每小时被动收入」同口径。
+    values = {"btc": 0.0, "sp500": 0.0, "ndx100": 0.0}
+    for key in values:
+        values[key] = float((assets or {}).get(key) or 0.0)
+    start = sum(values.values())
+    weights = (
+        {k: v / start for k, v in values.items()}
+        if start > 0
+        else {k: 0.0 for k in values}
+    )
+
+    er = expected_return or {}
+    scenarios: dict[str, dict] = {}
+    for name, suffix in (("low", "_low"), ("base", ""), ("high", "_high")):
+        rate = sum(weights[k] * float(er.get(k + suffix) or 0.0) for k in values)
+        days = _days_to_target(remaining, start, daily, rate)
+        days_int = None if days is None else int(days)
+        scenarios[name] = {
+            "rate": round(rate, 4),
+            "days": days_int,
+            "eta": (
+                None
+                if days_int is None
+                else (_now().date() + timedelta(days=days_int)).isoformat()
+            ),
+        }
+
+    chosen = scenarios["base"]
+    return {
+        **base,
+        "assets_cny": round(start, 2),
+        "weights": {k: round(v, 4) for k, v in weights.items()},
+        "weighted_rate": chosen["rate"],
+        "scenarios": scenarios,
+        "days_to_target": chosen["days"],
+        "eta": chosen["eta"],
+        "reason": None,
+    }
 
 
 def capital_for_years(annual_expense: float, years: float, rate: float) -> float:
@@ -488,7 +553,13 @@ def compute(
             else None
         ),
         "projection": (
-            projection(remaining, price.get("usd_cny"), cfg.get("contribution"))
+            projection(
+                remaining,
+                price.get("usd_cny"),
+                cfg.get("contribution"),
+                {"btc": btc_value, "sp500": sp500_value, "ndx100": ndx_value},
+                cfg.get("expected_return"),
+            )
             if cfg.display.get("show_projection")
             else None
         ),

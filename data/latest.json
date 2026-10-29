@@ -465,8 +465,32 @@
     "btc_cny_per_day": 66.14,
     "daily_cny": 86.14,
     "monthly_cny": 2584.12,
-    "days_to_target": 2158,
-    "eta": "2032-09-25",
+    "assets_cny": 19988.21,
+    "weights": {
+      "btc": 0.7285,
+      "sp500": 0.0449,
+      "ndx100": 0.2265
+    },
+    "weighted_rate": 0.1037,
+    "scenarios": {
+      "low": {
+        "rate": 0.0081,
+        "days": 1877,
+        "eta": "2031-12-19"
+      },
+      "base": {
+        "rate": 0.1037,
+        "days": 1475,
+        "eta": "2030-11-12"
+      },
+      "high": {
+        "rate": 0.2066,
+        "days": 1233,
+        "eta": "2030-03-15"
+      }
+    },
+    "days_to_target": 1475,
+    "eta": "2030-11-12",
     "reason": null
   },
   "sources": {

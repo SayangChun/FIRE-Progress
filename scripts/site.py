@@ -302,15 +302,26 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
     # ---- 外推
     proj = data.get("projection") or {}
     proj_html = ""
-    if proj.get("days_to_target"):
+    if proj.get("days_to_target") is not None:
+
+        def _y(days):
+            if days is None:
+                return "—"
+            return f"{days} 天" if days < 365 else f"{days / 365:.1f} 年"
+
         days = int(proj["days_to_target"])
-        horizon = f"{days} 天" if days < 365 else f"{days / 365:.1f} 年"
+        horizon = _y(days)
+        scen = proj.get("scenarios") or {}
+        low = scen.get("low") or {}
+        high = scen.get("high") or {}
         proj_html = f"""
-      <h2>线性外推</h2>
-      <p>按真实定投额（比特币 {money(proj['btc_cny_per_day'], cfg)}/天
-        + 标普500 {money(proj['sp500_cny_per_day'], cfg)}/天，
-        合计 {money(proj['daily_cny'], cfg)}/天），约 <strong>{horizon}</strong> 后达到目标（{proj['eta']}）。</p>
-      <p class="note">只算投入，不算涨跌：假设定投不中断、价格不变。</p>
+      <h2>外推</h2>
+      <p>按「定投 + 资产增值」外推：日投 {money(proj['daily_cny'], cfg)}
+        （月 {money(proj['monthly_cny'], cfg)}），叠加当前持仓按加权预期年化
+        {pct(proj['weighted_rate'] * 100, 2)} 增长，
+        约 <strong>{horizon}</strong> 后达到目标（{proj['eta']}）。</p>
+      <p class="note">区间：悲观 {_y(low.get('days'))} · 基准 {horizon} ·
+        乐观 {_y(high.get('days'))}。差距全部来自收益率假设。</p>
     """
 
     fig = lambda name, alt, cap: (

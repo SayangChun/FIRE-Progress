@@ -151,10 +151,12 @@ ok("但告警被保留下来", any("比特币" in w for w in no_btc["warnings"])
 ok("sources 里标为不可用", no_btc["sources"]["btc"] is False)
 
 print()
-print("线性外推：按真实定投额，不用历史增速")
+print("线性外推：定投额 + 资产增值")
 FX = 6.680538
 CONTRIB = cfg.get("contribution")
-proj = firemod.projection(185_828.10, FX, CONTRIB)
+ER = cfg.get("expected_return")
+ASSETS = {"btc": 14_562.22, "sp500": 900.0, "ndx100": 4_500.0}
+proj = firemod.projection(185_828.10, FX, CONTRIB, ASSETS, ER)
 ok(
     "比特币定投折人民币 = USDT × 汇率",
     abs(proj["btc_cny_per_day"] - 9.9 * FX) < 0.01,
@@ -166,21 +168,41 @@ ok(
     str(proj["daily_cny"]),
 )
 ok(
-    "天数 = 距离目标 ÷ 日定投额",
-    proj["days_to_target"] == int(185_828.10 / proj["daily_cny"]),
-    str(proj["days_to_target"]),
-)
-ok(
     "月定投额 = 日定投额 × 30（容差 0.5，日额已四舍五入到分）",
     abs(proj["monthly_cny"] - proj["daily_cny"] * 30) < 0.5,
     f'{proj["monthly_cny"]} vs {proj["daily_cny"] * 30:.2f}',
+)
+_w = {k: v / sum(ASSETS.values()) for k, v in ASSETS.items()}
+_expect_rate = _w["btc"] * 0.12 + _w["sp500"] * 0.06 + _w["ndx100"] * 0.06
+ok(
+    "加权预期年化按当前市值权重（与被动收入同口径）",
+    abs(proj["weighted_rate"] - _expect_rate) < 1e-4,
+    f'{proj["weighted_rate"]} vs {_expect_rate:.4f}',
+)
+ok(
+    "三档收益率单调：悲观 ≤ 基准 ≤ 乐观",
+    proj["scenarios"]["low"]["rate"]
+    <= proj["scenarios"]["base"]["rate"]
+    <= proj["scenarios"]["high"]["rate"],
+    str({k: v["rate"] for k, v in proj["scenarios"].items()}),
+)
+only_dca = firemod.projection(185_828.10, FX, CONTRIB)
+ok(
+    "不给资产时退化为纯定投（天数 = 剩余 ÷ 日定投）",
+    only_dca["days_to_target"] == int(185_828.10 / only_dca["daily_cny"]),
+    str(only_dca["days_to_target"]),
+)
+ok(
+    "计入资产增值后，天数比纯定投更短",
+    proj["days_to_target"] < only_dca["days_to_target"],
+    f'{proj["days_to_target"]} vs {only_dca["days_to_target"]}',
 )
 ok(
     "外推结果不再带历史增速字段",
     "window_days" not in proj and "daily_gain_cny" not in proj,
     str(sorted(proj)),
 )
-no_fx = firemod.projection(100_000.0, 0.0, CONTRIB)
+no_fx = firemod.projection(100_000.0, 0.0, CONTRIB, ASSETS, ER)
 ok(
     "缺汇率时不拿 0 冒充比特币定投",
     no_fx["days_to_target"] is None
@@ -196,9 +218,10 @@ ok(
 )
 ok("已达标（剩余 ≤ 0）返回 None", firemod.projection(0, FX, CONTRIB) is None)
 ok(
-    "compute() 里的外推用的是配置中的定投额",
-    abs(data["projection"]["daily_cny"] - (9.9 * 6.7 + 20.0)) < 0.01,
-    str(data["projection"].get("daily_cny")),
+    "compute() 里的外推用的是配置中的定投额与预期回报",
+    abs(data["projection"]["daily_cny"] - (9.9 * 6.7 + 20.0)) < 0.01
+    and data["projection"]["weighted_rate"] > 0,
+    str(data["projection"].get("weighted_rate")),
 )
 
 print()
