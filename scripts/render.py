@@ -885,12 +885,21 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             else:
                 horizon = "**超过 10 年**"
             out.append(
-                f"按近 {proj['window_days']} 天的平均增速（日均 +{money(proj['daily_gain_cny'], cfg)}）"
-                f"线性外推，{horizon}后达到目标（{proj['eta']}）。"
+                f"按真实定投额线性外推：比特币 **{money(proj['btc_cny_per_day'], cfg)}/天**"
+                f"（{proj['btc_usdt_per_day']:g} USDT × {proj['usd_cny']:.4f}）"
+                f" + 标普500 **{money(proj['sp500_cny_per_day'], cfg)}/天**"
+                f" = 合计 **{money(proj['daily_cny'], cfg)}/天**"
+                f"（月 {money(proj['monthly_cny'], cfg)}），{horizon}后达到目标（{proj['eta']}）。"
             )
             out.append("")
             out.append(
-                "> 线性外推不是预测：它假设近期增速会一直持续，实际会随行情、定投额度和开销变化。"
+                "> 只算投入，不算涨跌：假设定投不中断、价格不变。所以这个数是「还要投多久」，"
+                "不是「多久能涨到」——行情好会更快，行情差会更慢。"
+            )
+            out.append(">")
+            out.append(
+                "> 不用近 30 天增速的原因：那段增速由行情主导，涨得快不等于进度快，"
+                "跌的时候甚至会被推成「永远达不到」。定投额才是自己能控制的变量。"
             )
             if days >= 3650:
                 out.append(">")

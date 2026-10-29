@@ -168,53 +168,61 @@ def collect_warnings(*results: dict) -> list[str]:
 
 
 def projection(
-    history: list[dict], remaining: float, window_days: int
+    remaining: float, usd_cny: float, contribution: dict | None
 ) -> dict | None:
-    """按近 window_days 的平均日增额线性外推达成时间。
+    """按真实定投额线性外推达成时间。
 
-    这是「线性外推」，不是预测——它假设未来增速与过去一致，
-    而现实中资产会波动、定投会暂停。展示时必须标注清楚。
+    不用历史增速：历史增速由行情主导——涨得快不等于进度快，跌的时候
+    按历史增速外推还会得出「永远达不到」的荒谬结论。定投额是自己能控制的
+    输入，用它外推才稳定，也才能回答「我还得投多久」。
+
+    这仍是「线性外推」，不是预测——它假设定投不中断、价格不变，
+    所以结论是「还要投多久」，不是「多久能涨到」。展示时必须标注清楚。
     """
-    if not history or remaining <= 0:
+    if remaining <= 0:
         return None
 
-    cutoff = _now().date() - timedelta(days=window_days)
-    points: list[tuple] = []
-    for row in history:
-        try:
-            day = datetime.strptime(row["date"], "%Y-%m-%d").date()
-        except (KeyError, ValueError):
-            continue
-        if day >= cutoff:
-            points.append((day, float(row.get("total_cny") or 0.0)))
+    contrib = contribution or {}
+    btc_usdt = float(contrib.get("btc_usdt_per_day") or 0.0)
+    sp500 = float(contrib.get("sp500_cny_per_day") or 0.0)
+    ndx = float(contrib.get("ndx100_cny_per_day") or 0.0)
+    fx = float(usd_cny or 0.0)
 
-    if len(points) < 2:
-        return None
+    base = {
+        "btc_usdt_per_day": round(btc_usdt, 2),
+        "sp500_cny_per_day": round(sp500, 2),
+        "ndx100_cny_per_day": round(ndx, 2),
+        "usd_cny": round(fx, 4),
+    }
 
-    points.sort(key=lambda x: x[0])
-    span_days = (points[-1][0] - points[0][0]).days
-    if span_days < 3:
-        return None
-
-    daily = (points[-1][1] - points[0][1]) / span_days
-    if daily <= 0:
+    # 缺汇率时不拿 0 冒充，否则比特币定投会被悄悄算成 0。
+    if btc_usdt > 0 and fx <= 0:
         return {
-            "daily_gain_cny": round(daily, 4),
+            **base,
+            "btc_cny_per_day": None,
+            "daily_cny": None,
+            "monthly_cny": None,
             "days_to_target": None,
             "eta": None,
-            "window_days": window_days,
-            "reason": "近窗口内资产未增长，无法外推",
+            "reason": "缺少美元汇率，无法折算比特币定投额",
         }
+
+    btc_cny = btc_usdt * fx
+    daily = btc_cny + sp500 + ndx
+    base.update(
+        {
+            "btc_cny_per_day": round(btc_cny, 2),
+            "daily_cny": round(daily, 2),
+            "monthly_cny": round(daily * 30, 2),
+        }
+    )
+
+    if daily <= 0:
+        return {**base, "days_to_target": None, "eta": None, "reason": "定投额为 0，无法外推"}
 
     days = int(remaining / daily)
     eta = _now().date() + timedelta(days=days)
-    return {
-        "daily_gain_cny": round(daily, 4),
-        "days_to_target": days,
-        "eta": eta.isoformat(),
-        "window_days": window_days,
-        "reason": None,
-    }
+    return {**base, "days_to_target": days, "eta": eta.isoformat(), "reason": None}
 
 
 def capital_for_years(annual_expense: float, years: float, rate: float) -> float:
@@ -480,7 +488,7 @@ def compute(
             else None
         ),
         "projection": (
-            projection(history, remaining, int(cfg.display.get("projection_window_days", 30)))
+            projection(remaining, price.get("usd_cny"), cfg.get("contribution"))
             if cfg.display.get("show_projection")
             else None
         ),

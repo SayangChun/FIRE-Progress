@@ -458,10 +458,15 @@
     ]
   },
   "projection": {
-    "daily_gain_cny": 205.772,
-    "days_to_target": 903,
-    "eta": "2029-04-19",
-    "window_days": 30,
+    "btc_usdt_per_day": 9.9,
+    "sp500_cny_per_day": 20.0,
+    "ndx100_cny_per_day": 0.0,
+    "usd_cny": 6.6805,
+    "btc_cny_per_day": 66.14,
+    "daily_cny": 86.14,
+    "monthly_cny": 2584.12,
+    "days_to_target": 2158,
+    "eta": "2032-09-25",
     "reason": null
   },
   "sources": {

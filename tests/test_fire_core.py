@@ -151,6 +151,57 @@ ok("但告警被保留下来", any("比特币" in w for w in no_btc["warnings"])
 ok("sources 里标为不可用", no_btc["sources"]["btc"] is False)
 
 print()
+print("线性外推：按真实定投额，不用历史增速")
+FX = 6.680538
+CONTRIB = cfg.get("contribution")
+proj = firemod.projection(185_828.10, FX, CONTRIB)
+ok(
+    "比特币定投折人民币 = USDT × 汇率",
+    abs(proj["btc_cny_per_day"] - 9.9 * FX) < 0.01,
+    str(proj["btc_cny_per_day"]),
+)
+ok(
+    "日定投合计 = 比特币 + 标普500 + 纳指100",
+    abs(proj["daily_cny"] - (9.9 * FX + 20.0)) < 0.01,
+    str(proj["daily_cny"]),
+)
+ok(
+    "天数 = 距离目标 ÷ 日定投额",
+    proj["days_to_target"] == int(185_828.10 / proj["daily_cny"]),
+    str(proj["days_to_target"]),
+)
+ok(
+    "月定投额 = 日定投额 × 30（容差 0.5，日额已四舍五入到分）",
+    abs(proj["monthly_cny"] - proj["daily_cny"] * 30) < 0.5,
+    f'{proj["monthly_cny"]} vs {proj["daily_cny"] * 30:.2f}',
+)
+ok(
+    "外推结果不再带历史增速字段",
+    "window_days" not in proj and "daily_gain_cny" not in proj,
+    str(sorted(proj)),
+)
+no_fx = firemod.projection(100_000.0, 0.0, CONTRIB)
+ok(
+    "缺汇率时不拿 0 冒充比特币定投",
+    no_fx["days_to_target"] is None
+    and no_fx["btc_cny_per_day"] is None
+    and bool(no_fx["reason"]),
+    str(no_fx),
+)
+zero = firemod.projection(100_000.0, FX, {"btc_usdt_per_day": 0, "sp500_cny_per_day": 0})
+ok(
+    "定投额为 0 时给出原因，不做除零",
+    zero["days_to_target"] is None and bool(zero["reason"]),
+    str(zero),
+)
+ok("已达标（剩余 ≤ 0）返回 None", firemod.projection(0, FX, CONTRIB) is None)
+ok(
+    "compute() 里的外推用的是配置中的定投额",
+    abs(data["projection"]["daily_cny"] - (9.9 * 6.7 + 20.0)) < 0.01,
+    str(data["projection"].get("daily_cny")),
+)
+
+print()
 if failures:
     print(f"失败 {len(failures)} 项：")
     for f in failures:

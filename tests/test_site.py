@@ -49,7 +49,14 @@ def fake_data() -> dict:
             "withdrawal_rate": 0.043,
             "monthly_at_withdrawal_cny": 72.12,
         },
-        "projection": {"days_to_target": 905, "eta": "2029-04-20", "window_days": 30},
+        "projection": {
+            "days_to_target": 905,
+            "eta": "2029-04-20",
+            "btc_cny_per_day": 66.14,
+            "sp500_cny_per_day": 20.0,
+            "daily_cny": 86.14,
+            "monthly_cny": 2584.2,
+        },
         "life_plan": {
             "headline": "牡丹江 · 单人 · 租房 · 极简",
             "monthly_expense": 1461.0,

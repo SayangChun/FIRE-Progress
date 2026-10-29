@@ -307,8 +307,10 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
         horizon = f"{days} 天" if days < 365 else f"{days / 365:.1f} 年"
         proj_html = f"""
       <h2>线性外推</h2>
-      <p>按近 {proj['window_days']} 天的增速，约 <strong>{horizon}</strong> 后达到目标（{proj['eta']}）。</p>
-      <p class="note">外推不是预测，它假设近期增速会一直持续。</p>
+      <p>按真实定投额（比特币 {money(proj['btc_cny_per_day'], cfg)}/天
+        + 标普500 {money(proj['sp500_cny_per_day'], cfg)}/天，
+        合计 {money(proj['daily_cny'], cfg)}/天），约 <strong>{horizon}</strong> 后达到目标（{proj['eta']}）。</p>
+      <p class="note">只算投入，不算涨跌：假设定投不中断、价格不变。</p>
     """
 
     fig = lambda name, alt, cap: (
