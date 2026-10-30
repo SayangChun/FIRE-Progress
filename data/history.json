@@ -483,5 +483,19 @@
     "basis_cny": 17772.09,
     "profit_cny": 1741.8,
     "fx_usd_cny": 6.676858
+  },
+  {
+    "date": "2026-10-31",
+    "as_of": "2026-10-31T04:28:20+08:00",
+    "total_cny": 19433.28,
+    "progress_pct": 9.4358,
+    "btc_cny": 14007.05,
+    "btc_qty": 0.02724339,
+    "sp500_cny": 937.36,
+    "ndx100_cny": 4488.87,
+    "target_cny": 205953.49,
+    "basis_cny": 17772.09,
+    "profit_cny": 1661.19,
+    "fx_usd_cny": 6.676858
   }
 ]
