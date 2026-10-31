@@ -623,10 +623,13 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
 
     if not primary:
         out.append(
-            "> ⚠️ 这是 §3.5.8 的**备选道路**，工资/通勤为占位假设，尚未取代牡丹江首选方案；"
+            "> ⚠️ 这是 §3.5.8 的**备选道路**，尚未取代牡丹江首选方案；"
         )
         out.append(
-            "> 外推沿用 ¥205,953.49 作对照尺，北京不工作状态的真实目标尚未建模。"
+            "> 工资/通勤已按 2026-10-31 招聘实况校准（北京图书馆岗 ¥3,000–6,000、包吃住+馆内宿舍+坐岗），"
+        )
+        out.append(
+            "> 但「北京不工作状态的真实目标」尚未建模，外推仍沿用 ¥205,953.49 作对照尺（苹果比橘子，仅供对照）。"
         )
         out.append("")
 
@@ -1195,7 +1198,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                         f"> **备选：阶段 A 在北京做同等全职**（净 {money(ftb['net_monthly_cny'], cfg)}/月，"
                         f"盈余 {money(ftb['surplus_monthly_cny'], cfg)} 并入定投 → 月投 "
                         f"{money(ftbp['monthly_cny'], cfg)}），同一口径下 **{_horizon(ftbp['days_to_target'])}**"
-                        f"（{ftbp['eta']}）。工资为占位假设，仅供对照。"
+                        f"（{ftbp['eta']}）。工资已按 2026-10-31 招聘实况校准，但对照尺仍是牡丹江目标 ¥205,953.49，仅供对照。"
                     )
         else:
             out.append(f"暂不可外推：{proj.get('reason') or '数据不足'}")

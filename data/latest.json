@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-11-01T00:05:10+08:00",
+  "as_of": "2026-11-01T00:31:03+08:00",
   "as_of_date": "2026-11-01",
   "fire": {
     "monthly_expense": 1461.0,
@@ -233,13 +233,13 @@
     "override": false
   },
   "two_phase": {
-    "capital_cny": 19533.91,
+    "capital_cny": 19527.6,
     "annual_net_expense_cny": 8856.0,
     "rate": 0.043,
     "years": 2.4,
     "perpetual": false,
     "exhaust_age": 24.4,
-    "critical_rate": 0.4534,
+    "critical_rate": 0.4535,
     "graduation": "2029-06",
     "start_age": 22,
     "monthly_contribution": 2584,
@@ -277,10 +277,10 @@
     ]
   },
   "allocation": {
-    "btc_pct": 0.7222,
+    "btc_pct": 0.7221,
     "sp500_pct": 0.048,
-    "ndx100_pct": 0.2298,
-    "non_btc_pct": 0.2778,
+    "ndx100_pct": 0.2299,
+    "non_btc_pct": 0.2779,
     "sp500_target_range": [
       0.25,
       0.3
@@ -289,14 +289,14 @@
     "note": "再平衡走场内标普500 ETF，不受场外每日 20 元限购约束"
   },
   "assets": {
-    "total_cny": 19533.91,
-    "progress": 0.0948462035741647,
-    "progress_pct": 9.4846,
-    "remaining_cny": 186419.58,
+    "total_cny": 19527.6,
+    "progress": 0.09481559016820817,
+    "progress_pct": 9.4816,
+    "remaining_cny": 186425.89,
     "btc": {
       "qty": 0.02724339,
-      "price_cny": 517838.51,
-      "value_cny": 14107.68,
+      "price_cny": 517607.08,
+      "value_cny": 14101.37,
       "snapshot_date": "2026-10-25",
       "stale_days": 7,
       "positions": [
@@ -394,42 +394,42 @@
     "sp500_cny": 939.53,
     "ndx100_cny": 4177.22,
     "total_cny": 17758.26,
-    "profit_cny": 1775.64
+    "profit_cny": 1769.34
   },
   "price": {
-    "btc_usdt": 77642.01,
+    "btc_usdt": 77607.31,
     "usd_cny": 6.669566,
-    "btc_cny": 517838.51,
+    "btc_cny": 517607.08,
     "btc_source": "binance:api.binance.com",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-11-01T00:04:56+08:00"
+    "fetched_at": "2026-11-01T00:30:56+08:00"
   },
   "passive_income": {
     "hours_per_year": 8760,
-    "total_value_cny": 19533.91,
-    "weighted_rate": 0.10333290996121405,
-    "annual_cny": 2018.49,
-    "monthly_cny": 168.21,
-    "daily_cny": 5.530109589041096,
-    "hourly_cny": 0.23042123287671232,
-    "rate_low": 0.008333555816161463,
-    "rate_high": 0.20555441396700758,
-    "hourly_low_cny": 0.0185829794520548,
-    "hourly_high_cny": 0.4583653767123288,
+    "total_value_cny": 19527.6,
+    "weighted_rate": 0.10332749749746882,
+    "annual_cny": 2017.73,
+    "monthly_cny": 168.14,
+    "daily_cny": 5.528027397260274,
+    "hourly_cny": 0.23033447488584474,
+    "rate_low": 0.00833624649737548,
+    "rate_high": 0.20553999887278862,
+    "hourly_low_cny": 0.018582979452054796,
+    "hourly_high_cny": 0.45818529680365294,
     "monthly_expense": 1461.0,
-    "coverage": 0.11513175906913074,
+    "coverage": 0.11508840976500115,
     "withdrawal_rate": 0.043,
-    "monthly_at_withdrawal_cny": 70.0,
-    "hourly_at_withdrawal_cny": 0.09588561402429253,
+    "monthly_at_withdrawal_cny": 69.97,
+    "hourly_at_withdrawal_cny": 0.09585466512895566,
     "assets": [
       {
         "key": "btc",
         "label": "比特币",
-        "value_cny": 14107.68,
-        "weight": 0.7222148061279512,
+        "value_cny": 14101.37,
+        "weight": 0.7221251167541507,
         "rate": 0.12,
-        "annual_cny": 1692.92,
-        "hourly_cny": 0.19325584225957393,
+        "annual_cny": 1692.16,
+        "hourly_cny": 0.1931694732493315,
         "rate_low": 0.0,
         "rate_high": 0.25
       },
@@ -437,7 +437,7 @@
         "key": "sp500",
         "label": "标普500基金",
         "value_cny": 937.36,
-        "weight": 0.04798630528523553,
+        "weight": 0.04800179877361065,
         "rate": 0.06,
         "annual_cny": 56.24,
         "hourly_cny": 0.0064202739726027394,
@@ -448,7 +448,7 @@
         "key": "ndx100",
         "label": "纳指100基金",
         "value_cny": 4488.87,
-        "weight": 0.2297988885868132,
+        "weight": 0.22987308447223867,
         "rate": 0.06,
         "annual_cny": 269.33,
         "hourly_cny": 0.03074568493150685,
@@ -465,11 +465,11 @@
     "btc_cny_per_day": 66.03,
     "daily_cny": 86.03,
     "monthly_cny": 2580.86,
-    "assets_cny": 19533.91,
+    "assets_cny": 19527.6,
     "weights": {
-      "btc": 0.7222,
+      "btc": 0.7221,
       "sp500": 0.048,
-      "ndx100": 0.2298
+      "ndx100": 0.2299
     },
     "weighted_rate": 0.1033,
     "scenarios": {
@@ -484,9 +484,9 @@
         "eta": "2031-04-16"
       },
       "high": {
-        "rate": 0.2056,
-        "days": 1347,
-        "eta": "2030-07-10"
+        "rate": 0.2055,
+        "days": 1348,
+        "eta": "2030-07-11"
       }
     },
     "days_to_target": 1627,
@@ -505,11 +505,11 @@
     "low_cny": 69383.0,
     "high_cny": 123766.0,
     "note": "双线进度条的第一条。它回答「能不能走」，¥205,953 回答「能不能不工作」。",
-    "assets_cny": 19533.91,
-    "progress_low": 0.28153735763730164,
-    "progress_high": 0.15782934315521954,
-    "remaining_low_cny": 49849.09,
-    "remaining_high_cny": 104232.09,
+    "assets_cny": 19527.6,
+    "progress_low": 0.2814464861306257,
+    "progress_high": 0.15777840074981175,
+    "remaining_low_cny": 49855.4,
+    "remaining_high_cny": 104238.4,
     "reached_low": false,
     "reached_high": false
   },
@@ -531,7 +531,7 @@
     "commute_hours_per_day": 1.0,
     "occupied_hours_per_month": 195.0,
     "effective_hourly_cny": 14.05,
-    "note": "首选方案的具体形态：图书馆保安。低刺激、围绕书、可随时停；且普遍包吃住，个人现金开销极低。找不到时退回 labor_income 的兼职口径，目标随即回到 ¥205,953.49。",
+    "note": "首选方案的具体形态：图书馆保安。低刺激、围绕书、可随时停；且普遍包吃住，个人现金开销极低。牡丹江保安真实月薪约 ¥1,800–4,500（职友集：物业保安 100% 落在 ¥3–4.5k，且主要分布在爱民区，与居住选择契合），本配置取 ¥17/h≈¥2,739 为保守下限。找不到时退回 labor_income 的兼职口径，目标随即回到 ¥205,953.49。",
     "monthly_expense": 1461.0,
     "stage_a_monthly_expense": 556.0,
     "room_and_board_covered": true,
@@ -545,11 +545,11 @@
       "btc_cny_per_day": 66.03,
       "daily_cny": 157.81,
       "monthly_cny": 4734.28,
-      "assets_cny": 19533.91,
+      "assets_cny": 19527.6,
       "weights": {
-        "btc": 0.7222,
+        "btc": 0.7221,
         "sp500": 0.048,
-        "ndx100": 0.2298
+        "ndx100": 0.2299
       },
       "weighted_rate": 0.1033,
       "scenarios": {
@@ -564,7 +564,7 @@
           "eta": "2029-07-24"
         },
         "high": {
-          "rate": 0.2056,
+          "rate": 0.2055,
           "days": 879,
           "eta": "2029-03-29"
         }
@@ -592,7 +592,7 @@
     "commute_hours_per_day": 0.0,
     "occupied_hours_per_month": 173.33,
     "effective_hourly_cny": 19.94,
-    "note": "备选位置（§3.5.8）：北京图书馆保安 + 住宿舍不回家，同市独立又离家近。工资/通勤为占位假设，待核实。",
+    "note": "备选位置（§3.5.8）：北京图书馆保安 + 住宿舍不回家，同市独立又离家近。已核验：首都图书馆岗（金玺特卫）¥3,000/月、包吃包住、馆内宿舍、坐岗；58 同城同类 ¥5,000–6,000。本配置取 ¥20/h≈¥3,456 为区间中部估计。宿舍能否「不回家又离家近」仍取决于岗位与家的相对位置（外公房产位置未知）。",
     "monthly_expense": 1461.0,
     "stage_a_monthly_expense": 556.0,
     "room_and_board_covered": true,
@@ -606,11 +606,11 @@
       "btc_cny_per_day": 66.03,
       "daily_cny": 181.39,
       "monthly_cny": 5441.8,
-      "assets_cny": 19533.91,
+      "assets_cny": 19527.6,
       "weights": {
-        "btc": 0.7222,
+        "btc": 0.7221,
         "sp500": 0.048,
-        "ndx100": 0.2298
+        "ndx100": 0.2299
       },
       "weighted_rate": 0.1033,
       "scenarios": {
@@ -625,7 +625,7 @@
           "eta": "2029-04-03"
         },
         "high": {
-          "rate": 0.2056,
+          "rate": 0.2055,
           "days": 790,
           "eta": "2028-12-30"
         }

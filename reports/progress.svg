@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 140" width="680" height="140" role="img" aria-label="出发门槛与不工作门槛的双线进度">
-  <title>出发门槛 28.2% · 不工作门槛 9.5%</title>
-  <desc>两条线回答两个不同问题：出发门槛 ¥69,383.00（能不能走），不工作门槛 ¥205,953.49（能不能不工作）。当前资产 ¥19,533.91。</desc>
+  <title>出发门槛 28.1% · 不工作门槛 9.5%</title>
+  <desc>两条线回答两个不同问题：出发门槛 ¥69,383.00（能不能走），不工作门槛 ¥205,953.49（能不能不工作）。当前资产 ¥19,527.60。</desc>
   <style>
     .fg { fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
     .fg-muted { fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -16,15 +16,15 @@
     }
   </style>
   <text class="fg-muted" x="0" y="20" font-size="12">出发门槛</text>
-  <text class="fg" x="680" y="22" text-anchor="end" font-size="18" font-weight="600">28.2%</text>
+  <text class="fg" x="680" y="22" text-anchor="end" font-size="18" font-weight="600">28.1%</text>
   <rect class="track" x="0" y="32" width="680" height="10" rx="5.0"/>
   <rect class="fill-a" x="0" y="32" width="191.4" height="10" rx="5.0"/>
   <text class="fg-muted" x="0" y="60" font-size="11">目标 ¥69,383.00</text>
-  <text class="fg-muted" x="680" y="60" text-anchor="end" font-size="11">已积累 ¥19,533.91 · 还差 ¥49,849.09</text>
+  <text class="fg-muted" x="680" y="60" text-anchor="end" font-size="11">已积累 ¥19,527.60 · 还差 ¥49,855.40</text>
   <text class="fg-muted" x="0" y="82" font-size="12">不工作门槛</text>
   <text class="fg" x="680" y="84" text-anchor="end" font-size="18" font-weight="600">9.5%</text>
   <rect class="track" x="0" y="94" width="680" height="10" rx="5.0"/>
   <rect class="fill-b" x="0" y="94" width="64.5" height="10" rx="5.0"/>
   <text class="fg-muted" x="0" y="122" font-size="11">目标 ¥205,953.49</text>
-  <text class="fg-muted" x="680" y="122" text-anchor="end" font-size="11">已积累 ¥19,533.91 · 还差 ¥186,419.58</text>
+  <text class="fg-muted" x="680" y="122" text-anchor="end" font-size="11">已积累 ¥19,527.60 · 还差 ¥186,425.89</text>
 </svg>
