@@ -489,10 +489,19 @@ def compute(
     fulltime = None
     ft = lifeplan_mod.fulltime_income(cfg)
     if ft:
-        ft_surplus = ft["net_monthly_cny"] - monthly
+        # 阶段 A 个人月开销：默认等于完整月开销；若岗位包吃住，则扣除被覆盖的项
+        # （房租/取暖/物业费/食品/饮用水），个人只付通讯、交通、探亲、医疗缓冲等。
+        # ⚠️ 这一步只影响「阶段 A 盈余」的分母，**绝不改变 target_cny**（见下方不变量测试）。
+        ft_spec = ((cfg.get("fire") or {}).get("fulltime")) or {}
+        stage_a = monthly
+        if ft_spec.get("room_and_board_covered"):
+            stage_a = lifeplan_mod.monthly_excluding(cfg, ft_spec.get("covered_keys"))
+        ft_surplus = ft["net_monthly_cny"] - stage_a
         fulltime = {
             **ft,
             "monthly_expense": round(monthly, 2),
+            "stage_a_monthly_expense": round(stage_a, 2),
+            "room_and_board_covered": bool(ft_spec.get("room_and_board_covered")),
             "surplus_monthly_cny": round(ft_surplus, 2),
             "covered": ft_surplus >= 0,
             "projection": None,

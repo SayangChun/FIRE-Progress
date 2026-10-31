@@ -114,6 +114,23 @@ def monthly_total(cfg) -> float:
     return round(sum(it["monthly"] for it in items(cfg)), 2)
 
 
+def monthly_excluding(cfg, covered_keys: list[str] | None) -> float:
+    """阶段 A 个人月开销：从完整月开销中扣掉被「包吃住」覆盖的项。
+
+    仅 fire.fulltime.room_and_board_covered 为 true 时使用。覆盖项
+    （rent / heating / property_fee / food / drinking_water）由单位提供，
+    不计入阶段 A 个人现金开销；其余项（通讯、交通、探亲、医疗缓冲等）
+    无论是否包吃住都要自己掏，全部保留。
+
+    ⚠️ 返回值只用于计算阶段 A 盈余，**不进入 FIRE 目标**——目标是不工作、
+    自己负担全部开销的状态，与阶段 A 是否被包吃住无关。
+    """
+    skip = set(covered_keys or [])
+    return round(
+        sum(it["monthly"] for it in items(cfg) if it.get("key") not in skip), 2
+    )
+
+
 def by_group(cfg) -> list[dict]:
     """按分组聚合，供 README 表格展示小计。"""
     groups: dict[str, list[dict]] = {}

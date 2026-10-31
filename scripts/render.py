@@ -605,7 +605,12 @@ def _fulltime_block(data: dict, cfg) -> str:
     out.append("| 项目 | 数值 |")
     out.append("| --- | ---: |")
     out.append(f"| 月净收入 | {money(ft['net_monthly_cny'], cfg)} |")
-    out.append(f"| 月开销 | {money(ft['monthly_expense'], cfg)} |")
+    if ft.get("room_and_board_covered"):
+        out.append(
+            f"| 阶段 A 个人月开销（包吃住，已扣房租/伙食） | {money(ft['stage_a_monthly_expense'], cfg)} |"
+        )
+    else:
+        out.append(f"| 月开销 | {money(ft['monthly_expense'], cfg)} |")
     out.append(f"| **月盈余** | **{money(ft['surplus_monthly_cny'], cfg)}** |")
     out.append(f"| 等效时薪（含通勤） | {money(ft['effective_hourly_cny'], cfg, decimals=2)} |")
     out.append(f"| 每月占用工时 | {ft['occupied_hours_per_month']:.0f} 小时 |")

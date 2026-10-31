@@ -126,7 +126,21 @@ ok(
     str(ft["net_monthly_cny"] - monthly),
 )
 
-print("\n⚠️ 核心：全职不改变 FIRE 目标")
+print("\n包吃住：阶段 A 个人月开销")
+covered = cfg["fire"]["fulltime"]["covered_keys"]
+stage_a = lifeplan_mod.monthly_excluding(cfg, covered)
+ok(
+    "被包吃住覆盖后阶段 A 个人开销约 ¥556",
+    abs(stage_a - 556) < 1.0,
+    str(stage_a),
+)
+ok(
+    "覆盖项正是房租/取暖/物业费/食品/饮用水（合计 ¥905）",
+    abs(monthly - stage_a - 905) < 1.0,
+    str(monthly - stage_a),
+)
+
+print("\n⚠️ 核心：全职 + 包吃住都不改变 FIRE 目标")
 ok("目标仍是 ¥205,953.49", abs(target - 205953.49) < 0.01, str(target))
 ok(
     "目标只由「月开销 − 兼职净收入」决定",
@@ -155,6 +169,29 @@ data = fire_mod.compute(
 ok("compute 带 departure", isinstance(data.get("departure"), dict))
 ok("compute 带 fulltime", isinstance(data.get("fulltime"), dict))
 ok("compute 的目标未被全职影响", abs(data["fire"]["target_cny"] - target) < 0.01)
+# 关掉包吃住必须精确退回旧盈余（¥1,278.33），且目标仍不变
+no_rb = variant(**{"fire.fulltime.room_and_board_covered": False})
+data_no_rb = fire_mod.compute(no_rb, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
+ok(
+    "关掉包吃住后阶段 A 盈余退回 ¥1,278.33",
+    abs(data_no_rb["fulltime"]["surplus_monthly_cny"] - 1278.33) < 0.05,
+    str(data_no_rb["fulltime"]["surplus_monthly_cny"]),
+)
+ok("关掉包吃住后目标仍不变", abs(data_no_rb["fire"]["target_cny"] - 205953.49) < 0.01)
+ok(
+    "compute 的 fulltime 带 stage_a_monthly_expense 且≈¥556",
+    abs(data["fulltime"]["stage_a_monthly_expense"] - 556) < 1.0,
+    str(data["fulltime"]["stage_a_monthly_expense"]),
+)
+ok(
+    "compute 的 fulltime 标记 room_and_board_covered",
+    data["fulltime"]["room_and_board_covered"] is True,
+)
+ok(
+    "包吃住后盈余 ≈ ¥2,183（净收入 ¥2,739 − 阶段 A ¥556），大于旧 ¥1,278",
+    abs(data["fulltime"]["surplus_monthly_cny"] - 2183.33) < 1.0,
+    str(data["fulltime"]["surplus_monthly_cny"]),
+)
 ok(
     "departure 完成度 = 资产 ÷ 下沿",
     abs(data["departure"]["progress_low"] - data["assets"]["total_cny"] / gate["low_cny"]) < 1e-9,
@@ -190,6 +227,10 @@ ok(
 ok(
     "外推段给出全职的第二条外推",
     "阶段 A 若有全职收入" in block,
+)
+ok(
+    "README 全职小节显示阶段 A 个人月开销（包吃住）",
+    "阶段 A 个人月开销（包吃住" in block,
 )
 
 no_ft = dict(data)
