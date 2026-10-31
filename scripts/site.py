@@ -211,11 +211,16 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
     nav_date = (assets.get("sp500") or {}).get("latest_nav_date") or "—"
 
     cards = [
-        ("FIRE 目标", money(target, cfg)),
+        ("不工作门槛", money(target, cfg)),
         ("当前资产", money(total, cfg)),
-        ("距离目标", money(remaining, cfg)),
-        ("完成度", pct(progress, 2)),
+        ("距离不工作门槛", money(remaining, cfg)),
+        ("不工作门槛完成度", pct(progress, 2)),
     ]
+    # 出发门槛（2026-10-31）：有数据时补一张卡，口径与 README 的双线进度条一致。
+    dep = data.get("departure")
+    if dep:
+        cards.insert(0, ("出发门槛", f'{money(dep["low_cny"], cfg)}–{money(dep["high_cny"], cfg)}'))
+        cards.append(("出发门槛完成度", pct(dep.get("progress_low") or 0.0, 2)))
     labor = fire.get("labor_income")
     if labor:
         cards.append(("兼职净收入（月）", money(labor.get("net_monthly_cny"), cfg)))
