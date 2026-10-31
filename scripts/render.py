@@ -1128,7 +1128,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                 f"（月 {money(proj['monthly_cny'], cfg)}，比特币 {proj['btc_usdt_per_day']:g} USDT"
                 f" + 标普500 {money(proj['sp500_cny_per_day'], cfg)}），"
                 f"叠加当前持仓按加权预期年化 **{proj['weighted_rate'] * 100:.2f}%** 增长，"
-                f"**{_horizon(days)}**后达到目标（{proj['eta']}）。"
+                f"**{_horizon(days)}**后达到**不工作门槛**（{proj['eta']}）。"
             )
             out.append("")
             out.append(
@@ -1151,6 +1151,18 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             if days >= 3650:
                 out.append(">")
                 out.append("> 在这个尺度上外推结果已无参考意义——真正决定进度的是月定投额，不是等待。")
+            # 全职情景的第二条外推。口径与上面完全一致，只换了定投额，
+            # 所以两条可以直接比。细节在「阶段 A 首选方案」那个折叠块里。
+            ft = data.get("fulltime") or {}
+            ftp = ft.get("projection") or {}
+            if ftp.get("days_to_target"):
+                out.append(">")
+                out.append(
+                    f"> **阶段 A 若有全职收入**（净 {money(ft['net_monthly_cny'], cfg)}/月，"
+                    f"盈余 {money(ft['surplus_monthly_cny'], cfg)} 并入定投 → 月投 "
+                    f"{money(ftp['monthly_cny'], cfg)}），同一口径下 **{_horizon(ftp['days_to_target'])}**"
+                    f"（{ftp['eta']}）。这是敏感性测算，不是承诺——它假设这份工作从现在就有。"
+                )
         else:
             out.append(f"暂不可外推：{proj.get('reason') or '数据不足'}")
         out.append("")

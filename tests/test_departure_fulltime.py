@@ -183,6 +183,14 @@ block = render_mod.render_block(data, cfg, [])
 ok("README 出现两条门槛", "出发门槛" in block and "不工作门槛" in block)
 ok("README 出现全职小节", "阶段 A 首选方案" in block)
 ok("README 明说全职不改变目标", "全职**不改变**上面的 FIRE 目标" in block)
+ok(
+    "外推文案说「不工作门槛」而不是含糊的「目标」",
+    "后达到**不工作门槛**" in block,
+)
+ok(
+    "外推段给出全职的第二条外推",
+    "阶段 A 若有全职收入" in block,
+)
 
 no_ft = dict(data)
 no_ft.pop("fulltime")
