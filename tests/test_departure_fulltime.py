@@ -226,6 +226,19 @@ ok("upsert_snapshot 写入 departure_cny", snap[0].get("departure_cny") == gate[
    str(snap[0].get("departure_cny")))
 ok("upsert_snapshot 仍写 target_cny", snap[0].get("target_cny") == data["fire"]["target_cny"])
 
+print("\n静态页卡片")
+from scripts import site as site_mod  # noqa: E402
+import tempfile  # noqa: E402
+
+with tempfile.TemporaryDirectory() as tmp:
+    html = site_mod.build_page(data, cfg, [snap[0]], Path(tmp))
+# progress_low 是比率（0.2811），pct() 只格式化不乘 100 —— 曾经漏乘，
+# 页面上显示成 0.28%。这里按「和 README 一致」钉死。
+want_dep = f'{data["departure"]["progress_low"] * 100:.2f}%'
+ok("静态页出发门槛完成度按百分数显示", f"<dd>{want_dep}</dd>" in html, want_dep)
+ok("静态页不工作门槛完成度仍在", f'<dd>{data["assets"]["progress_pct"]:.2f}%</dd>' in html)
+ok("静态页出现出发门槛卡片", "<dt>出发门槛</dt>" in html)
+
 print()
 if failures:
     print(f"失败 {len(failures)} 项：")

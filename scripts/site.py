@@ -217,10 +217,12 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
         ("不工作门槛完成度", pct(progress, 2)),
     ]
     # 出发门槛（2026-10-31）：有数据时补一张卡，口径与 README 的双线进度条一致。
+    # ⚠️ progress_low 是**比率**（0.2811），而 pct() 只负责格式化、不乘 100，
+    #    与本函数里 progress 用的是 progress_pct（已是百分数）不同，必须显式 ×100。
     dep = data.get("departure")
     if dep:
         cards.insert(0, ("出发门槛", f'{money(dep["low_cny"], cfg)}–{money(dep["high_cny"], cfg)}'))
-        cards.append(("出发门槛完成度", pct(dep.get("progress_low") or 0.0, 2)))
+        cards.append(("出发门槛完成度", pct((dep.get("progress_low") or 0.0) * 100, 2)))
     labor = fire.get("labor_income")
     if labor:
         cards.append(("兼职净收入（月）", money(labor.get("net_monthly_cny"), cfg)))
