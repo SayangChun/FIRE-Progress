@@ -172,8 +172,14 @@ def _days_to_target(
 ) -> float | None:
     """解「多久后达到目标」：目标 = A(1+r)^n + C·((1+r)^n − 1)/r。
 
-    反解 n = ln((剩余 + C/r) / (起点 + C/r)) / ln(1+r)，按日复利。
+    反解 n = ln((目标 + C/r) / (起点 + C/r)) / ln(1+r)，按日复利。
     年化 ≤ 0 时退化为纯定投（不猜测负收益下的路径，那没有意义）。
+
+    ⚠️ 2026-10-31 修正：入参 remaining 是**缺口**（目标 − 起点），
+    不是目标本身。分子必须是「目标 + C/r」，即 (remaining + start) + C/r。
+    原实现直接用 remaining，等于把目标当成缺口来解，系统性低估天数——
+    资产越接近目标，低估越严重（A→T 时会算出「已经到达」）。
+    实测 2026-10-31 当天：错解 1486 天（2030-11-25），正解 1626 天（2031-01-13）。
     """
     if daily <= 0:
         return None
@@ -182,7 +188,7 @@ def _days_to_target(
     rd = (1 + annual) ** (1 / 365) - 1
     if rd <= 0:
         return remaining / daily
-    num = remaining + daily / rd
+    num = remaining + start + daily / rd
     den = start + daily / rd
     if den <= 0 or num <= den:
         return 0.0
