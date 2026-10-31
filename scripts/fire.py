@@ -483,29 +483,37 @@ def compute(
             "reached_high": total >= gate["high_cny"],
         }
 
-    # --- 全职情景（2026-10-31 新增）---
+    # --- 全职情景（2026-10-31 新增，含北京备选）---
     # 只展示现金流与外推，**绝不进入 target_cny**：
     # 全职净收入 > 月开销，代进目标公式会得到负数，那个负数没有意义。
+    # fulltime = 牡丹江首选；fulltime_beijing = §3.5.8 备选位置（北京图书馆保安）。
     fulltime = None
-    ft = lifeplan_mod.fulltime_income(cfg)
-    if ft:
+    fulltime_beijing = None
+    for _key, _slot in (("fulltime", "fulltime"), ("fulltime_beijing", "fulltime_beijing")):
+        ft = lifeplan_mod.fulltime_income(cfg, _key)
+        if not ft:
+            continue
         # 阶段 A 个人月开销：默认等于完整月开销；若岗位包吃住，则扣除被覆盖的项
         # （房租/取暖/物业费/食品/饮用水），个人只付通讯、交通、探亲、医疗缓冲等。
         # ⚠️ 这一步只影响「阶段 A 盈余」的分母，**绝不改变 target_cny**（见下方不变量测试）。
-        ft_spec = ((cfg.get("fire") or {}).get("fulltime")) or {}
+        _spec = ((cfg.get("fire") or {}).get(_key)) or {}
         stage_a = monthly
-        if ft_spec.get("room_and_board_covered"):
-            stage_a = lifeplan_mod.monthly_excluding(cfg, ft_spec.get("covered_keys"))
-        ft_surplus = ft["net_monthly_cny"] - stage_a
-        fulltime = {
+        if _spec.get("room_and_board_covered"):
+            stage_a = lifeplan_mod.monthly_excluding(cfg, _spec.get("covered_keys"))
+        _surplus = ft["net_monthly_cny"] - stage_a
+        _res = {
             **ft,
             "monthly_expense": round(monthly, 2),
             "stage_a_monthly_expense": round(stage_a, 2),
-            "room_and_board_covered": bool(ft_spec.get("room_and_board_covered")),
-            "surplus_monthly_cny": round(ft_surplus, 2),
-            "covered": ft_surplus >= 0,
+            "room_and_board_covered": bool(_spec.get("room_and_board_covered")),
+            "surplus_monthly_cny": round(_surplus, 2),
+            "covered": _surplus >= 0,
             "projection": None,
         }
+        if _slot == "fulltime":
+            fulltime = _res
+        else:
+            fulltime_beijing = _res
 
     # --- 本金 ---
     # 标普500：优先取 config 手工值，否则用 sp500-dca 仓库的累计投入（精确值）
@@ -540,22 +548,23 @@ def compute(
             cfg.get("expected_return"),
         )
 
-    if fulltime is not None and proj is not None:
-        # 全职盈余并入标普500 日投：比特币日投是固定 USDT 额度，不随盈余变。
-        # 盈余 ≤ 0 时不并入——否则会静默拉长外推，看起来像「全职更慢」。
-        if fulltime["surplus_monthly_cny"] > 0:
-            base_contrib = cfg.get("contribution") or {}
-            ft_contrib = dict(base_contrib)
-            ft_contrib["sp500_cny_per_day"] = float(
-                base_contrib.get("sp500_cny_per_day") or 0.0
-            ) + fulltime["surplus_monthly_cny"] * 12 / 365
-            fulltime["projection"] = projection(
-                remaining,
-                price.get("usd_cny"),
-                ft_contrib,
-                {"btc": btc_value, "sp500": sp500_value, "ndx100": ndx_value},
-                cfg.get("expected_return"),
-            )
+    for _ft in (fulltime, fulltime_beijing):
+        if _ft is not None and proj is not None:
+            # 全职盈余并入标普500 日投：比特币日投是固定 USDT 额度，不随盈余变。
+            # 盈余 ≤ 0 时不并入——否则会静默拉长外推，看起来像「全职更慢」。
+            if _ft["surplus_monthly_cny"] > 0:
+                base_contrib = cfg.get("contribution") or {}
+                ft_contrib = dict(base_contrib)
+                ft_contrib["sp500_cny_per_day"] = float(
+                    base_contrib.get("sp500_cny_per_day") or 0.0
+                ) + _ft["surplus_monthly_cny"] * 12 / 365
+                _ft["projection"] = projection(
+                    remaining,
+                    price.get("usd_cny"),
+                    ft_contrib,
+                    {"btc": btc_value, "sp500": sp500_value, "ndx100": ndx_value},
+                    cfg.get("expected_return"),
+                )
 
     return {
         "as_of": stamp,
@@ -632,6 +641,7 @@ def compute(
         # 出发门槛回答「能不能走」，全职情景回答「走之后攒得多快」。
         "departure": departure,
         "fulltime": fulltime,
+        "fulltime_beijing": fulltime_beijing,
         "sources": {
             "btc": btc.get("available", False),
             "sp500": sp500.get("available", False),

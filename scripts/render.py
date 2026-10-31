@@ -574,8 +574,8 @@ def _positions_table(positions: list[dict], cfg) -> str:
     return "\n".join(rows) + "\n"
 
 
-def _fulltime_block(data: dict, cfg) -> str:
-    """全职情景：阶段 A 首选方案的现金流。
+def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True) -> str:
+    """全职情景：阶段 A 首选/备选方案的现金流。
 
     ⚠️ 这一节**不参与 FIRE 目标**。全职净收入大于月开销，
     代进 (月开销 − 净收入) × 12 ÷ 提取率 会得到负数——
@@ -583,14 +583,19 @@ def _fulltime_block(data: dict, cfg) -> str:
 
     所以这里只展示三件事：净收入多少、每月盈余多少、以及
     「若这笔盈余从今天起就并入定投，达标会提前多久」。
+
+    key 指定读取 data 里的哪个全职变体（"fulltime" 牡丹江首选，
+    "fulltime_beijing" §3.5.8 备选）；primary=False 时标题改为「备选方案」
+    并追加一条「备选、工资为占位假设」的提示。
     """
-    ft = data.get("fulltime")
+    ft = data.get(key)
     if not ft:
         return ""
 
     out: list[str] = []
     out.append("<details>")
-    out.append(f"<summary>阶段 A 首选方案 · {ft.get('label') or '全职'}</summary>")
+    prefix = "阶段 A 首选方案" if primary else "阶段 A 备选方案"
+    out.append(f"<summary>{prefix} · {ft.get('label') or '全职'}</summary>")
     out.append("")
     out.append(
         f"**{money(ft['hourly_wage'], cfg, decimals=0)}/小时 × "
@@ -615,6 +620,15 @@ def _fulltime_block(data: dict, cfg) -> str:
     out.append(f"| 等效时薪（含通勤） | {money(ft['effective_hourly_cny'], cfg, decimals=2)} |")
     out.append(f"| 每月占用工时 | {ft['occupied_hours_per_month']:.0f} 小时 |")
     out.append("")
+
+    if not primary:
+        out.append(
+            "> ⚠️ 这是 §3.5.8 的**备选道路**，工资/通勤为占位假设，尚未取代牡丹江首选方案；"
+        )
+        out.append(
+            "> 外推沿用 ¥205,953.49 作对照尺，北京不工作状态的真实目标尚未建模。"
+        )
+        out.append("")
 
     proj = ft.get("projection")
     if proj and proj.get("eta"):
@@ -985,6 +999,11 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append(ft_block.strip())
         out.append("")
 
+    ft_block_bj = _fulltime_block(data, cfg, key="fulltime_beijing", primary=False)
+    if ft_block_bj:
+        out.append(ft_block_bj.strip())
+        out.append("")
+
     if cfg.display.get("show_life_plan", True):
         plan_block = _life_plan_block(data, cfg)
         if plan_block:
@@ -1168,6 +1187,16 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                     f"{money(ftp['monthly_cny'], cfg)}），同一口径下 **{_horizon(ftp['days_to_target'])}**"
                     f"（{ftp['eta']}）。这是敏感性测算，不是承诺——它假设这份工作从现在就有。"
                 )
+                ftb = data.get("fulltime_beijing") or {}
+                ftbp = ftb.get("projection") or {}
+                if ftbp.get("days_to_target"):
+                    out.append(">")
+                    out.append(
+                        f"> **备选：阶段 A 在北京做同等全职**（净 {money(ftb['net_monthly_cny'], cfg)}/月，"
+                        f"盈余 {money(ftb['surplus_monthly_cny'], cfg)} 并入定投 → 月投 "
+                        f"{money(ftbp['monthly_cny'], cfg)}），同一口径下 **{_horizon(ftbp['days_to_target'])}**"
+                        f"（{ftbp['eta']}）。工资为占位假设，仅供对照。"
+                    )
         else:
             out.append(f"暂不可外推：{proj.get('reason') or '数据不足'}")
         out.append("")

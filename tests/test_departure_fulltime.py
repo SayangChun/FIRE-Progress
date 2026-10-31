@@ -209,6 +209,33 @@ ok(
     f'{ft_proj["days_to_target"]} vs {data["projection"]["days_to_target"]}',
 )
 
+print("\n北京备选位置（§3.5.8）")
+bj = data.get("fulltime_beijing")
+ok("compute 带 fulltime_beijing（备选位置）", isinstance(bj, dict))
+ok("北京备选不改变 FIRE 目标", abs(data["fire"]["target_cny"] - target) < 0.01)
+ok(
+    "北京备选阶段 A 个人开销也≈¥556（同 covered_keys 扣除）",
+    abs(bj["stage_a_monthly_expense"] - 556) < 1.0,
+    str(bj["stage_a_monthly_expense"]),
+)
+ok(
+    "北京备选净收入 ≈ ¥3,456.67（¥20/h × 173.33h − 装备 ¥10）",
+    abs(bj["net_monthly_cny"] - 3456.67) < 1.0,
+    str(bj["net_monthly_cny"]),
+)
+ok(
+    "北京备选盈余 ≈ ¥2,900.67（净 ¥3,456.67 − 阶段 A ¥556），高于牡丹江 ¥2,183",
+    abs(bj["surplus_monthly_cny"] - 2900.67) < 1.0,
+    str(bj["surplus_monthly_cny"]),
+)
+bj_proj = bj.get("projection")
+ok("北京备选外推存在", isinstance(bj_proj, dict))
+ok(
+    "北京备选外推比牡丹江备选更早达标（攒钱更快）",
+    bj_proj["days_to_target"] < ft_proj["days_to_target"],
+    f'{bj_proj["days_to_target"]} vs {ft_proj["days_to_target"]}',
+)
+
 print("\n渲染降级")
 svg = render_mod.dual_progress_svg(data, cfg)
 ok("有 departure 时画出双线", isinstance(svg, str) and "出发门槛" in svg and "不工作门槛" in svg)
@@ -232,6 +259,9 @@ ok(
     "README 全职小节显示阶段 A 个人月开销（包吃住）",
     "阶段 A 个人月开销（包吃住" in block,
 )
+ok("README 出现北京备选小节", "阶段 A 备选方案" in block)
+ok("北京备选小节标为 §3.5.8 备选道路", "§3.5.8" in block and "备选道路" in block)
+ok("外推段给出北京备选的第二条外推", "备选：阶段 A 在北京做同等全职" in block)
 
 no_ft = dict(data)
 no_ft.pop("fulltime")

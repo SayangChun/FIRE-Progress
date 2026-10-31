@@ -275,20 +275,25 @@ def labor_income(cfg) -> dict | None:
     return _income_from_spec(spec, "fire.labor_income", "兼职")
 
 
-def fulltime_income(cfg) -> dict | None:
-    """全职净收入。fire.fulltime.enabled 为 false 时返回 None。
+def fulltime_income(cfg, key: str = "fulltime") -> dict | None:
+    """全职净收入。fire.<key>.enabled 为 false 时返回 None。
 
-    ⚠️ **不参与 FIRE 目标计算**，原因见 config.yaml 的注释：
+    默认 key="fulltime" 读取牡丹江首选方案；传入 "fulltime_beijing" 等
+    其它 key 可读取备选位置（见 config.yaml 的 fulltime_beijing 与
+    docs/FIRE-ROADMAP.md §3.5.8）。所有变体共用同一套现金流算法，
+    且**都不参与 FIRE 目标计算**。
+
+    ⚠️ 不参与 FIRE 目标计算，原因见 config.yaml 的注释：
     全职净收入必然大于月开销，代进 (月开销 − 净收入) × 12 ÷ 提取率
     会得到负数。负数不代表「超额完成」，而是这个公式在这里没有答案。
 
     所以本函数只输出现金流，由调用方单独展示；谁都不能把它塞进
     _net_after_labor，那会让目标变成负数并静默通过所有下游计算。
     """
-    spec = ((cfg.get("fire") or {}).get("fulltime")) or {}
+    spec = ((cfg.get("fire") or {}).get(key)) or {}
     if not spec.get("enabled"):
         return None
-    return _income_from_spec(spec, "fire.fulltime", "全职")
+    return _income_from_spec(spec, f"fire.{key}", "全职")
 
 
 def departure_gate(cfg) -> dict | None:
