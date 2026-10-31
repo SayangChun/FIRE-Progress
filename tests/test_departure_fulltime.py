@@ -263,6 +263,22 @@ ok("README 出现北京备选小节", "阶段 A 备选方案" in block)
 ok("北京备选小节标为 §3.5.8 备选道路", "§3.5.8" in block and "备选道路" in block)
 ok("外推段给出北京备选的第二条外推", "备选：阶段 A 在北京做同等全职" in block)
 
+print("\n北京不工作独立口径（beijing-rent-minimal profile）")
+cfg_bj = cfgmod.load()
+cfg_bj["life_plan"]["profile"] = "beijing-rent-minimal"
+data_bj = fire_mod.compute(cfg_bj, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
+tgt_bj = data_bj["fire"]["target_cny"]
+ok("北京 profile 不工作目标 > 牡丹江（北京花销更高）", tgt_bj > target, f"{tgt_bj:.0f} vs {target:.0f}")
+ok(
+    "北京 profile 不工作目标在合理区间（¥70万–120万，估算）",
+    700000 < tgt_bj < 1200000,
+    str(tgt_bj),
+)
+ok(
+    "切到北京 profile 不污染牡丹江目标",
+    abs(data["fire"]["target_cny"] - target) < 0.01,
+)
+
 no_ft = dict(data)
 no_ft.pop("fulltime")
 block2 = render_mod.render_block(no_ft, cfg, [])

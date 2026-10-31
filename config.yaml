@@ -320,6 +320,39 @@ life_plan:
         - {key: medical_buffer, group: 医疗与应急, label: 医疗自付预留, monthly: 120, note: "门诊与小病自付。⚠️ 对照方案同样不参加任何医保（2026-10-21 决定）"}
         - {key: buffer, group: 医疗与应急, label: 应急与物价缓冲, monthly: 187, note: "按月留一笔机动钱。⚠️ 移除医保两项后本方案合计为 ¥2,754（原按 ¥2,800 设计）"}
 
+    # 对照方案：北京外环 · 单人 · 租房 · 极简（2026-10-31 新增，估算假设）
+    # ⚠️ 这是 §3.5.8「北京图书馆保安」备选路径的**不工作状态独立口径**，
+    # 数字均为**估算假设**（北京外环房租取自安居客 2026-10 通州/大兴实拍 2100–3400 元/月），
+    # **不是他的决策，也不改变当前激活的牡丹江方案**。当前激活 profile 仍是 mudanjiang-rent-minimal，
+    # 切到这里才会生效；切到这里后 README 主目标会变成本档的北京目标。
+    # 用途：回答「如果不在工作、独自住北京，需要攒多少」——这是北京路径的真实终点，
+    # 与牡丹江 ¥205,953.49 不可直接比（北京不工作花销高得多）。
+    beijing-rent-minimal:
+      city: 北京
+      province: 北京
+      housing: rent
+      household: 1
+      lifestyle: 极简
+      headline: 北京外环 · 单人 · 租房 · 极简（估算）
+      items:
+        - {key: rent, group: 住房与水电燃气, label: 房租, monthly: 2800, note: "外环一居约 40㎡，安居客 2026-10 通州/大兴实拍 2100–3400，取保守 2800。⚠️ 估算，非实测签约价"}
+        - {key: heating, group: 住房与水电燃气, label: 取暖费, monthly: 100, note: "北京集中供暖 ~¥30/㎡·季 × 40㎡ ÷ 12，外环住宅；估算"}
+        - {key: property_fee, group: 住房与水电燃气, label: 物业费, monthly: 150, note: "¥3–4/㎡·月 × 40㎡；估算"}
+        - {key: water, group: 住房与水电燃气, label: 水费, monthly: 15, note: "单人约 3 吨/月"}
+        - {key: electricity, group: 住房与水电燃气, label: 电费, monthly: 60, note: "约 120 度/月；北京夏空调/冬无集中供暖制冷，略高于牡丹江"}
+        - {key: gas, group: 住房与水电燃气, label: 燃气/液化气, monthly: 40, note: "自己做饭"}
+        - {key: appliance, group: 住房与水电燃气, label: 家电维修与更换摊销, monthly: 20, note: "改买二手，按 10 年摊销"}
+        - {key: telecom, group: 日常开销, label: 网络与手机, monthly: 30, note: "纯流量卡，不装宽带"}
+        - {key: food, group: 日常开销, label: 食品, monthly: 450, note: "北京食品高于牡丹江 ¥300，极简线上仍高约 50%；估算"}
+        - {key: drinking_water, group: 日常开销, label: 饮用水, monthly: 15, note: "桶装水或净水器滤芯"}
+        - {key: supplies, group: 日常开销, label: 日用品, monthly: 22, note: "极限档"}
+        - {key: transport, group: 日常开销, label: 交通, monthly: 100, note: "北京以地铁为主，月均 100 合理"}
+        - {key: home_visit, group: 日常开销, label: 探亲与返乡交通, monthly: 30, note: "同城，偶发本地交通，远低于牡丹江 ¥100 跨城"}
+        - {key: clothing, group: 日常开销, label: 衣物, monthly: 30, note: "按年摊销，含冬装"}
+        - {key: misc, group: 日常开销, label: 杂项（快递与小额）, monthly: 5, note: "无会员/订阅"}
+        - {key: medical_buffer, group: 医疗与应急, label: 医疗自付预留, monthly: 80, note: "门诊自付；无医保，住院 100% 自付（同牡丹江口径）"}
+        - {key: buffer, group: 医疗与应急, label: 应急与物价缓冲, monthly: 137, note: "安全垫，不下调"}
+
   # 一次性支出：不进入「月开销 × 12 ÷ 提取率」，单独加总。
   # 它们只在 FIRE 落地的那一年发生一次。
   one_off:
