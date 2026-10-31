@@ -83,6 +83,32 @@ FIRE 目标资产 = 组合需覆盖 × 12 ÷ 提取率
 > 之所以要这样分开，是因为两者回答的问题不同：
 > 目标公式 → 「还要攒多少」（进度条）；两段式 → 「这笔钱够撑多久」（决策）。
 
+### 1.1b 全职情景与出发门槛（2026-10-31）
+
+阶段 A 改为「全职优先、兼职兜底」后，多了两个函数，**同样都不参与 `target_cny`**：
+
+| 函数 | 作用 | 为什么不进目标 |
+| --- | --- | --- |
+| `lifeplan.fulltime_income(cfg)` | 全职净收入（`fire.fulltime`） | 净收入 ¥2,739 > 月开销 ¥1,461，代进公式得 **负数**。负数不是「超额完成」，是公式在这里没有答案——它算的是「资产要多大才能替代工资」，而全职本身就有工资 |
+| `lifeplan.departure_gate(cfg)` | 出发门槛 = 医疗应急 + 搬家 + 空窗 | 它回答「能不能走」，与「能不能不工作」是两个问题，混进同一个百分比会两边都读错 |
+
+```
+出发门槛 low  = 医疗应急 low  + 一次性搬家 + 月开销 × 空窗月数 low
+出发门槛 high = 医疗应急 high + 一次性搬家 + 月开销 × 空窗月数 high
+全职盈余      = 全职净收入 − 月开销          # 注意是月开销，不是「组合需覆盖」
+```
+
+> ⚠️ **`_net_after_labor` 仍然只读 `labor_income`（兼职兜底）。**
+> 一旦有人把 `fulltime_income()` 的结果传进去，目标会变成负数并静默通过所有下游计算，
+> 看板上完全看不出来。`tests/test_departure_fulltime.py` 钉死了这一条：
+> 「把全职塞进 `_net_after_labor` 必须报错」。
+>
+> 全职只影响「多久到」，不影响「到多少」：`compute()` 用同一份资产、同一个
+> `projection()`，只把盈余并进 `contribution.sp500_cny_per_day`，算出第二条外推。
+>
+> README 的进度条由 `render.dual_progress_svg()` 生成；没有 `departure` 字段时返回 `None`，
+> 调用方退回 `progress_svg()` 单条，行为与旧口径完全一致。
+
 ### 1.2 月开销从哪来（life_plan）
 
 「月开销」是整个模型里最主观的输入，直接决定 FIRE 目标，因此**不写成常量**，
@@ -549,3 +575,5 @@ git push -u origin main
 | 2026-10-29 | **定居城市确定为牡丹江**（原为「省内占位、最终未定」，保留将来调整的可能）。只改表述与定位：`config.yaml` 的 `life_plan` 注释块、README 的「FIRE 生活规划」段与变更记录、规划书 §2 与 §8、路线图 §1.2 与 §7、支出清单头部与变更记录。**代码、配置数值、月开销 ¥1,461、FIRE 目标 ¥205,953.49 全部不变**——模型一直按牡丹江口径计算，这次不产生任何新的口径分支 |
 | 2026-10-29 | **线性外推改为按真实定投额**（他给出：比特币 9.9 USDT/天、标普500 ¥20/天、纳指100 已停止定投）。原逻辑用近 30 天平均日增额（`display.projection_window_days`），问题是被行情主导：涨得快不等于进度快，跌的时候还会推出「永远达不到」。新增 `config.yaml` 的 `contribution` 段；`fire.projection()` 签名由 `(history, remaining, window_days)` 改为 `(remaining, usd_cny, contribution)`，输出增加 `daily_cny` / `monthly_cny` / `btc_cny_per_day` 等拆项，去掉 `window_days` / `daily_gain_cny`；缺汇率时不拿 0 冒充比特币定投，直接返回原因。`render.py` / `site.py` 文案同步；`test_fire_core.py` 新增 9 项断言，`test_site.py` 夹具同步。**FIRE 目标 ¥205,953.49 不变**；外推结果由 2.5 年变为 5.9 年（2032-09-25），因为只算投入、不算涨跌 |
 | 2026-10-29 | **线性外推加入资产增值 + 定投额重算**。`fire.projection()` 增加 `assets` 与 `expected_return` 参数：按当前市值加权预期年化（与被动收入同口径），解 `目标 = A(1+r)^n + C·((1+r)^n − 1)/r` 反推天数；新增 `_days_to_target()` 与 `_horizon()`。输出增加 `weighted_rate` 与 `scenarios`（悲观 / 基准 / 乐观），README 与静态页同时给出区间。`config.yaml` 的 `timeline.monthly_contribution` 2,000 → **2,584**（= 9.9 USDT/天 + ¥20/天 按 ¥6.68 折算），毕业本金 ¥9.4 万 → **¥11 万**，两段式随之重算（3 天 18.1 年、4 天永续、临界 8.05%）。`test_fire_core.py` 同步扩充。**FIRE 目标 ¥205,953.49 不变** |
+| **2026-10-31** | **阶段 A 改为「全职优先、兼职兜底」**（不再以写作为主业）。新增 `config.yaml` 的 `fire.fulltime`（¥17/h × 40h/周，净 ¥2,739.33、盈余 ¥1,278.33）与 `departure`（医疗 ¥5–10 万 + 搬家 ¥1.5 万 + 空窗 3–6 月 = ¥69,383–123,766）。`lifeplan.py` 把 `labor_income()` 拆成通用的 `_income_from_spec()`，新增 `fulltime_income()` 与 `departure_gate()`；`fire.compute()` 输出增加 `departure` / `fulltime` 两段，并用同一个 `projection()` 跑第二条外推（盈余并入 `contribution.sp500_cny_per_day`）；`render.py` 新增 `dual_progress_svg()`（无 `departure` 时返回 `None`，退回 `progress_svg()`）与 `_fulltime_block()`，README 指标表改为「出发门槛 / 不工作门槛」两行。新增 `tests/test_departure_fulltime.py`（35 项）并挂进 CI。**⚠️ FIRE 目标 ¥205,953.49 一分未动**——全职净收入大于月开销，代进公式得负数，`_net_after_labor` 仍然只读兼职口径，测试钉死「把全职塞进去必须报错」 |
+| **2026-10-31** | **修正 `_days_to_target()` 的反解错误**。入参 `remaining` 是**缺口**（目标 − 起点），但分子写成 `remaining + C/r`，等于在解 `FV = 缺口`，**系统性低估天数**；资产越接近目标越离谱（A→T 时算出「已到达」）。改为 `num = remaining + start + daily/rd`（即 `目标 + C/r`）。当日实测：错解 1486 天（2030-11-25），正解 1626 天（2031-04-14），差 4.6 个月。`annual ≤ 0` 的纯定投分支不受影响，7 个既有测试全部通过 |

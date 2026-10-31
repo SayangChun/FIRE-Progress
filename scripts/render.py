@@ -92,6 +92,80 @@ def progress_svg(data: dict, cfg) -> str:
 """
 
 
+# ---------------------------------------------------------------- 双线进度条
+
+
+def dual_progress_svg(data: dict, cfg) -> str | None:
+    """双线进度条：出发门槛 / 不工作门槛。没有 departure 数据时返回 None。
+
+    为什么是两条
+    ------------
+    2026-10-31 起，阶段 A 有全职工作，现金流为正，
+    「攒够 ¥205,953 才能走」不再成立——那是「靠资产覆盖净支出」的永续要求。
+
+    真正卡住出发的是三笔钱（医疗应急 + 搬家 + 空窗），
+    而 ¥205,953 回答的是另一个问题：能不能不工作。
+
+    两条线画在同一张图里，是为了避免任何一条被当成「唯一标准」：
+    只看上面那条会以为「到了就能躺平」，只看下面那条会以为「永远走不了」。
+    """
+    dep = data.get("departure")
+    if not dep:
+        return None
+
+    assets = data["assets"]
+    fire = data["fire"]
+    cur = float(assets.get("total_cny") or 0.0)
+
+    rows = [
+        ("出发门槛", float(dep["low_cny"]), float(dep.get("progress_low") or 0.0), "#2563eb", "#60a5fa"),
+        ("不工作门槛", float(fire["target_cny"]), float(assets.get("progress") or 0.0), "#d97706", "#f0b429"),
+    ]
+
+    width, height = 680, 140
+    track_h = 10
+    parts: list[str] = []
+    for i, (name, target, ratio, color, color_dark) in enumerate(rows):
+        top = 8 + i * 62
+        ratio = max(min(ratio, 1.0), 0.0)
+        pct = ratio * 100
+        fill_w = max(width * ratio, 1.0) if ratio > 0 else 0.0
+        fill_r = min(track_h / 2, fill_w / 2) if fill_w else 0.0
+        remain = max(target - cur, 0.0)
+        cls = "fill-a" if i == 0 else "fill-b"
+        parts.append(
+            f'  <text class="fg-muted" x="0" y="{top + 12}" font-size="12">{name}</text>\n'
+            f'  <text class="fg" x="{width}" y="{top + 14}" text-anchor="end" font-size="18" font-weight="600">{pct:.1f}%</text>\n'
+            f'  <rect class="track" x="0" y="{top + 24}" width="{width}" height="{track_h}" rx="{track_h / 2}"/>\n'
+            f'  <rect class="{cls}" x="0" y="{top + 24}" width="{fill_w:.1f}" height="{track_h}" rx="{fill_r:.1f}"/>\n'
+            f'  <text class="fg-muted" x="0" y="{top + 52}" font-size="11">目标 {money(target, cfg)}</text>\n'
+            f'  <text class="fg-muted" x="{width}" y="{top + 52}" text-anchor="end" font-size="11">'
+            f'已积累 {money(cur, cfg)} · 还差 {money(remain, cfg)}</text>'
+        )
+
+    body = "\n".join(parts)
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="出发门槛与不工作门槛的双线进度">
+  <title>出发门槛 {rows[0][2] * 100:.1f}% · 不工作门槛 {rows[1][2] * 100:.1f}%</title>
+  <desc>两条线回答两个不同问题：出发门槛 {money(rows[0][1], cfg)}（能不能走），不工作门槛 {money(rows[1][1], cfg)}（能不能不工作）。当前资产 {money(cur, cfg)}。</desc>
+  <style>
+    .fg {{ fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
+    .fg-muted {{ fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
+    .track {{ fill: #e7ebef; }}
+    .fill-a {{ fill: #2563eb; }}
+    .fill-b {{ fill: #d97706; }}
+    @media (prefers-color-scheme: dark) {{
+      .fg {{ fill: #e6edf3; }}
+      .fg-muted {{ fill: #8b949e; }}
+      .track {{ fill: #21262d; }}
+      .fill-a {{ fill: #60a5fa; }}
+      .fill-b {{ fill: #f0b429; }}
+    }}
+  </style>
+{body}
+</svg>
+"""
+
+
 # ---------------------------------------------------------------- 曲线 SVG
 
 
@@ -449,6 +523,67 @@ def _positions_table(positions: list[dict], cfg) -> str:
     return "\n".join(rows) + "\n"
 
 
+def _fulltime_block(data: dict, cfg) -> str:
+    """全职情景：阶段 A 首选方案的现金流。
+
+    ⚠️ 这一节**不参与 FIRE 目标**。全职净收入大于月开销，
+    代进 (月开销 − 净收入) × 12 ÷ 提取率 会得到负数——
+    负数不是「超额完成」，是那个公式在这里没有答案。
+
+    所以这里只展示三件事：净收入多少、每月盈余多少、以及
+    「若这笔盈余从今天起就并入定投，达标会提前多久」。
+    """
+    ft = data.get("fulltime")
+    if not ft:
+        return ""
+
+    out: list[str] = []
+    out.append("<details>")
+    out.append(f"<summary>阶段 A 首选方案 · {ft.get('label') or '全职'}</summary>")
+    out.append("")
+    out.append(
+        f"**{money(ft['hourly_wage'], cfg, decimals=0)}/小时 × "
+        f"{ft['hours_per_week']:.0f} 小时/周 = "
+        f"毛收入 {money(ft['gross_monthly_cny'], cfg)}/月**，"
+        f"扣掉工作增量消耗 {money(ft['cost_monthly_cny'], cfg)}"
+        f"（交通 {money(ft['transport_cny'], cfg)} + 餐食 {money(ft['meal_cny'], cfg)}"
+        f" + 装备 {money(ft['gear_cny'], cfg)}），"
+        f"净收入 **{money(ft['net_monthly_cny'], cfg)}/月**。"
+    )
+    out.append("")
+    out.append("| 项目 | 数值 |")
+    out.append("| --- | ---: |")
+    out.append(f"| 月净收入 | {money(ft['net_monthly_cny'], cfg)} |")
+    out.append(f"| 月开销 | {money(ft['monthly_expense'], cfg)} |")
+    out.append(f"| **月盈余** | **{money(ft['surplus_monthly_cny'], cfg)}** |")
+    out.append(f"| 等效时薪（含通勤） | {money(ft['effective_hourly_cny'], cfg, decimals=2)} |")
+    out.append(f"| 每月占用工时 | {ft['occupied_hours_per_month']:.0f} 小时 |")
+    out.append("")
+
+    proj = ft.get("projection")
+    if proj and proj.get("eta"):
+        out.append(
+            f"> 若这份盈余从现在起并入定投（月投 {money(proj['monthly_cny'], cfg)}），"
+            f"按基准年化 **{proj['weighted_rate'] * 100:.2f}%** 外推，"
+            f"约 **{proj['days_to_target'] / 365:.2f} 年**后达到不工作门槛（{proj['eta']}）；"
+            f"不做全职则要 {data['projection']['days_to_target'] / 365:.2f} 年"
+            f"（{data['projection']['eta']}）。"
+        )
+        out.append(">")
+        out.append(
+            "> ⚠️ 这是**敏感性测算**，不是承诺：它假设这份工作从今天就有、"
+            "且盈余全部存下。实际要到 2029-06 毕业才可能开始。"
+        )
+        out.append(">")
+        out.append(
+            "> ⚠️ 全职**不改变**上面的 FIRE 目标。目标只由「月开销 − 兼职净收入」决定；"
+            "全职只影响「多久到」，不影响「到多少」。"
+        )
+    out.append("")
+    out.append("</details>")
+    return "\n".join(out)
+
+
 def _life_plan_block(data: dict, cfg) -> str:
     """FIRE 后月开销明细：让「目标资产」的来历可追溯。
 
@@ -725,30 +860,67 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("")
 
     if cfg.display.get("show_progress_bar", True):
-        out.append("![FIRE 完成度](reports/progress.svg)")
-        out.append("")
-        out.append(
-            "> 完成度 = 当前资产 ÷ FIRE 目标。资产随行情走，目标随口径走；"
-            "月开销、提取率或兼职收入改一项，百分比就会变，未必是资产涨跌。"
-        )
+        if data.get("departure"):
+            out.append("![双线进度](reports/progress.svg)")
+            out.append("")
+            out.append("> **两条线回答两个不同问题，别把它们混成一个百分比。**")
+            out.append(">")
+            out.append(
+                "> - **出发门槛** = 医疗专项应急金 + 一次性搬家 + 空窗期月开销。"
+                "它决定「能不能去牡丹江」——因为阶段 A 有工作、有现金流，"
+                "不需要资产覆盖生活费。"
+            )
+            out.append(
+                "> - **不工作门槛** = 组合需覆盖 × 12 ÷ 提取率。"
+                "它决定「能不能不工作」，也就是兼职兜底的永续线。"
+            )
+            out.append(">")
+            out.append(
+                "> 2026-10-31 之前只有第二条，因为假设「攒够才走」。"
+                "阶段 A 改为全职优先后，出发条件换成第一条，"
+                "第二条降级为长期目标。"
+            )
+        else:
+            out.append("![FIRE 完成度](reports/progress.svg)")
+            out.append("")
+            out.append(
+                "> 完成度 = 当前资产 ÷ FIRE 目标。资产随行情走，目标随口径走；"
+                "月开销、提取率或兼职收入改一项，百分比就会变，未必是资产涨跌。"
+            )
         out.append("")
 
     out.append("| 指标 | 数值 |")
     out.append("| --- | ---: |")
-    out.append(f"| 🎯 FIRE 目标资产 | {money(fire['target_cny'], cfg)} |")
+    dep = data.get("departure")
+    if dep:
+        # 有出发门槛时，表头按「两个问题」排序：先能不能走，再能不能不工作。
+        out.append(
+            f"| 🚪 出发门槛（能不能走） | {money(dep['low_cny'], cfg)}–{money(dep['high_cny'], cfg)} |"
+        )
+        out.append(f"| 🎯 不工作门槛（能不能不工作） | {money(fire['target_cny'], cfg)} |")
+        out.append(f"| 💰 当前资产 | {money(assets['total_cny'], cfg)} |")
+        out.append(f"| 📈 出发门槛完成度 | **{dep['progress_low'] * 100:.3f}%** |")
+        out.append(f"| 📈 不工作门槛完成度 | **{pct:.3f}%** |")
+    else:
+        out.append(f"| 🎯 FIRE 目标资产 | {money(fire['target_cny'], cfg)} |")
+        out.append(f"| 💰 当前资产 | {money(assets['total_cny'], cfg)} |")
+        out.append(f"| 📈 完成度 | **{pct:.3f}%** |")
     labor = fire.get("labor_income")
     if labor:
         out.append(f"| ☕ 兼职净收入（月） | {money(labor['net_monthly_cny'], cfg)} |")
         out.append(f"| 🧾 组合需覆盖（月） | {money(fire['net_monthly_expense'], cfg)} |")
-    out.append(f"| 💰 当前资产 | {money(assets['total_cny'], cfg)} |")
-    out.append(f"| 📈 完成度 | **{pct:.3f}%** |")
-    out.append(f"| ⏳ 距离目标 | {money(assets['remaining_cny'], cfg)} |")
+    out.append(f"| ⏳ 距离不工作门槛 | {money(assets['remaining_cny'], cfg)} |")
     pi = data.get("passive_income")
     if pi:
         out.append(
             f"| ⏱️ 每小时被动收入（按预期年化） | {money(pi['hourly_cny'], cfg, decimals=2)} |"
         )
     out.append("")
+
+    ft_block = _fulltime_block(data, cfg)
+    if ft_block:
+        out.append(ft_block.strip())
+        out.append("")
 
     if cfg.display.get("show_life_plan", True):
         plan_block = _life_plan_block(data, cfg)
@@ -952,11 +1124,26 @@ def merge_readme(existing: str, block: str) -> str:
 
 
 def default_readme(
-    block: str, cfg, monthly: float, net_monthly: float | None = None
+    block: str,
+    cfg,
+    monthly: float,
+    net_monthly: float | None = None,
+    departure: dict | None = None,
 ) -> str:
     rate = float(cfg.fire.withdrawal_rate)
     # 组合需覆盖 = 月开销 − 兼职净收入。没传就退回全部月开销，与旧口径一致。
     net = monthly if net_monthly is None else net_monthly
+    # 出发门槛是 2026-10-31 新增的第二条线；缺数据时不写这一行，行为与旧版一致。
+    gate_rows = ""
+    gate_note = ""
+    if departure:
+        gate_rows = (
+            f"| **出发门槛**（能不能走） | **¥{departure['low_cny']:,.0f} – ¥{departure['high_cny']:,.0f}** |\n"
+        )
+        gate_note = (
+            "\n出发门槛 = 医疗专项应急金 + 一次性搬家 + 空窗期月开销。"
+            "阶段 A 有工作、有现金流，出发不需要资产覆盖生活费。\n"
+        )
     return f"""# FIRE-Progress
 
 > 我的 FIRE 进度看板。只统计三项长期不动用的资产：比特币、标普500基金、纳指100基金。
@@ -967,13 +1154,14 @@ def default_readme(
 
 | 参数 | 取值 |
 | --- | ---: |
-| 月开销 | ¥{monthly:,.0f} |
+{gate_rows}| 月开销 | ¥{monthly:,.0f} |
 | 组合需覆盖（月开销 − 兼职净收入） | ¥{net:,.0f} |
 | 提取率 | {rate * 100:.1f}% |
-| **FIRE 目标资产** | **¥{net * 12 / rate:,.2f}** |
+| **不工作门槛**（能不能不工作） | **¥{net * 12 / rate:,.2f}** |
 
-公式：`FIRE 目标 = 组合需覆盖 × 12 ÷ 提取率`，`完成度 = 当前资产 ÷ FIRE 目标`。
+公式：`不工作门槛 = 组合需覆盖 × 12 ÷ 提取率`，`完成度 = 当前资产 ÷ 不工作门槛`。
 组合需覆盖 = 月开销 − 兼职净收入（咖啡师 FIRE，见 `fire.labor_income`；关掉就退回传统 FIRE）。
+{gate_note}
 月开销由 [config.yaml](config.yaml) 的 `life_plan` 逐项推导，依据见
 [docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。
 

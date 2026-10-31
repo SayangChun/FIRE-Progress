@@ -316,7 +316,9 @@ def main() -> int:
     write_json(cfgmod.LATEST_PATH, data)
 
     if cfg.display.get("show_progress_bar", True):
-        svg = rendermod.progress_svg(data, cfg)
+        # 有 departure 数据时画双线（出发门槛 / 不工作门槛），
+        # 否则退回单条 FIRE 完成度，行为与旧口径完全一致。
+        svg = rendermod.dual_progress_svg(data, cfg) or rendermod.progress_svg(data, cfg)
         (cfgmod.REPORTS_DIR / "progress.svg").write_text(svg, encoding="utf-8")
         print("→ 已写出 reports/progress.svg")
 
@@ -338,7 +340,11 @@ def main() -> int:
         merged_readme = rendermod.merge_readme(existing, block)
     else:
         merged_readme = rendermod.default_readme(
-            block, cfg, fire["monthly_expense"], fire["net_monthly_expense"]
+            block,
+            cfg,
+            fire["monthly_expense"],
+            fire["net_monthly_expense"],
+            data.get("departure"),
         )
     readme_path.write_text(merged_readme, encoding="utf-8")
     print("→ 已更新 README.md")

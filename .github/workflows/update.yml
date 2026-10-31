@@ -53,6 +53,8 @@ jobs:
         run: python tests/test_passive_income.py
       - name: 两段式口径回归测试
         run: python tests/test_two_phase.py
+      - name: 出发门槛与全职情景回归测试
+        run: python tests/test_departure_fulltime.py
       - name: 静态页冒烟测试
         run: python tests/test_site.py
 

@@ -14,6 +14,14 @@ FIRE 之后仍做低压力、可随时停的兼职，收入覆盖一部分开销
 所以资产不必覆盖全部开销。净收入为 0 时公式退化为传统 FIRE
 「月开销 × 12 ÷ 提取率」——两种口径共用同一套代码。
 
+2026-10-31 起新增两个口径，**都不改变上面这条主线公式**：
+
+1. `fulltime_income()` —— 全职净收入。只做现金流展示，**不参与目标计算**。
+   全职净收入必然大于月开销，代进公式会得负数，那个负数没有意义。
+2. `departure_gate()` —— 出发门槛 = 医疗专项 + 一次性搬家 + 空窗期开销。
+   全职方案下它才是「能不能走」的约束，比 ¥205,953 更早成为瓶颈。
+   ¥205,953 保留原义：**能不能不工作**（兼职兜底的永续线）。
+
 为什么一次性支出不进月开销
 --------------------------
 搬家、押金、家具、购房款是一次性消耗，不产生永续现金流。
@@ -161,8 +169,8 @@ _LABOR_REQUIRED = (
 )
 
 
-def labor_income(cfg) -> dict | None:
-    """把兼职换算成「每月净收入」。labor_income.enabled 为 false 时返回 None。
+def _income_from_spec(spec: dict, where: str, default_label: str) -> dict:
+    """把「按时薪计的工作」换算成每月净收入。兼职与全职共用同一套算法。
 
     净收入 = 毛收入 − 工作增量消耗
 
@@ -173,15 +181,13 @@ def labor_income(cfg) -> dict | None:
       - 装备：防滑鞋等按年摊销
     这个区分是整段计算里最容易错的地方。扣多了会让目标虚高，
     等于拿「上班多花的钱」把「本来就要花的钱」又算了一遍。
-    """
-    spec = ((cfg.get("fire") or {}).get("labor_income")) or {}
-    if not spec.get("enabled"):
-        return None
 
+    where 只用于报错定位（如 "fire.labor_income"），不参与计算。
+    """
     for field in _LABOR_REQUIRED:
         if spec.get(field) is None:
             raise LifePlanError(
-                f"fire.labor_income 缺少字段 {field!r}"
+                f"{where} 缺少字段 {field!r}"
                 "（enabled 为 true 时不能省略，否则净收入会静默算成 0）"
             )
 
@@ -199,7 +205,7 @@ def labor_income(cfg) -> dict | None:
         ("work_days_per_week", days_week),
     ):
         if value <= 0:
-            raise LifePlanError(f"fire.labor_income.{name} 必须为正数，当前 {value}")
+            raise LifePlanError(f"{where}.{name} 必须为正数，当前 {value}")
 
     hours_month = hours_week * WEEKS_PER_YEAR / MONTHS_PER_YEAR
     days_month = days_week * WEEKS_PER_YEAR / MONTHS_PER_YEAR
@@ -210,8 +216,8 @@ def labor_income(cfg) -> dict | None:
 
     if net <= 0:
         raise LifePlanError(
-            f"fire.labor_income 算出的月净收入为 {net:.2f} 元（≤0）："
-            "兼职收入抵不上通勤与在外吃饭的增量消耗，这份工在财务上是倒贴的"
+            f"{where} 算出的月净收入为 {net:.2f} 元（≤0）："
+            "收入抵不上通勤与在外吃饭的增量消耗，这份工在财务上是倒贴的"
         )
 
     hours_day = hours_week / days_week
@@ -219,7 +225,7 @@ def labor_income(cfg) -> dict | None:
 
     return {
         "enabled": True,
-        "label": str(spec.get("label") or "兼职"),
+        "label": str(spec.get("label") or default_label),
         "hourly_wage": round(wage, 2),
         "hours_per_week": round(hours_week, 2),
         "hours_per_day": round(hours_day, 2),
@@ -238,6 +244,89 @@ def labor_income(cfg) -> dict | None:
         "effective_hourly_cny": round(net / occupied, 2) if occupied else None,
         "note": str(spec.get("note") or ""),
     }
+
+
+def labor_income(cfg) -> dict | None:
+    """兼职净收入。fire.labor_income.enabled 为 false 时返回 None。
+
+    这是 **FIRE 目标的兜底口径**：全职找不到时退回这里。
+    全职本身走 fulltime_income()，绝不进入目标计算（见那个函数的说明）。
+    """
+    spec = ((cfg.get("fire") or {}).get("labor_income")) or {}
+    if not spec.get("enabled"):
+        return None
+    return _income_from_spec(spec, "fire.labor_income", "兼职")
+
+
+def fulltime_income(cfg) -> dict | None:
+    """全职净收入。fire.fulltime.enabled 为 false 时返回 None。
+
+    ⚠️ **不参与 FIRE 目标计算**，原因见 config.yaml 的注释：
+    全职净收入必然大于月开销，代进 (月开销 − 净收入) × 12 ÷ 提取率
+    会得到负数。负数不代表「超额完成」，而是这个公式在这里没有答案。
+
+    所以本函数只输出现金流，由调用方单独展示；谁都不能把它塞进
+    _net_after_labor，那会让目标变成负数并静默通过所有下游计算。
+    """
+    spec = ((cfg.get("fire") or {}).get("fulltime")) or {}
+    if not spec.get("enabled"):
+        return None
+    return _income_from_spec(spec, "fire.fulltime", "全职")
+
+
+def departure_gate(cfg) -> dict | None:
+    """出发门槛 = 医疗专项应急金 + 一次性搬家 + 空窗期月开销。
+
+    为什么需要它
+    ------------
+    旧口径把「攒够 ¥205,953」当成出发条件。但那是「靠资产覆盖净支出」的
+    永续要求；一旦阶段 A 有全职工作，现金流为正，这个门槛就不再是出发条件。
+
+    真正决定「能不能走」的是三笔钱：
+      1. 医疗专项应急金 —— 零医保、住院 100% 自付，唯一防线（规划书 §5.4）
+      2. 一次性搬家     —— 押金、运费、家具、过冬装备，取自 life_plan.one_off
+      3. 空窗期月开销   —— 到牡丹江后到第一笔工资之间
+
+    给出 low / high 两档：下沿是出发前必须到位的，上沿差额可以边工作边补。
+    """
+    spec = cfg.get("departure") or {}
+    if not spec.get("enabled"):
+        return None
+
+    monthly = monthly_total(cfg)
+    moving = one_off_total(cfg)
+    med_low = float(spec.get("medical_reserve_low") or 0.0)
+    med_high = float(spec.get("medical_reserve_high") or 0.0)
+    gap_low = float(spec.get("gap_months_low") or 0.0)
+    gap_high = float(spec.get("gap_months_high") or 0.0)
+
+    if med_low <= 0 or gap_low <= 0:
+        raise LifePlanError(
+            "departure.medical_reserve_low / gap_months_low 必须为正数，"
+            "否则出发门槛会静默算成只有搬家费"
+        )
+    if med_high < med_low or gap_high < gap_low:
+        raise LifePlanError("departure 的上沿不能小于下沿")
+
+    gap_low_cny = monthly * gap_low
+    gap_high_cny = monthly * gap_high
+    low = med_low + moving + gap_low_cny
+    high = med_high + moving + gap_high_cny
+
+    return {
+        "enabled": True,
+        "medical_low_cny": round(med_low, 2),
+        "medical_high_cny": round(med_high, 2),
+        "moving_cny": round(moving, 2),
+        "gap_months_low": gap_low,
+        "gap_months_high": gap_high,
+        "gap_low_cny": round(gap_low_cny, 2),
+        "gap_high_cny": round(gap_high_cny, 2),
+        "low_cny": round(low, 2),
+        "high_cny": round(high, 2),
+        "note": str(spec.get("note") or ""),
+    }
+
 
 
 def _net_after_labor(monthly: float, labor: dict | None) -> float:

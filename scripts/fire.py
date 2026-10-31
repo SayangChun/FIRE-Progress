@@ -466,6 +466,38 @@ def compute(
     progress = total / target if target else 0.0
     remaining = max(target - total, 0.0)
 
+    # --- 出发门槛（2026-10-31 新增）---
+    # 全职方案下，「能不能走」由这笔钱决定，而不是 ¥205,953。
+    # ⚠️ 它不改 target_cny，只是并行的一条线：两条线回答两个不同问题。
+    gate = lifeplan_mod.departure_gate(cfg)
+    departure = None
+    if gate:
+        departure = {
+            **gate,
+            "assets_cny": round(total, 2),
+            "progress_low": (total / gate["low_cny"]) if gate["low_cny"] else 0.0,
+            "progress_high": (total / gate["high_cny"]) if gate["high_cny"] else 0.0,
+            "remaining_low_cny": round(max(gate["low_cny"] - total, 0.0), 2),
+            "remaining_high_cny": round(max(gate["high_cny"] - total, 0.0), 2),
+            "reached_low": total >= gate["low_cny"],
+            "reached_high": total >= gate["high_cny"],
+        }
+
+    # --- 全职情景（2026-10-31 新增）---
+    # 只展示现金流与外推，**绝不进入 target_cny**：
+    # 全职净收入 > 月开销，代进目标公式会得到负数，那个负数没有意义。
+    fulltime = None
+    ft = lifeplan_mod.fulltime_income(cfg)
+    if ft:
+        ft_surplus = ft["net_monthly_cny"] - monthly
+        fulltime = {
+            **ft,
+            "monthly_expense": round(monthly, 2),
+            "surplus_monthly_cny": round(ft_surplus, 2),
+            "covered": ft_surplus >= 0,
+            "projection": None,
+        }
+
     # --- 本金 ---
     # 标普500：优先取 config 手工值，否则用 sp500-dca 仓库的累计投入（精确值）
     cfg_basis = cfg.get("cost_basis") or {}
@@ -487,6 +519,34 @@ def compute(
 
     now = _now(cfg.automation.get("timezone", "Asia/Shanghai"))
     stamp = as_of or now.isoformat(timespec="seconds")
+
+    # 两条外推：主口径（兼职兜底）与全职情景。同一个 projection()，只换定投额。
+    proj = None
+    if cfg.display.get("show_projection"):
+        proj = projection(
+            remaining,
+            price.get("usd_cny"),
+            cfg.get("contribution"),
+            {"btc": btc_value, "sp500": sp500_value, "ndx100": ndx_value},
+            cfg.get("expected_return"),
+        )
+
+    if fulltime is not None and proj is not None:
+        # 全职盈余并入标普500 日投：比特币日投是固定 USDT 额度，不随盈余变。
+        # 盈余 ≤ 0 时不并入——否则会静默拉长外推，看起来像「全职更慢」。
+        if fulltime["surplus_monthly_cny"] > 0:
+            base_contrib = cfg.get("contribution") or {}
+            ft_contrib = dict(base_contrib)
+            ft_contrib["sp500_cny_per_day"] = float(
+                base_contrib.get("sp500_cny_per_day") or 0.0
+            ) + fulltime["surplus_monthly_cny"] * 12 / 365
+            fulltime["projection"] = projection(
+                remaining,
+                price.get("usd_cny"),
+                ft_contrib,
+                {"btc": btc_value, "sp500": sp500_value, "ndx100": ndx_value},
+                cfg.get("expected_return"),
+            )
 
     return {
         "as_of": stamp,
@@ -558,17 +618,11 @@ def compute(
             if cfg.display.get("show_passive_income", True)
             else None
         ),
-        "projection": (
-            projection(
-                remaining,
-                price.get("usd_cny"),
-                cfg.get("contribution"),
-                {"btc": btc_value, "sp500": sp500_value, "ndx100": ndx_value},
-                cfg.get("expected_return"),
-            )
-            if cfg.display.get("show_projection")
-            else None
-        ),
+        "projection": proj,
+        # 出发门槛与全职情景（2026-10-31）。两者都**不改变上面的 target_cny**：
+        # 出发门槛回答「能不能走」，全职情景回答「走之后攒得多快」。
+        "departure": departure,
+        "fulltime": fulltime,
         "sources": {
             "btc": btc.get("available", False),
             "sp500": sp500.get("available", False),
