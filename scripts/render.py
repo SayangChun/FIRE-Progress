@@ -169,21 +169,45 @@ def dual_progress_svg(data: dict, cfg) -> str | None:
 # ---------------------------------------------------------------- 曲线 SVG
 
 
-def curve_svg(history: list[dict], cfg) -> str:
-    width, height = 680, 240
-    pad_l, pad_r, pad_t, pad_b = 58, 20, 26, 34
+def curve_svg(history: list[dict], cfg, departure_cny: float | None = None) -> str:
+    """进度曲线：两条线，回答两个不同问题。
 
-    points = [
-        (row["date"], float(row.get("progress_pct") or 0.0), row.get("target_cny"))
-        for row in history
-        if row.get("date") and row.get("progress_pct") is not None
-    ]
+    - **不工作门槛**完成度 = 资产 ÷ FIRE 目标（`target_cny`，逐日留档）
+    - **出发门槛**完成度   = 资产 ÷ 出发门槛（`departure_cny`，2026-10-31 起）
 
-    if len(points) < 2:
+    为什么画两条
+    ------------
+    阶段 A 有工作后，「攒够 ¥205,953 才能走」不再成立。两条线的距离就是
+    「离能走还有多远」与「离能不工作还有多远」的差——只画一条会把两者混成一个数。
+
+    ⚠️ 出发门槛是 2026-10-31 才定义的概念，此前的记录里没有 `departure_cny`，
+    这段按**当前门槛**折算，不是当时记录的值。图注里会写明。
+    门槛只由医疗应急、搬家、月开销决定，不含行情，所以折算段是一条平滑线；
+    而 FIRE 目标逐日留档，因此有台阶——**两条线形状的差异本身就是信息**。
+    """
+    width, height = 680, 262
+    pad_l, pad_r, pad_t, pad_b = 58, 62, 48, 34
+
+    rows: list[dict] = []
+    for row in history:
+        if not row.get("date") or row.get("progress_pct") is None:
+            continue
+        total = float(row.get("total_cny") or 0.0)
+        gate = row.get("departure_cny") or departure_cny
+        rows.append(
+            {
+                "date": row["date"],
+                "target": row.get("target_cny"),
+                "fire": float(row["progress_pct"]),
+                "dep": (total / float(gate) * 100.0) if gate else None,
+            }
+        )
+
+    if len(rows) < 2:
         return (
             f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" '
             f'width="{width}" height="{height}" role="img">'
-            f'<title>FIRE 进度曲线</title>'
+            f'<title>进度曲线</title>'
             f'<rect x="0" y="0" width="{width}" height="{height}" fill="none"/>'
             f'<text x="{width / 2}" y="{height / 2}" text-anchor="middle" font-size="13" '
             f'font-family="ui-sans-serif,system-ui,sans-serif" fill="#57606a">'
@@ -191,27 +215,39 @@ def curve_svg(history: list[dict], cfg) -> str:
             f"</svg>"
         )
 
-    points.sort(key=lambda item: item[0])
-    y_max = max(p[1] for p in points)
+    rows.sort(key=lambda r: r["date"])
+    has_dep = all(r["dep"] is not None for r in rows)
+    # 出发门槛折算的起点：第一条自带 departure_cny 的记录（没有则视为全程折算）
+    derived_from = next(
+        (r["date"] for r in history if r.get("departure_cny")), None
+    )
+
+    values = [r["fire"] for r in rows]
+    if has_dep:
+        values += [r["dep"] for r in rows]
+    y_max = max(values) if values else 0.0
     y_max = y_max * 1.15 if y_max > 0 else 1.0
 
     plot_w = width - pad_l - pad_r
     plot_h = height - pad_t - pad_b
 
-    def x_at(index: int) -> float:
-        return pad_l + (plot_w * index / (len(points) - 1))
+    def x_at(i: int) -> float:
+        return pad_l + (plot_w * i / (len(rows) - 1))
 
-    def y_at(value: float) -> float:
-        return pad_t + plot_h * (1 - value / y_max)
+    def y_at(v: float) -> float:
+        return pad_t + plot_h * (1 - v / y_max)
 
-    line_pts = [(x_at(i), y_at(v)) for i, (_, v, _t) in enumerate(points)]
-    line_path = " ".join(
-        f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(line_pts)
-    )
-    area_path = (
-        f"{line_path} L{line_pts[-1][0]:.1f},{pad_t + plot_h:.1f} "
-        f"L{line_pts[0][0]:.1f},{pad_t + plot_h:.1f} Z"
-    )
+    def path_of(key: str) -> tuple[str, tuple[float, float] | None]:
+        pts = [(x_at(i), y_at(r[key])) for i, r in enumerate(rows) if r[key] is not None]
+        if not pts:
+            return "", None
+        d = " ".join(
+            f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(pts)
+        )
+        return d, pts[-1]
+
+    fire_path, fire_end = path_of("fire")
+    dep_path, dep_end = path_of("dep") if has_dep else ("", None)
 
     grid: list[str] = []
     for step in range(5):
@@ -222,67 +258,82 @@ def curve_svg(history: list[dict], cfg) -> str:
         )
         grid.append(
             f'<text class="fg-muted" x="{pad_l - 8}" y="{y + 4:.1f}" text-anchor="end" '
-            f'font-size="10">{y_max * (1 - ratio):.3f}%</text>'
+            f'font-size="10">{y_max * (1 - ratio):.2f}%</text>'
         )
-
-    last_x, last_y = line_pts[-1]
 
     # 口径调整点：相邻两天的 target_cny 不同，说明 FIRE 目标（分母）变了。
     # 这类台阶不是资产涨跌造成的，必须在图上标出来，否则会被误读。
+    # 出发门槛只在月开销变化时才动，历史上没有对应的台阶可标。
     marks: list[str] = []
-    for i in range(1, len(points)):
-        prev_target, cur_target = points[i - 1][2], points[i][2]
-        if prev_target is None or cur_target is None or prev_target == cur_target:
+    for i in range(1, len(rows)):
+        prev_t, cur_t = rows[i - 1]["target"], rows[i]["target"]
+        if prev_t is None or cur_t is None or prev_t == cur_t:
             continue
         mx = x_at(i)
         marks.append(
             f'<line class="mark" x1="{mx:.1f}" y1="{pad_t}" '
             f'x2="{mx:.1f}" y2="{pad_t + plot_h:.1f}"/>'
         )
-        right = mx > pad_l + plot_w * 0.7
-        anchor = "end" if right else "start"
-        tx = mx - 4 if right else mx + 4
-        marks.append(
-            f'<text class="fg-muted" x="{tx:.1f}" y="{pad_t - 9}" '
-            f'text-anchor="{anchor}" font-size="9">口径调整</text>'
+
+    legend = (
+        f'<rect x="{pad_l}" y="12" width="10" height="10" rx="2" fill="#2563eb"/>'
+        f'<text class="fg-muted" x="{pad_l + 16}" y="21" font-size="11">出发门槛</text>'
+        f'<rect x="{pad_l + 86}" y="12" width="10" height="10" rx="2" fill="#d97706"/>'
+        f'<text class="fg-muted" x="{pad_l + 102}" y="21" font-size="11">不工作门槛</text>'
+    )
+
+    end_labels = ""
+    if fire_end:
+        end_labels += (
+            f'<circle cx="{fire_end[0]:.1f}" cy="{fire_end[1]:.1f}" r="3.5" fill="#d97706"/>'
+            f'<text class="fg-muted" x="{fire_end[0] + 7:.1f}" y="{fire_end[1] + 4:.1f}" '
+            f'font-size="11" font-weight="500" fill="#d97706">{rows[-1]["fire"]:.2f}%</text>'
+        )
+    if dep_end:
+        end_labels += (
+            f'<circle cx="{dep_end[0]:.1f}" cy="{dep_end[1]:.1f}" r="3.5" fill="#2563eb"/>'
+            f'<text class="fg-muted" x="{dep_end[0] + 7:.1f}" y="{dep_end[1] + 4:.1f}" '
+            f'font-size="11" font-weight="500" fill="#2563eb">{rows[-1]["dep"]:.2f}%</text>'
         )
 
-    note = "竖虚线处为口径调整（FIRE 目标变化），不是资产变动。" if marks else ""
-    # 分子（资产构成）变化不会被自动标注——那会在曲线上留一个无标记的跳升，
-    # 看起来像一天赚了钱。人工说明写在 config 的 display.capital_change_note。
+    note = "竖虚线处为 FIRE 目标变化（分母变了），不是资产变动。"
+    if has_dep and derived_from:
+        note += (
+            f" 出发门槛自 {derived_from} 起逐日记录，之前按当前门槛折算，"
+            "因此那一段是平滑线——它不是历史记录，是反事实。"
+        )
     extra = str(cfg.display.get("capital_change_note") or "").strip()
     if extra:
         note = f"{note} {extra}".strip()
 
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="FIRE 进度曲线">
-  <title>FIRE 进度曲线</title>
-  <desc>从 {points[0][0]} 到 {points[-1][0]} 的完成度变化，最新 {points[-1][1]:.3f}%。{note}</desc>
+    dep_desc = f"，出发门槛 {rows[-1]['dep']:.2f}%" if has_dep else ""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="进度曲线：出发门槛与不工作门槛">
+  <title>进度曲线：出发门槛与不工作门槛</title>
+  <desc>从 {rows[0]['date']} 到 {rows[-1]['date']}，不工作门槛完成度 {rows[-1]['fire']:.2f}%{dep_desc}。{note}</desc>
   <defs>
-    <linearGradient id="fireArea" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#d97706" stop-opacity="0.30"/>
-      <stop offset="100%" stop-color="#d97706" stop-opacity="0.02"/>
-    </linearGradient>
     <style>
       .fg-muted {{ fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
       .grid {{ stroke: #d8dee4; stroke-width: 1; stroke-dasharray: 3 4; }}
       .mark {{ stroke: #b9c0c8; stroke-width: 1; stroke-dasharray: 2 3; }}
-      .line {{ fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
+      .line-dep {{ fill: none; stroke: #2563eb; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
+      .line-fire {{ fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
       @media (prefers-color-scheme: dark) {{
         .fg-muted {{ fill: #8b949e; }}
         .grid {{ stroke: #30363d; }}
         .mark {{ stroke: #4d545c; }}
-        .line {{ stroke: #f0b429; }}
+        .line-dep {{ stroke: #60a5fa; }}
+        .line-fire {{ stroke: #f0b429; }}
       }}
     </style>
   </defs>
+  {legend}
   {''.join(grid)}
   {''.join(marks)}
-  <path d="{area_path}" fill="url(#fireArea)"/>
-  <path d="{line_path}" class="line"/>
-  <circle cx="{last_x:.1f}" cy="{last_y:.1f}" r="3.5" fill="#d97706"/>
-  <text class="fg-muted" x="{pad_l}" y="{height - 12}" font-size="10">{points[0][0]}</text>
-  <text class="fg-muted" x="{pad_l + plot_w}" y="{height - 12}" text-anchor="end" font-size="10">{points[-1][0]}</text>
-  <text class="fg-muted" x="{last_x:.1f}" y="{last_y - 10:.1f}" text-anchor="end" font-size="11" font-weight="500">{points[-1][1]:.3f}%</text>
+  {f'<path d="{dep_path}" class="line-dep"/>' if dep_path else ''}
+  <path d="{fire_path}" class="line-fire"/>
+  {end_labels}
+  <text class="fg-muted" x="{pad_l}" y="{height - 12}" font-size="10">{rows[0]['date']}</text>
+  <text class="fg-muted" x="{pad_l + plot_w}" y="{height - 12}" text-anchor="end" font-size="10">{rows[-1]['date']}</text>
 </svg>
 """
 
@@ -843,12 +894,19 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("![FIRE 进度曲线](reports/curve.svg)")
         out.append("")
         out.append(
-            "> 每个点是当天的完成度原值，按 `data/history.json` 连线，不回填、不重算。"
+            "> 两条线：**出发门槛**（能不能走）与**不工作门槛**（能不能不工作）。"
+            "每个点是当天的完成度原值，按 `data/history.json` 连线，不回填、不重算。"
         )
         out.append(">")
         out.append(
-            "> 竖虚线是口径调整日：那天 FIRE 目标变了，曲线因此出现台阶。"
+            "> 竖虚线是口径调整日：那天 FIRE 目标变了，不工作门槛那条线因此出现台阶。"
             "目标值逐日记在 `data/history.json` 里，可以查到。"
+        )
+        out.append(">")
+        out.append(
+            "> ⚠️ **出发门槛是 2026-10-31 才定义的概念**，此前的记录里没有它，"
+            "那段按当前门槛折算，所以是平滑线——**它是反事实，不是历史记录**。"
+            "它只由医疗应急、搬家、月开销决定，不含行情；两条线形状的差异本身就是信息。"
         )
         cap_note = str(cfg.display.get("capital_change_note") or "").strip()
         if cap_note:

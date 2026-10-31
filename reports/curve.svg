@@ -1,30 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 240" width="680" height="240" role="img" aria-label="FIRE 进度曲线">
-  <title>FIRE 进度曲线</title>
-  <desc>从 2026-09-24 到 2026-10-31 的完成度变化，最新 9.465%。竖虚线处为口径调整（FIRE 目标变化），不是资产变动。 2026-10-27 起分子纳入纳指100（当日跳升约 2.1 个点属口径变化，非资产增长）。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 262" width="680" height="262" role="img" aria-label="进度曲线：出发门槛与不工作门槛">
+  <title>进度曲线：出发门槛与不工作门槛</title>
+  <desc>从 2026-09-24 到 2026-10-31，不工作门槛完成度 9.47%，出发门槛 28.11%。竖虚线处为 FIRE 目标变化（分母变了），不是资产变动。 出发门槛自 2026-10-31 起逐日记录，之前按当前门槛折算，因此那一段是平滑线——它不是历史记录，是反事实。 2026-10-27 起分子纳入纳指100（当日跳升约 2.1 个点属口径变化，非资产增长）。</desc>
   <defs>
-    <linearGradient id="fireArea" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#d97706" stop-opacity="0.30"/>
-      <stop offset="100%" stop-color="#d97706" stop-opacity="0.02"/>
-    </linearGradient>
     <style>
       .fg-muted { fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
       .grid { stroke: #d8dee4; stroke-width: 1; stroke-dasharray: 3 4; }
       .mark { stroke: #b9c0c8; stroke-width: 1; stroke-dasharray: 2 3; }
-      .line { fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+      .line-dep { fill: none; stroke: #2563eb; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+      .line-fire { fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
       @media (prefers-color-scheme: dark) {
         .fg-muted { fill: #8b949e; }
         .grid { stroke: #30363d; }
         .mark { stroke: #4d545c; }
-        .line { stroke: #f0b429; }
+        .line-dep { stroke: #60a5fa; }
+        .line-fire { stroke: #f0b429; }
       }
     </style>
   </defs>
-  <line class="grid" x1="58" y1="26.0" x2="660" y2="26.0"/><text class="fg-muted" x="50" y="30.0" text-anchor="end" font-size="10">11.301%</text><line class="grid" x1="58" y1="71.0" x2="660" y2="71.0"/><text class="fg-muted" x="50" y="75.0" text-anchor="end" font-size="10">8.475%</text><line class="grid" x1="58" y1="116.0" x2="660" y2="116.0"/><text class="fg-muted" x="50" y="120.0" text-anchor="end" font-size="10">5.650%</text><line class="grid" x1="58" y1="161.0" x2="660" y2="161.0"/><text class="fg-muted" x="50" y="165.0" text-anchor="end" font-size="10">2.825%</text><line class="grid" x1="58" y1="206.0" x2="660" y2="206.0"/><text class="fg-muted" x="50" y="210.0" text-anchor="end" font-size="10">0.000%</text>
-  <line class="mark" x1="106.8" y1="26" x2="106.8" y2="206.0"/><text class="fg-muted" x="110.8" y="17" text-anchor="start" font-size="9">口径调整</text><line class="mark" x1="139.4" y1="26" x2="139.4" y2="206.0"/><text class="fg-muted" x="143.4" y="17" text-anchor="start" font-size="9">口径调整</text><line class="mark" x1="285.8" y1="26" x2="285.8" y2="206.0"/><text class="fg-muted" x="289.8" y="17" text-anchor="start" font-size="9">口径调整</text><line class="mark" x1="367.1" y1="26" x2="367.1" y2="206.0"/><text class="fg-muted" x="371.1" y="17" text-anchor="start" font-size="9">口径调整</text><line class="mark" x1="481.0" y1="26" x2="481.0" y2="206.0"/><text class="fg-muted" x="477.0" y="17" text-anchor="end" font-size="9">口径调整</text><line class="mark" x1="497.3" y1="26" x2="497.3" y2="206.0"/><text class="fg-muted" x="493.3" y="17" text-anchor="end" font-size="9">口径调整</text><line class="mark" x1="562.4" y1="26" x2="562.4" y2="206.0"/><text class="fg-muted" x="558.4" y="17" text-anchor="end" font-size="9">口径调整</text>
-  <path d="M58.0,167.4 L74.3,166.8 L90.5,167.3 L106.8,160.4 L123.1,161.5 L139.4,155.6 L155.6,155.6 L171.9,155.8 L188.2,154.6 L204.4,155.2 L220.7,154.7 L237.0,152.2 L253.2,152.3 L269.5,153.8 L285.8,152.4 L302.1,151.8 L318.3,152.2 L334.6,150.6 L350.9,150.4 L367.1,149.2 L383.4,149.9 L399.7,151.1 L415.9,150.2 L432.2,150.3 L448.5,148.4 L464.8,148.1 L481.0,108.4 L497.3,102.1 L513.6,104.4 L529.8,104.5 L546.1,106.3 L562.4,86.0 L578.6,86.6 L594.9,52.0 L611.2,50.4 L627.5,49.5 L643.7,55.1 L660.0,55.2 L660.0,206.0 L58.0,206.0 Z" fill="url(#fireArea)"/>
-  <path d="M58.0,167.4 L74.3,166.8 L90.5,167.3 L106.8,160.4 L123.1,161.5 L139.4,155.6 L155.6,155.6 L171.9,155.8 L188.2,154.6 L204.4,155.2 L220.7,154.7 L237.0,152.2 L253.2,152.3 L269.5,153.8 L285.8,152.4 L302.1,151.8 L318.3,152.2 L334.6,150.6 L350.9,150.4 L367.1,149.2 L383.4,149.9 L399.7,151.1 L415.9,150.2 L432.2,150.3 L448.5,148.4 L464.8,148.1 L481.0,108.4 L497.3,102.1 L513.6,104.4 L529.8,104.5 L546.1,106.3 L562.4,86.0 L578.6,86.6 L594.9,52.0 L611.2,50.4 L627.5,49.5 L643.7,55.1 L660.0,55.2" class="line"/>
-  <circle cx="660.0" cy="55.2" r="3.5" fill="#d97706"/>
-  <text class="fg-muted" x="58" y="228" font-size="10">2026-09-24</text>
-  <text class="fg-muted" x="660" y="228" text-anchor="end" font-size="10">2026-10-31</text>
-  <text class="fg-muted" x="660.0" y="45.2" text-anchor="end" font-size="11" font-weight="500">9.465%</text>
+  <rect x="58" y="12" width="10" height="10" rx="2" fill="#2563eb"/><text class="fg-muted" x="74" y="21" font-size="11">出发门槛</text><rect x="144" y="12" width="10" height="10" rx="2" fill="#d97706"/><text class="fg-muted" x="160" y="21" font-size="11">不工作门槛</text>
+  <line class="grid" x1="58" y1="48.0" x2="618" y2="48.0"/><text class="fg-muted" x="50" y="52.0" text-anchor="end" font-size="10">33.54%</text><line class="grid" x1="58" y1="93.0" x2="618" y2="93.0"/><text class="fg-muted" x="50" y="97.0" text-anchor="end" font-size="10">25.16%</text><line class="grid" x1="58" y1="138.0" x2="618" y2="138.0"/><text class="fg-muted" x="50" y="142.0" text-anchor="end" font-size="10">16.77%</text><line class="grid" x1="58" y1="183.0" x2="618" y2="183.0"/><text class="fg-muted" x="50" y="187.0" text-anchor="end" font-size="10">8.39%</text><line class="grid" x1="58" y1="228.0" x2="618" y2="228.0"/><text class="fg-muted" x="50" y="232.0" text-anchor="end" font-size="10">0.00%</text>
+  <line class="mark" x1="103.4" y1="48" x2="103.4" y2="228.0"/><line class="mark" x1="133.7" y1="48" x2="133.7" y2="228.0"/><line class="mark" x1="269.9" y1="48" x2="269.9" y2="228.0"/><line class="mark" x1="345.6" y1="48" x2="345.6" y2="228.0"/><line class="mark" x1="451.5" y1="48" x2="451.5" y2="228.0"/><line class="mark" x1="466.6" y1="48" x2="466.6" y2="228.0"/><line class="mark" x1="527.2" y1="48" x2="527.2" y2="228.0"/>
+  <path d="M58.0,123.3 L73.1,121.7 L88.3,123.0 L103.4,118.0 L118.5,120.6 L133.7,119.4 L148.8,119.3 L163.9,119.7 L179.1,117.1 L194.2,118.4 L209.4,117.3 L224.5,111.9 L239.6,112.1 L254.8,115.5 L269.9,116.8 L285.0,115.5 L300.2,116.3 L315.3,113.0 L330.4,112.5 L345.6,112.1 L360.7,113.4 L375.8,115.8 L391.0,114.1 L406.1,114.4 L421.2,110.3 L436.4,109.7 L451.5,108.5 L466.6,107.3 L481.8,109.9 L496.9,110.0 L512.1,112.2 L527.2,108.0 L542.3,108.6 L557.5,74.0 L572.6,72.4 L587.7,71.5 L602.9,77.1 L618.0,77.2" class="line-dep"/>
+  <path d="M58.0,215.0 L73.1,214.8 L88.3,214.9 L103.4,212.6 L118.5,213.0 L133.7,211.0 L148.8,211.0 L163.9,211.1 L179.1,210.7 L194.2,210.9 L209.4,210.7 L224.5,209.9 L239.6,209.9 L254.8,210.4 L269.9,210.0 L285.0,209.7 L300.2,209.9 L315.3,209.3 L330.4,209.3 L345.6,208.9 L360.7,209.1 L375.8,209.5 L391.0,209.2 L406.1,209.3 L421.2,208.6 L436.4,208.5 L451.5,195.1 L466.6,193.0 L481.8,193.8 L496.9,193.8 L512.1,194.4 L527.2,187.6 L542.3,187.8 L557.5,176.1 L572.6,175.6 L587.7,175.3 L602.9,177.2 L618.0,177.2" class="line-fire"/>
+  <circle cx="618.0" cy="177.2" r="3.5" fill="#d97706"/><text class="fg-muted" x="625.0" y="181.2" font-size="11" font-weight="500" fill="#d97706">9.47%</text><circle cx="618.0" cy="77.2" r="3.5" fill="#2563eb"/><text class="fg-muted" x="625.0" y="81.2" font-size="11" font-weight="500" fill="#2563eb">28.11%</text>
+  <text class="fg-muted" x="58" y="250" font-size="10">2026-09-24</text>
+  <text class="fg-muted" x="618" y="250" text-anchor="end" font-size="10">2026-10-31</text>
 </svg>

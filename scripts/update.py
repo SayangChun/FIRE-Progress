@@ -173,6 +173,11 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
         # 旧记录没有这个字段，读的时候要容忍缺失（用 .get）。
         "ndx100_cny": (data["assets"].get("ndx100") or {}).get("value_cny"),
         "target_cny": data["fire"]["target_cny"],
+        # 出发门槛（2026-10-31 新增）：与 target_cny 同理，逐日留档。
+        # 它只由医疗应急、搬家、月开销决定，不含行情——但月开销会改，
+        # 所以今天不记，事后同样无法精确重建。
+        # 旧记录没有这个字段，读的时候要容忍缺失（用 .get）。
+        "departure_cny": (data.get("departure") or {}).get("low_cny"),
         "basis_cny": basis.get("total_cny"),
         "profit_cny": basis.get("profit_cny"),
         # 比特币本金是「美元成本 × 当日汇率」，汇率不记下来事后无法审计
@@ -323,7 +328,9 @@ def main() -> int:
         print("→ 已写出 reports/progress.svg")
 
     if cfg.display.get("show_curve", True):
-        svg = rendermod.curve_svg(history, cfg)
+        svg = rendermod.curve_svg(
+            history, cfg, (data.get("departure") or {}).get("low_cny")
+        )
         (cfgmod.REPORTS_DIR / "curve.svg").write_text(svg, encoding="utf-8")
         print(f"→ 已写出 reports/curve.svg（{len(history)} 个数据点）")
 

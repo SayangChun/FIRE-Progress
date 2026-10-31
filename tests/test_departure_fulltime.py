@@ -189,6 +189,43 @@ no_ft.pop("fulltime")
 block2 = render_mod.render_block(no_ft, cfg, [])
 ok("没有 fulltime 时不出空表", "阶段 A 首选方案" not in block2)
 
+print("\n进度曲线：两条线")
+HIST = [
+    {"date": "2026-10-01", "total_cny": 10000.0, "progress_pct": 4.855, "target_cny": 205953.49},
+    {"date": "2026-10-15", "total_cny": 12000.0, "progress_pct": 5.827, "target_cny": 205953.49},
+    {"date": "2026-10-31", "total_cny": 19491.38, "progress_pct": 9.464, "target_cny": 205953.49},
+]
+two = render_mod.curve_svg(HIST, cfg, gate["low_cny"])
+ok(
+    "有 departure 时画出两条线",
+    'class="line-dep"' in two and 'class="line-fire"' in two,
+)
+ok("两条线各有末端标注", two.count('r="3.5"') == 2, str(two.count('r="3.5"')))
+ok(
+    "出发门槛那条线更高（同样的资产 ÷ 更小的门槛）",
+    f"{19491.38 / gate['low_cny'] * 100:.2f}%" in two,
+    "末端百分比没出现",
+)
+one = render_mod.curve_svg(HIST, cfg)
+ok(
+    "不给 departure 时只画一条（向后兼容）",
+    'class="line-dep"' not in one and 'class="line-fire"' in one,
+)
+ok(
+    "历史里自带 departure_cny 时优先用它，不退回传参",
+    'class="line-dep"' in render_mod.curve_svg(
+        [{**r, "departure_cny": 80000.0} for r in HIST], cfg
+    ),
+)
+
+print("\nhistory 逐日留档")
+from scripts import update as update_mod  # noqa: E402
+
+snap = update_mod.upsert_snapshot([], data)
+ok("upsert_snapshot 写入 departure_cny", snap[0].get("departure_cny") == gate["low_cny"],
+   str(snap[0].get("departure_cny")))
+ok("upsert_snapshot 仍写 target_cny", snap[0].get("target_cny") == data["fire"]["target_cny"])
+
 print()
 if failures:
     print(f"失败 {len(failures)} 项：")
