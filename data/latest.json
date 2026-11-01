@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-11-01T16:51:30+08:00",
-  "as_of_date": "2026-11-01",
+  "as_of": "2026-11-02T04:16:40+08:00",
+  "as_of_date": "2026-11-02",
   "fire": {
     "monthly_expense": 1461.0,
     "net_monthly_expense": 738.0,
@@ -233,13 +233,13 @@
     "override": false
   },
   "two_phase": {
-    "capital_cny": 20103.73,
+    "capital_cny": 20011.97,
     "annual_net_expense_cny": 8856.0,
     "rate": 0.043,
     "years": 2.4,
     "perpetual": false,
     "exhaust_age": 24.4,
-    "critical_rate": 0.4405,
+    "critical_rate": 0.4425,
     "graduation": "2029-06",
     "start_age": 22,
     "monthly_contribution": 2584,
@@ -277,10 +277,10 @@
     ]
   },
   "allocation": {
-    "btc_pct": 0.7301,
-    "sp500_pct": 0.0466,
-    "ndx100_pct": 0.2233,
-    "non_btc_pct": 0.2699,
+    "btc_pct": 0.7289,
+    "sp500_pct": 0.0468,
+    "ndx100_pct": 0.2243,
+    "non_btc_pct": 0.2711,
     "sp500_target_range": [
       0.25,
       0.3
@@ -289,14 +289,14 @@
     "note": "再平衡走场内标普500 ETF，不受场外每日 20 元限购约束"
   },
   "assets": {
-    "total_cny": 20103.73,
-    "progress": 0.09761293879027437,
-    "progress_pct": 9.7613,
-    "remaining_cny": 185849.76,
+    "total_cny": 20011.97,
+    "progress": 0.09716741456776047,
+    "progress_pct": 9.7167,
+    "remaining_cny": 185941.52,
     "btc": {
       "qty": 0.02812354,
-      "price_cny": 521893.59,
-      "value_cny": 14677.5,
+      "price_cny": 518630.94,
+      "value_cny": 14585.74,
       "snapshot_date": "2026-11-01",
       "stale_days": 0,
       "positions": [
@@ -394,42 +394,42 @@
     "sp500_cny": 939.53,
     "ndx100_cny": 4177.22,
     "total_cny": 18226.88,
-    "profit_cny": 1876.84
+    "profit_cny": 1785.09
   },
   "price": {
-    "btc_usdt": 78233.28,
+    "btc_usdt": 77744.2,
     "usd_cny": 6.670992,
-    "btc_cny": 521893.59,
+    "btc_cny": 518630.94,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-11-01T08:51:28+00:00"
+    "fetched_at": "2026-11-01T20:16:38+00:00"
   },
   "passive_income": {
     "hours_per_year": 8760,
-    "total_value_cny": 20103.73,
-    "weighted_rate": 0.10380532829722716,
-    "annual_cny": 2086.87,
-    "monthly_cny": 173.91,
-    "daily_cny": 5.717452054794521,
-    "hourly_cny": 0.23822716894977167,
-    "rate_low": 0.008097350015601273,
-    "rate_high": 0.20681419226768843,
-    "hourly_low_cny": 0.018582979452054796,
-    "hourly_high_cny": 0.4746273630136987,
+    "total_value_cny": 20011.97,
+    "weighted_rate": 0.10373105740616077,
+    "annual_cny": 2075.86,
+    "monthly_cny": 172.99,
+    "daily_cny": 5.687287671232877,
+    "hourly_cny": 0.23697031963470322,
+    "rate_low": 0.008134477334324031,
+    "rate_high": 0.2066161460394569,
+    "hourly_low_cny": 0.018582979452054792,
+    "hourly_high_cny": 0.4720086415525114,
     "monthly_expense": 1461.0,
-    "coverage": 0.11903205566963267,
+    "coverage": 0.11840406114533425,
     "withdrawal_rate": 0.043,
-    "monthly_at_withdrawal_cny": 72.04,
-    "hourly_at_withdrawal_cny": 0.09868266962633218,
+    "monthly_at_withdrawal_cny": 71.71,
+    "hourly_at_withdrawal_cny": 0.09823226294658524,
     "assets": [
       {
         "key": "btc",
         "label": "比特币",
-        "value_cny": 14677.5,
-        "weight": 0.7300883328132908,
+        "value_cny": 14585.74,
+        "weight": 0.7288507555225323,
         "rate": 0.12,
-        "annual_cny": 1761.3,
-        "hourly_cny": 0.20106157882340547,
+        "annual_cny": 1750.29,
+        "hourly_cny": 0.19980462994969314,
         "rate_low": 0.0,
         "rate_high": 0.25
       },
@@ -437,7 +437,7 @@
         "key": "sp500",
         "label": "标普500基金",
         "value_cny": 937.36,
-        "weight": 0.046626184358962604,
+        "weight": 0.046839970993378305,
         "rate": 0.06,
         "annual_cny": 56.24,
         "hourly_cny": 0.0064202739726027394,
@@ -448,7 +448,7 @@
         "key": "ndx100",
         "label": "纳指100基金",
         "value_cny": 4488.87,
-        "weight": 0.2232854828277465,
+        "weight": 0.22430927348408944,
         "rate": 0.06,
         "annual_cny": 269.33,
         "hourly_cny": 0.03074568493150685,
@@ -465,32 +465,32 @@
     "btc_cny_per_day": 66.04,
     "daily_cny": 86.04,
     "monthly_cny": 2581.28,
-    "assets_cny": 20103.73,
+    "assets_cny": 20011.97,
     "weights": {
-      "btc": 0.7301,
-      "sp500": 0.0466,
-      "ndx100": 0.2233
+      "btc": 0.7289,
+      "sp500": 0.0468,
+      "ndx100": 0.2243
     },
-    "weighted_rate": 0.1038,
+    "weighted_rate": 0.1037,
     "scenarios": {
       "low": {
         "rate": 0.0081,
-        "days": 2099,
-        "eta": "2032-07-31"
+        "days": 2100,
+        "eta": "2032-08-02"
       },
       "base": {
-        "rate": 0.1038,
-        "days": 1619,
-        "eta": "2031-04-08"
+        "rate": 0.1037,
+        "days": 1620,
+        "eta": "2031-04-10"
       },
       "high": {
-        "rate": 0.2068,
-        "days": 1339,
-        "eta": "2030-07-02"
+        "rate": 0.2066,
+        "days": 1340,
+        "eta": "2030-07-04"
       }
     },
-    "days_to_target": 1619,
-    "eta": "2031-04-08",
+    "days_to_target": 1620,
+    "eta": "2031-04-10",
     "reason": null
   },
   "departure": {
@@ -505,11 +505,11 @@
     "low_cny": 69383.0,
     "high_cny": 123766.0,
     "note": "双线进度条的第一条。它回答「能不能走」，¥205,953 回答「能不能不工作」。",
-    "assets_cny": 20103.73,
-    "progress_low": 0.2897500144719687,
-    "progress_high": 0.16243334400488504,
-    "remaining_low_cny": 49279.27,
-    "remaining_high_cny": 103662.27,
+    "assets_cny": 20011.97,
+    "progress_low": 0.2884275396902354,
+    "progress_high": 0.1616919669887336,
+    "remaining_low_cny": 49371.03,
+    "remaining_high_cny": 103754.03,
     "reached_low": false,
     "reached_high": false
   },
@@ -545,32 +545,32 @@
       "btc_cny_per_day": 66.04,
       "daily_cny": 157.82,
       "monthly_cny": 4734.71,
-      "assets_cny": 20103.73,
+      "assets_cny": 20011.97,
       "weights": {
-        "btc": 0.7301,
-        "sp500": 0.0466,
-        "ndx100": 0.2233
+        "btc": 0.7289,
+        "sp500": 0.0468,
+        "ndx100": 0.2243
       },
-      "weighted_rate": 0.1038,
+      "weighted_rate": 0.1037,
       "scenarios": {
         "low": {
           "rate": 0.0081,
           "days": 1159,
-          "eta": "2030-01-03"
+          "eta": "2030-01-04"
         },
         "base": {
-          "rate": 0.1038,
-          "days": 992,
-          "eta": "2029-07-20"
+          "rate": 0.1037,
+          "days": 993,
+          "eta": "2029-07-22"
         },
         "high": {
-          "rate": 0.2068,
-          "days": 874,
-          "eta": "2029-03-24"
+          "rate": 0.2066,
+          "days": 875,
+          "eta": "2029-03-26"
         }
       },
-      "days_to_target": 992,
-      "eta": "2029-07-20",
+      "days_to_target": 993,
+      "eta": "2029-07-22",
       "reason": null
     }
   },
@@ -606,32 +606,32 @@
       "btc_cny_per_day": 66.04,
       "daily_cny": 181.41,
       "monthly_cny": 5442.22,
-      "assets_cny": 20103.73,
+      "assets_cny": 20011.97,
       "weights": {
-        "btc": 0.7301,
-        "sp500": 0.0466,
-        "ndx100": 0.2233
+        "btc": 0.7289,
+        "sp500": 0.0468,
+        "ndx100": 0.2243
       },
-      "weighted_rate": 0.1038,
+      "weighted_rate": 0.1037,
       "scenarios": {
         "low": {
           "rate": 0.0081,
-          "days": 1010,
-          "eta": "2029-08-07"
+          "days": 1011,
+          "eta": "2029-08-09"
         },
         "base": {
-          "rate": 0.1038,
-          "days": 880,
-          "eta": "2029-03-30"
+          "rate": 0.1037,
+          "days": 881,
+          "eta": "2029-04-01"
         },
         "high": {
-          "rate": 0.2068,
+          "rate": 0.2066,
           "days": 786,
-          "eta": "2028-12-26"
+          "eta": "2028-12-27"
         }
       },
-      "days_to_target": 880,
-      "eta": "2029-03-30",
+      "days_to_target": 881,
+      "eta": "2029-04-01",
       "reason": null
     }
   },
@@ -640,5 +640,5 @@
     "sp500": true
   },
   "warnings": [],
-  "history_days": 39
+  "history_days": 40
 }
