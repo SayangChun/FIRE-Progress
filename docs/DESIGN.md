@@ -448,6 +448,8 @@ README 中 `<!-- FIRE:START -->` 与 `<!-- FIRE:END -->` 之间由脚本重写�
 
 ## 6. 代码结构与数据流
 
+## 6. 代码结构与数据流
+
 ```
 FIRE-Progress/
 ├── README.md                    # 展示层（自动区块 + 人工说明）
@@ -455,14 +457,21 @@ FIRE-Progress/
 ├── requirements.txt             # 仅 PyYAML（HTTP 用标准库，减少 CI 故障点）
 ├── docs/
 │   ├── DESIGN.md                # 本文档（实现方案）
-│   └── FIRE-LIFE-PLAN.md        # ★ 生活规划书（城市/住房/饮食/医疗/敏感性）
+│   ├── FIRE-WHY.md              # 为什么做这件事（不参与计算）
+│   ├── FIRE-LIFE-PLAN.md        # 生活规划书（城市/住房/饮食/医疗/敏感性）
+│   ├── FIRE-ROADMAP.md          # 两段式时间线（够撑多久）
+│   └── FIRE-SPENDING-CHECKLIST.md # 支出候选清单（130+ 项逐项判定）
 ├── scripts/
 │   ├── config.py                # 配置加载（支持 cfg.a.b 点号访问）
 │   ├── net.py                   # 极简 HTTP：JSON 与纯文本两种抓取，5xx 重试
-│   ├── lifeplan.py              # ★ 生活规划：月开销逐项汇总、校验、一次性支出
-│   ├── fire.py                  # ★ 计算核心：目标、进度、成本、外推
-│   ├── render.py                # README 区块 + SVG 进度条与曲线生成
-│   ├── update.py                # 主入口：抓取 → 计算 → 落盘 → 渲染
+│   ├── lifeplan.py              # 生活规划：月开销逐项汇总、校验、一次性支出
+│   ├── fire.py                  # 计算核心：目标、进度、成本、外推、两段式
+│   ├── fmt.py                   # 金额格式化（三个渲染器共用一份）
+│   ├── charts.py                # 三张 SVG：进度条、进度曲线、收益曲线
+│   ├── blocks.py                # README 各小节文案，各返回一段 markdown
+│   ├── render.py                # 组装：按顺序拼接小节 → 替换进手写 README
+│   ├── site.py                  # GitHub Pages 静态页（手机端）
+│   ├── update.py                # 主入口：抓取 → 计算 → 落盘 → 渲染 → 出图
 │   └── sources/
 │       ├── btc_repo.py          # 读取 0.1BTC 仓库的 holdings.csv
 │       ├── sp500.py             # 读取 sp500-dca 仓库的 portfolio.json
@@ -471,20 +480,35 @@ FIRE-Progress/
 ├── data/
 │   ├── history.json             # 按天的进度快照（曲线数据源）
 │   └── latest.json              # 最近一次结果（兜底缓存，必须入库）
-├── reports/
-│   ├── progress.svg             # 完成度进度条（自绘）
-│   ├── curve.svg                # 进度曲线（自绘）
-│   └── profit.svg               # 收益曲线（双面板，自绘）
+├── reports/                     # 三张 SVG（由 Actions 生成，入库供 README 引用）
+├── site/                        # 静态页生成结果（gitignore，只存在于 CI 与本地）
 ├── tests/
 │   ├── fixtures/                # 样例数据，供 --mock 使用
-│   ├── test_commit_gate.py      # 提交门控的回归测试（22 项）
-│   ├── test_fire_core.py        # 分子口径的回归测试（19 项，2026-10-15 替代 test_emergency.py）
-│   ├── test_labor_income.py     # 兼职收入口径的回归测试（26 项，2026-10-20 新增）
-│   ├── test_life_plan.py        # 生活规划口径的回归测试（31 项）
-│   ├── test_passive_income.py   # 被动收入口径的回归测试（20 项）
-│   └── test_two_phase.py        # 两段式口径的回归测试（20 项，2026-10-27 新增）
+│   ├── test_commit_gate.py      # 提交门控
+│   ├── test_departure_fulltime.py # 出发门槛与全职情景
+│   ├── test_fire_core.py        # 分子口径（加资产不改目标）
+│   ├── test_labor_income.py     # 兼职收入（只扣增量）
+│   ├── test_life_plan.py        # 月开销与一次性支出
+│   ├── test_passive_income.py   # 被动收入（不参与目标）
+│   ├── test_site.py             # 静态页（资产遍历、隐私遮蔽）
+│   └── test_two_phase.py        # 两段式
 └── .github/workflows/update.yml
 ```
+
+**为什么把渲染拆成四个文件**：原来一个 `render.py` 同时管画图、写文案、拼顺序，
+改一句措辞要在 1300 行里找位置。现在 `charts.py` 只画图、`blocks.py` 只写小节、
+`render.py` 只管顺序，`fmt.py` 放共用格式化——改哪一层去哪个文件，不用通读。
+拆分前后用同一份数据跑过，六个输出逐字一致。
+
+> `net.py` 而不是 `http.py`：脚本目录会进入 `sys.path[0]`，叫 `http.py` 会
+> **覆盖标准库的 `http` 包**，导致 `urllib.request` 导入失败。这个问题已经出现过。
+
+> **进度标识全部自绘 SVG，不用 shields.io 徽章**：shields.io 是不可控的外部服务，
+> 大陆网络下时通时不通（本地实测直连与代理均不可达）；而且 badge 的 label 含中文时
+> 若不 URL 编码，会直接返回「404 badge not found」。
+> 文本进度条（`█░▎`）同样不可靠——这些块字符在 Unicode 里的东亚宽度是
+> **Ambiguous**，中文环境按全角渲染、英文环境按半角，一旦 fallback 到不同字体，
+> 整条进度条就会宽度错乱。SVG 按坐标绘制，与字体、与外部服务都无关。
 
 > `net.py` 而不是 `http.py`：脚本目录会进入 `sys.path[0]`，叫 `http.py` 会
 > **覆盖标准库的 `http` 包**，导致 `urllib.request` 导入失败。这个问题已经出现过。
@@ -590,3 +614,4 @@ git push -u origin main
 | **2026-10-31** | **修正 `_days_to_target()` 的反解错误**。入参 `remaining` 是**缺口**（目标 − 起点），但分子写成 `remaining + C/r`，等于在解 `FV = 缺口`，**系统性低估天数**；资产越接近目标越离谱（A→T 时算出「已到达」）。改为 `num = remaining + start + daily/rd`（即 `目标 + C/r`）。当日实测：错解 1486 天（2030-11-25），正解 1626 天（2031-04-14），差 4.6 个月。`annual ≤ 0` 的纯定投分支不受影响，7 个既有测试全部通过 |
 | **2026-10-31** | **全职首选形态定为图书馆保安 + 包吃住**（他明确向往图书馆工作，因喜欢看书；保安岗普遍包吃住，真实自付极少）。阶段 A 个人月开销由 ¥1,461 降至约 ¥556（房租/取暖/物业费/食品/饮用水由单位提供）。`config.yaml` 新增 `fire.fulltime.room_and_board_covered` 与 `covered_keys`；`lifeplan.monthly_excluding()` 求阶段 A 个人开销；`fire.compute()` 用它对全职盈余改用阶段 A 开销，盈余 ¥1,278.33 → 约 ¥2,183.33，月投约 ¥4,734。`render._fulltime_block` 在包吃住时改显「阶段 A 个人月开销」。`tests/test_departure_fulltime.py` 钉死：**包吃住只改阶段 A 盈余与外推速度，绝不改 `target_cny`**；关掉开关精确退回旧盈余。路线图 §1.2/§1.3/§3.5 同步，新增 §3.5.7。 | ¥205,953.49 不变 |
 | **2026-10-31** | **阶段 A 备选位置建模：北京图书馆保安（住宿舍不回家）**（§3.5.8）。`config.yaml` 新增 `fire.fulltime_beijing`（enabled，工资/通勤为**占位假设**：¥20/h、宿舍在馆内＝通勤与餐补 0，包吃住同牡丹江）；`lifeplan.fulltime_income()` 支持 `key` 参数读取不同全职变体；`fire.compute()` 用同一套逻辑构建 `fulltime`（牡丹江）与 `fulltime_beijing`（北京），二者都**不参与 `target_cny`**，`render._fulltime_block` 支持 `key/primary` 渲染「备选方案」小节并补占位假设提示，外推段补北京第二条线。占位假设下北京岗净收入 ¥3,456.67、盈余 ¥2,900.67、对照到 ¥205,953 约 2.4 年（比牡丹江 2.7 年略快）。⚠️ **目标 ¥205,953.49 与月开销 ¥1,461 不变**；北京不工作真实目标未建模，外推对照尺沿用牡丹江口径。 | ¥205,953.49 不变 |
+| 2026-11-01 | **渲染层拆成四个模块**（纯重构，不动任何数字）：`render.py` 1304 行拆为 `fmt.py`（金额格式化）、`charts.py`（三张 SVG）、`blocks.py`（README 小节文案）、`render.py`（组装，450 行）；`site.py` 删掉自己那份 `money()`，改用 `fmt.money`，避免两份实现分叉。拆分前后用同一份 `latest.json` 跑过，`render_block` / `curve` / `profit` / `progress` / `dual` / `default_readme` 六个输出**逐字一致**。另删除两个代码里从未引用的配置键（`display.curve_days`、`timeline.one_off_reference`）。**FIRE 目标 ¥205,953.49、月开销、完成度全部不变** |

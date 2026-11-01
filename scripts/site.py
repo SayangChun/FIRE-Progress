@@ -16,6 +16,7 @@ import shutil
 from pathlib import Path
 
 from . import config as cfgmod
+from .fmt import money
 
 # 资产顺序固定，避免 dict 顺序变化导致页面上下跳
 ASSET_LABELS = {
@@ -169,15 +170,6 @@ footer {
 """
 
 
-def money(value, cfg, decimals: int = 2) -> str:
-    if value is None:
-        return "—"
-    if cfg.privacy.get("mode") == "masked":
-        return "已隐藏"
-    symbol = cfg.fire.get("currency_symbol", "¥")
-    return f"{symbol}{value:,.{decimals}f}"
-
-
 def pct(value: float, decimals: int = 1) -> str:
     return f"{value:.{decimals}f}%"
 
@@ -296,7 +288,7 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
     if pi.get("hourly_cny") is not None:
         passive_html = f"""
       <h2>每小时被动收入</h2>
-      <p><strong>{money(pi['hourly_cny'], cfg, 2)}</strong> / 小时 ·
+      <p><strong>{money(pi['hourly_cny'], cfg, decimals=2)}</strong> / 小时 ·
         {money(pi['monthly_cny'], cfg)} / 月 ·
         {money(pi['annual_cny'], cfg)} / 年</p>
       <p class="muted">按当前持仓和预期年化 {pct((pi['weighted_rate'] or 0) * 100)} 加权算出来的，
