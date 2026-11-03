@@ -483,13 +483,13 @@ def compute(
             "reached_high": total >= gate["high_cny"],
         }
 
-    # --- 全职情景（2026-10-31 新增，含北京备选）---
+    # --- 全职情景（2026-11-03 起为阶段 A 主线）---
     # 只展示现金流与外推，**绝不进入 target_cny**：
     # 全职净收入 > 月开销，代进目标公式会得到负数，那个负数没有意义。
-    # fulltime = 牡丹江首选；fulltime_beijing = §3.5.8 备选位置（北京图书馆保安）。
+    # fulltime = 北京（起点城市）；fulltime_mudanjiang = 备选城市（牡丹江）。
     fulltime = None
-    fulltime_beijing = None
-    for _key, _slot in (("fulltime", "fulltime"), ("fulltime_beijing", "fulltime_beijing")):
+    fulltime_mudanjiang = None
+    for _key, _slot in (("fulltime", "fulltime"), ("fulltime_mudanjiang", "fulltime_mudanjiang")):
         ft = lifeplan_mod.fulltime_income(cfg, _key)
         if not ft:
             continue
@@ -513,7 +513,7 @@ def compute(
         if _slot == "fulltime":
             fulltime = _res
         else:
-            fulltime_beijing = _res
+            fulltime_mudanjiang = _res
 
     # --- 本金 ---
     # 标普500：优先取 config 手工值，否则用 sp500-dca 仓库的累计投入（精确值）
@@ -548,7 +548,7 @@ def compute(
             cfg.get("expected_return"),
         )
 
-    for _ft in (fulltime, fulltime_beijing):
+    for _ft in (fulltime, fulltime_mudanjiang):
         if _ft is not None and proj is not None:
             # 全职盈余并入标普500 日投：比特币日投是固定 USDT 额度，不随盈余变。
             # 盈余 ≤ 0 时不并入——否则会静默拉长外推，看起来像「全职更慢」。
@@ -641,7 +641,7 @@ def compute(
         # 出发门槛回答「能不能走」，全职情景回答「走之后攒得多快」。
         "departure": departure,
         "fulltime": fulltime,
-        "fulltime_beijing": fulltime_beijing,
+        "fulltime_mudanjiang": fulltime_mudanjiang,
         "sources": {
             "btc": btc.get("available", False),
             "sp500": sp500.get("available", False),

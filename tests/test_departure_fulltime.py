@@ -81,12 +81,12 @@ ok("下沿落在 ¥6–8 万区间", 60000 < gate["low_cny"] < 80000, str(gate["
 off_gate = variant(**{"departure.enabled": False})
 ok("关闭时返回 None", lifeplan_mod.departure_gate(off_gate) is None)
 
-print("\n全职净收入")
+print("\n全职净收入（北京起点）")
 ft = lifeplan_mod.fulltime_income(cfg)
 ok("开启时返回 dict", isinstance(ft, dict))
 ok(
     "毛收入 = 周工时 × 52÷12 × 时薪",
-    abs(ft["gross_monthly_cny"] - 40 * 52 / 12 * 17) < 0.02,
+    abs(ft["gross_monthly_cny"] - 40 * 52 / 12 * 20) < 0.02,
     str(ft["gross_monthly_cny"]),
 )
 ok(
@@ -94,18 +94,17 @@ ok(
     abs(ft["net_monthly_cny"] - (ft["gross_monthly_cny"] - ft["cost_monthly_cny"])) < 0.02,
     str(ft["net_monthly_cny"]),
 )
-ok("净收入约 ¥2,739", abs(ft["net_monthly_cny"] - 2739.33) < 0.05, str(ft["net_monthly_cny"]))
+ok("净收入约 ¥3,456.67", abs(ft["net_monthly_cny"] - 3456.67) < 0.05, str(ft["net_monthly_cny"]))
 ok(
-    "只扣增量：餐食是 ¥154（22 天 × ¥7），不是全天饭钱",
-    abs(ft["meal_cny"] - 154) < 0.01,
-    str(ft["meal_cny"]),
+    "宿舍在馆内：餐食与交通增量均为 0",
+    abs(ft["meal_cny"]) < 0.01 and abs(ft["transport_cny"]) < 0.01,
+    f'{ft["meal_cny"]} / {ft["transport_cny"]}',
 )
 ok(
-    "等效时薪低于净时薪（通勤计入占用）",
-    ft["effective_hourly_cny"] < ft["net_hourly_cny"],
-    f'{ft["effective_hourly_cny"]} vs {ft["net_hourly_cny"]}',
+    "月占用 173.33 小时（坐岗无通勤）",
+    abs(ft["occupied_hours_per_month"] - 40 * 52 / 12) < 0.5,
+    str(ft["occupied_hours_per_month"]),
 )
-ok("月占用 195 小时（含 1h 通勤 × 21.67 天）", abs(ft["occupied_hours_per_month"] - 195) < 0.5)
 
 off_ft = variant(**{"fire.fulltime.enabled": False})
 ok("关闭时返回 None", lifeplan_mod.fulltime_income(off_ft) is None)
@@ -113,7 +112,7 @@ ok("关闭时返回 None", lifeplan_mod.fulltime_income(off_ft) is None)
 print("\n全职盈余")
 ok(
     "盈余 = 净收入 − 月开销（不是 − 净月开销）",
-    abs((ft["net_monthly_cny"] - monthly) - 1278.33) < 0.05,
+    abs((ft["net_monthly_cny"] - monthly) - 1995.67) < 0.05,
     str(ft["net_monthly_cny"] - monthly),
 )
 ok(
@@ -169,12 +168,12 @@ data = fire_mod.compute(
 ok("compute 带 departure", isinstance(data.get("departure"), dict))
 ok("compute 带 fulltime", isinstance(data.get("fulltime"), dict))
 ok("compute 的目标未被全职影响", abs(data["fire"]["target_cny"] - target) < 0.01)
-# 关掉包吃住必须精确退回旧盈余（¥1,278.33），且目标仍不变
+# 关掉包吃住必须精确退回「自付全款」的盈余（¥1,995.67），且目标仍不变
 no_rb = variant(**{"fire.fulltime.room_and_board_covered": False})
 data_no_rb = fire_mod.compute(no_rb, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
 ok(
-    "关掉包吃住后阶段 A 盈余退回 ¥1,278.33",
-    abs(data_no_rb["fulltime"]["surplus_monthly_cny"] - 1278.33) < 0.05,
+    "关掉包吃住后阶段 A 盈余退回 ¥1,995.67",
+    abs(data_no_rb["fulltime"]["surplus_monthly_cny"] - 1995.67) < 0.05,
     str(data_no_rb["fulltime"]["surplus_monthly_cny"]),
 )
 ok("关掉包吃住后目标仍不变", abs(data_no_rb["fire"]["target_cny"] - 205953.49) < 0.01)
@@ -188,8 +187,8 @@ ok(
     data["fulltime"]["room_and_board_covered"] is True,
 )
 ok(
-    "包吃住后盈余 ≈ ¥2,183（净收入 ¥2,739 − 阶段 A ¥556），大于旧 ¥1,278",
-    abs(data["fulltime"]["surplus_monthly_cny"] - 2183.33) < 1.0,
+    "包吃住后盈余 ≈ ¥2,901（净收入 ¥3,457 − 阶段 A ¥556）",
+    abs(data["fulltime"]["surplus_monthly_cny"] - 2900.67) < 1.0,
     str(data["fulltime"]["surplus_monthly_cny"]),
 )
 ok(
@@ -209,31 +208,31 @@ ok(
     f'{ft_proj["days_to_target"]} vs {data["projection"]["days_to_target"]}',
 )
 
-print("\n北京备选位置（§3.5.8）")
-bj = data.get("fulltime_beijing")
-ok("compute 带 fulltime_beijing（备选位置）", isinstance(bj, dict))
-ok("北京备选不改变 FIRE 目标", abs(data["fire"]["target_cny"] - target) < 0.01)
+print("\n牡丹江备选城市")
+mdj = data.get("fulltime_mudanjiang")
+ok("compute 带 fulltime_mudanjiang（备选城市）", isinstance(mdj, dict))
+ok("牡丹江备选不改变 FIRE 目标", abs(data["fire"]["target_cny"] - target) < 0.01)
 ok(
-    "北京备选阶段 A 个人开销也≈¥556（同 covered_keys 扣除）",
-    abs(bj["stage_a_monthly_expense"] - 556) < 1.0,
-    str(bj["stage_a_monthly_expense"]),
+    "牡丹江备选阶段 A 个人开销也≈¥556（同 covered_keys 扣除）",
+    abs(mdj["stage_a_monthly_expense"] - 556) < 1.0,
+    str(mdj["stage_a_monthly_expense"]),
 )
 ok(
-    "北京备选净收入 ≈ ¥3,456.67（¥20/h × 173.33h − 装备 ¥10）",
-    abs(bj["net_monthly_cny"] - 3456.67) < 1.0,
-    str(bj["net_monthly_cny"]),
+    "牡丹江备选净收入 ≈ ¥2,739.33（¥17/h × 173.33h − 通勤 ¥43.33 − 餐食 ¥154 − 装备 ¥10）",
+    abs(mdj["net_monthly_cny"] - 2739.33) < 1.0,
+    str(mdj["net_monthly_cny"]),
 )
 ok(
-    "北京备选盈余 ≈ ¥2,900.67（净 ¥3,456.67 − 阶段 A ¥556），高于牡丹江 ¥2,183",
-    abs(bj["surplus_monthly_cny"] - 2900.67) < 1.0,
-    str(bj["surplus_monthly_cny"]),
+    "牡丹江备选盈余 ≈ ¥2,183.33（净 ¥2,739.33 − 阶段 A ¥556），低于北京 ¥2,900.67",
+    abs(mdj["surplus_monthly_cny"] - 2183.33) < 1.0,
+    str(mdj["surplus_monthly_cny"]),
 )
-bj_proj = bj.get("projection")
-ok("北京备选外推存在", isinstance(bj_proj, dict))
+mdj_proj = mdj.get("projection")
+ok("牡丹江备选外推存在", isinstance(mdj_proj, dict))
 ok(
-    "北京备选外推比牡丹江备选更早达标（攒钱更快）",
-    bj_proj["days_to_target"] < ft_proj["days_to_target"],
-    f'{bj_proj["days_to_target"]} vs {ft_proj["days_to_target"]}',
+    "北京起点外推比牡丹江备选更早达标（攒钱更快）",
+    ft_proj["days_to_target"] < mdj_proj["days_to_target"],
+    f'{ft_proj["days_to_target"]} vs {mdj_proj["days_to_target"]}',
 )
 
 print("\n渲染降级")
@@ -259,9 +258,9 @@ ok(
     "README 全职小节显示阶段 A 个人月开销（包吃住）",
     "阶段 A 个人月开销（包吃住" in block,
 )
-ok("README 出现北京备选小节", "阶段 A 备选方案" in block)
-ok("北京备选小节标为 §3.5.8 备选道路", "§3.5.8" in block and "备选道路" in block)
-ok("外推段给出北京备选的第二条外推", "备选：阶段 A 在北京做同等全职" in block)
+ok("README 出现牡丹江备选小节", "阶段 A 备选城市" in block)
+ok("牡丹江备选小节标为备选城市", "备选城市" in block and "牡丹江" in block)
+ok("外推段给出牡丹江备选的第二条外推", "备选城市：牡丹江图书馆保安" in block)
 
 print("\n北京不工作独立口径（beijing-rent-minimal profile）")
 cfg_bj = cfgmod.load()

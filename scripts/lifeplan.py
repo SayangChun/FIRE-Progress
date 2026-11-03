@@ -278,8 +278,8 @@ def labor_income(cfg) -> dict | None:
 def fulltime_income(cfg, key: str = "fulltime") -> dict | None:
     """全职净收入。fire.<key>.enabled 为 false 时返回 None。
 
-    默认 key="fulltime" 读取牡丹江首选方案；传入 "fulltime_beijing" 等
-    其它 key 可读取备选位置（见 config.yaml 的 fulltime_beijing 与
+    默认 key="fulltime" 读取北京起点方案；传入 "fulltime_mudanjiang" 等
+    其它 key 可读取备选城市（见 config.yaml 的 fulltime_mudanjiang 与
     docs/FIRE-ROADMAP.md §3.5.8）。所有变体共用同一套现金流算法，
     且**都不参与 FIRE 目标计算**。
 

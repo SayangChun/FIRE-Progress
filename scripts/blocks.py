@@ -54,9 +54,9 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
     所以这里只展示三件事：净收入多少、每月盈余多少、以及
     「若这笔盈余从今天起就并入定投，达标会提前多久」。
 
-    key 指定读取 data 里的哪个全职变体（"fulltime" 牡丹江首选，
-    "fulltime_beijing" §3.5.8 备选）；primary=False 时标题改为「备选方案」
-    并追加一条「备选、工资为占位假设」的提示。
+    key 指定读取 data 里的哪个全职变体（"fulltime" 北京起点，
+    "fulltime_mudanjiang" 备选城市）；primary=False 时标题改为「备选城市」
+    并追加一条「备选城市、岗位数量待确认」的提示。
     """
     ft = data.get(key)
     if not ft:
@@ -64,7 +64,7 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
 
     out: list[str] = []
     out.append("<details>")
-    prefix = "阶段 A 首选方案" if primary else "阶段 A 备选方案"
+    prefix = "阶段 A 首选方案" if primary else "阶段 A 备选城市"
     out.append(f"<summary>{prefix} · {ft.get('label') or '全职'}</summary>")
     out.append("")
     out.append(
@@ -93,13 +93,14 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
 
     if not primary:
         out.append(
-            "> ⚠️ 这是 §3.5.8 的**备选道路**，尚未取代牡丹江首选方案；"
+            "> ⚠️ 这是**备选城市**（牡丹江），尚未取代北京起点方案；"
         )
         out.append(
-            "> 工资/通勤已按 2026-10-31 招聘实况校准（北京图书馆岗 ¥3,000–6,000、包吃住+馆内宿舍+坐岗），"
+            "> 牡丹江保安真实月薪 ¥1,800–4,500，取 ¥17/h 为保守下限；"
+            "但当地图书馆岗位数量未知，需实地确认。"
         )
         out.append(
-            "> 但「北京不工作状态的真实目标」尚未建模，外推仍沿用 ¥205,953.49 作对照尺（苹果比橘子，仅供对照）。"
+            "> 外推仍沿用 ¥205,953.49 作对照尺（这是「牡丹江不工作」的口径，仅供对照）。"
         )
         out.append("")
 
