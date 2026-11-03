@@ -448,7 +448,11 @@ def compute(
     # 目标按「组合需覆盖的月开销」算：咖啡师 FIRE 下兼职收入先抵扣一部分。
     # plan_summary 为 None（life_plan 未启用）时退回全部月开销，行为与旧口径一致。
     net_monthly = (plan_summary or {}).get("net_monthly_expense", monthly)
-    target = target_cny(net_monthly, rate)
+    # ⚠️ 不工作门槛按 target_profile 算（默认 = 当前 profile，见 lifeplan.target_profile_name）。
+    # 与 net_monthly 分开，避免「阶段 A 换城市」把进度条分母一起拖走：
+    # 切到 beijing-rent-minimal 时，月开销变 ¥4,084 用于门槛，但 target 仍按牡丹江 ¥1,461 算。
+    target_net = (plan_summary or {}).get("target_net_monthly_expense", net_monthly)
+    target = target_cny(target_net, rate)
 
     btc_qty = float(btc.get("total_btc") or 0.0)
     btc_value = btc_qty * float(price["btc_cny"])

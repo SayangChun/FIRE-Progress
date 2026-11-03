@@ -58,11 +58,11 @@ def enabled(cfg) -> bool:
     return bool(_plan(cfg).get("enabled"))
 
 
-def active_profile(cfg) -> dict:
+def _profile_by_name(cfg, name: str) -> dict:
+    """按名字取 profile（含存在性校验）。名字不存在时直接报错，不回落。"""
     plan = _plan(cfg)
     if not plan.get("enabled"):
         raise LifePlanError("life_plan.enabled 为 false，无法读取生活规划")
-    name = plan.get("profile")
     profiles = plan.get("profiles") or {}
     if not profiles:
         raise LifePlanError("life_plan.profiles 为空")
@@ -75,9 +75,36 @@ def active_profile(cfg) -> dict:
     return prof
 
 
-def items(cfg) -> list[dict]:
-    """当前方案的逐项月开销（已做字段与符号校验）。"""
-    prof = active_profile(cfg)
+def active_profile(cfg) -> dict:
+    return _profile_by_name(cfg, _plan(cfg).get("profile"))
+
+
+def target_profile_name(cfg) -> str:
+    """计算 target_cny 用哪个 profile。默认等于当前 profile。
+
+    单独指定是为了拆开两件事：
+
+      - `profile` 决定「阶段 A 在哪个城市」，影响月开销、阶段 A 个人开销与出发门槛；
+      - `target_profile` 决定「不工作门槛按哪个城市算」。
+
+    2026-11-03 起阶段 A 可能是多城市，但他真正会「独自不工作」的城市只有牡丹江。
+    若不留这一项，切到 `beijing-rent-minimal` 会把目标从 ¥205,953 拉到 ¥937,953，
+    进度条从 9.5% 塌到 2.1%——那个数不是目标，是「独自在北京不工作」的假设值。
+    """
+    plan = _plan(cfg)
+    return plan.get("target_profile") or plan.get("profile")
+
+
+def items(cfg, profile_name: str | None = None) -> list[dict]:
+    """逐项月开销（已做字段与符号校验）。
+
+    profile_name 为空时用当前 profile；传名字可读其它 profile（用于 target_profile）。
+    """
+    prof = (
+        active_profile(cfg)
+        if profile_name is None
+        else _profile_by_name(cfg, profile_name)
+    )
     raw = prof.get("items") or []
     if not raw:
         raise LifePlanError(f"方案 {prof['profile_name']!r} 的 items 为空")
@@ -110,8 +137,8 @@ def items(cfg) -> list[dict]:
     return out
 
 
-def monthly_total(cfg) -> float:
-    return round(sum(it["monthly"] for it in items(cfg)), 2)
+def monthly_total(cfg, profile_name: str | None = None) -> float:
+    return round(sum(it["monthly"] for it in items(cfg, profile_name)), 2)
 
 
 def monthly_excluding(cfg, covered_keys: list[str] | None) -> float:
@@ -381,11 +408,20 @@ def summary(cfg) -> dict:
     extra = one_off_total(cfg)
     labor = labor_income(cfg)
     net_monthly = _net_after_labor(monthly, labor)
-    target = _target(net_monthly, rate)
+
+    # 不工作门槛按 target_profile 算（默认 = 当前 profile）。
+    # 两者不同时，进度条的分母不随「阶段 A 在哪个城市」漂移。
+    target_name = target_profile_name(cfg)
+    if target_name == prof["profile_name"]:
+        target_net = net_monthly
+    else:
+        target_net = _net_after_labor(monthly_total(cfg, target_name), labor)
+    target = _target(target_net, rate)
 
     return {
         "enabled": True,
         "profile": prof["profile_name"],
+        "target_profile": target_name,
         "city": prof.get("city"),
         "province": prof.get("province"),
         "housing": prof.get("housing"),
@@ -394,7 +430,10 @@ def summary(cfg) -> dict:
         "headline": prof.get("headline") or "",
         "monthly_expense": monthly,
         # 组合需要覆盖的月开销：月开销 − 兼职净收入。没配兼职时等于月开销。
+        # ⚠️ 这是「当前城市」的净支出，用于阶段 A 与出发门槛；
+        #    target_cny 用的是下面那个「基准城市」的净支出。
         "net_monthly_expense": net_monthly,
+        "target_net_monthly_expense": round(target_net, 2),
         "labor_income": labor,
         "annual_expense": round(monthly * 12, 2),
         "target_cny": round(target, 2),
@@ -435,6 +474,9 @@ def resolve_monthly(cfg) -> tuple[float, dict | None]:
                 "derived_monthly_expense": data["monthly_expense"],
                 "monthly_expense": monthly,
                 "net_monthly_expense": net_monthly,
+                # 覆盖是「整体试算」：目标也从覆盖值重算，所以基准口径必须一起更新，
+                # 否则 fire.compute() 会读到 summary() 留下的旧值。
+                "target_net_monthly_expense": round(net_monthly, 2),
                 "annual_expense": round(monthly * 12, 2),
                 "target_cny": round(target, 2),
                 "target_with_one_off": round(target + data["one_off_total"], 2),

@@ -149,12 +149,30 @@ if len(profile_names) >= 2:
         f"各方案月开销：{totals}",
     )
     for name in profile_names:
-        alt = variant(**{"life_plan.profile": name})
+        # 自洽性检查必须把 target_profile 也切到同一方案，
+        # 否则目标会按 config 里钉住的基准城市算，和自身净月开销对不上。
+        alt = variant(**{"life_plan.profile": name, "life_plan.target_profile": name})
         _, alt_plan = lifeplan_mod.resolve_monthly(alt)
         check(
             f"{name} 的目标与自身净月开销自洽",
             abs(alt_plan["target_cny"] - alt_plan["net_monthly_expense"] * 12 / RATE) < 0.01,
         )
+
+    # target_profile 钉住时，换「阶段 A 所在城市」不应改变目标——
+    # 否则切到北京会让进度条分母从 ¥205,953 跳到 ¥937,953。
+    base_target = lifeplan_mod.summary(cfg)["target_cny"]
+    pinned = variant(**{"life_plan.profile": "beijing-rent-minimal"})
+    _, pinned_plan = lifeplan_mod.resolve_monthly(pinned)
+    check(
+        "target_profile 钉住时，换 profile 不改目标",
+        abs(pinned_plan["target_cny"] - base_target) < 0.01,
+        f'{pinned_plan["target_cny"]} vs {base_target}',
+    )
+    check(
+        "但月开销确实换成了北京口径",
+        abs(pinned_plan["monthly_expense"] - 4084) < 1.0,
+        str(pinned_plan["monthly_expense"]),
+    )
 else:
     print("  skip 只定义了一个方案，跳过切换测试")
 

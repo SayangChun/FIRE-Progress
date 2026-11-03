@@ -262,20 +262,43 @@ ok("README 出现牡丹江备选小节", "阶段 A 备选城市" in block)
 ok("牡丹江备选小节标为备选城市", "备选城市" in block and "牡丹江" in block)
 ok("外推段给出牡丹江备选的第二条外推", "备选城市：牡丹江图书馆保安" in block)
 
-print("\n北京不工作独立口径（beijing-rent-minimal profile）")
+print("\n城市切换：月开销随 profile，目标随 target_profile")
 cfg_bj = cfgmod.load()
 cfg_bj["life_plan"]["profile"] = "beijing-rent-minimal"
 data_bj = fire_mod.compute(cfg_bj, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
 tgt_bj = data_bj["fire"]["target_cny"]
-ok("北京 profile 不工作目标 > 牡丹江（北京花销更高）", tgt_bj > target, f"{tgt_bj:.0f} vs {target:.0f}")
 ok(
-    "北京 profile 不工作目标在合理区间（¥70万–120万，估算）",
-    700000 < tgt_bj < 1200000,
+    "切到北京 profile 后月开销 = ¥4,084（阶段 A 与门槛用）",
+    abs(data_bj["fire"]["monthly_expense"] - 4084) < 1.0,
+    str(data_bj["fire"]["monthly_expense"]),
+)
+# 核心：换城市不能把进度条分母一起拖走。target_profile 钉在牡丹江。
+ok(
+    "切到北京 profile 后目标仍钉在牡丹江口径 ¥205,953.49",
+    abs(tgt_bj - 205953.49) < 0.01,
     str(tgt_bj),
+)
+ok(
+    "life_plan 摘要标出 target_profile = mudanjiang-rent-minimal",
+    (data_bj.get("life_plan") or {}).get("target_profile") == "mudanjiang-rent-minimal",
+    str((data_bj.get("life_plan") or {}).get("target_profile")),
 )
 ok(
     "切到北京 profile 不污染牡丹江目标",
     abs(data["fire"]["target_cny"] - target) < 0.01,
+)
+# 想看「独自在北京不工作」的参考值，必须同时把 target_profile 也切过去。
+cfg_bj_ref = cfgmod.load()
+cfg_bj_ref["life_plan"]["profile"] = "beijing-rent-minimal"
+cfg_bj_ref["life_plan"]["target_profile"] = "beijing-rent-minimal"
+data_bj_ref = fire_mod.compute(
+    cfg_bj_ref, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[]
+)
+tgt_bj_ref = data_bj_ref["fire"]["target_cny"]
+ok(
+    "显式切 target_profile 时，北京独自不工作参考目标 ≈ ¥937,953",
+    abs(tgt_bj_ref - 937953.49) < 5.0,
+    str(tgt_bj_ref),
 )
 # 出发门槛用当前 profile 的月开销算空窗期，所以换城市会改变门槛。
 # 北京月开销 ¥4,084 → 空窗 3–6 月 ¥12,252–24,504 → 门槛 ¥77,252–139,504。
