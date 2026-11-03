@@ -93,7 +93,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             out.append(">")
             out.append(
                 "> - **出发门槛** = 医疗专项应急金 + 一次性搬家 + 空窗期月开销。"
-                "它决定「能不能去牡丹江」——因为阶段 A 有工作、有现金流，"
+                "它决定「能不能出发」——因为阶段 A 有工作、有现金流，"
                 "不需要资产覆盖生活费。"
             )
             out.append(
