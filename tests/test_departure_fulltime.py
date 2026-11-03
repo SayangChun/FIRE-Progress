@@ -277,6 +277,29 @@ ok(
     "切到北京 profile 不污染牡丹江目标",
     abs(data["fire"]["target_cny"] - target) < 0.01,
 )
+# 出发门槛用当前 profile 的月开销算空窗期，所以换城市会改变门槛。
+# 北京月开销 ¥4,084 → 空窗 3–6 月 ¥12,252–24,504 → 门槛 ¥77,252–139,504。
+gate_bj = data_bj.get("departure") or {}
+ok(
+    "切到北京 profile 出发门槛更高（空窗期按北京月开销）",
+    gate_bj.get("low_cny", 0) > gate["low_cny"],
+    f'{gate_bj.get("low_cny")} vs {gate["low_cny"]}',
+)
+ok(
+    "北京出发门槛 ≈ ¥77,252–139,504（引擎实算）",
+    abs(gate_bj.get("low_cny", 0) - 77252) < 1 and abs(gate_bj.get("high_cny", 0) - 139504) < 1,
+    f'{gate_bj.get("low_cny")} – {gate_bj.get("high_cny")}',
+)
+# 北京兼职是负的：¥723 − ¥4,084 = −¥3,361。这条钉死「兜底链不能只写退回兼职」。
+ok(
+    "北京兼职盈余为负（−¥3,361），说明兜底必须换城市",
+    abs(
+        lifeplan_mod.labor_income(cfg_bj)["net_monthly_cny"]
+        - lifeplan_mod.monthly_total(cfg_bj)
+        + 3361
+    )
+    < 1.0,
+)
 
 no_ft = dict(data)
 no_ft.pop("fulltime")
