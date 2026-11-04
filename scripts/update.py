@@ -298,7 +298,12 @@ def main() -> int:
             print(f"    组合需覆盖 = ¥{plan['net_monthly_expense']:,.2f}")
         if plan.get("one_off_total"):
             print(f"    一次性支出 = ¥{plan['one_off_total']:,.2f}（不计入月开销）")
-    base = fire.get("net_monthly_expense", fire["monthly_expense"])
+    # 目标由 target_profile 的净支出决定（见 lifeplan.target_profile_name），
+    # 不是当前城市的 net_monthly_expense——两者在「阶段 A 换城市」时会不同。
+    base = fire.get(
+        "target_net_monthly_expense",
+        fire.get("net_monthly_expense", fire["monthly_expense"]),
+    )
     print(f"  目标 = ¥{fire['target_cny']:,.2f}（{base:.0f} × 12 ÷ {fire['withdrawal_rate']}）")
     print(f"  比特币 = {assets['btc']['qty']:.8f} → ¥{assets['btc']['value_cny']:,.2f}")
     print(f"  标普500 = ¥{assets['sp500']['value_cny']:,.2f}")

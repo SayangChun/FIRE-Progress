@@ -283,6 +283,19 @@ ok(
     (data_bj.get("life_plan") or {}).get("target_profile") == "mudanjiang-rent-minimal",
     str((data_bj.get("life_plan") or {}).get("target_profile")),
 )
+# 目标公式必须用 target_profile 的净支出反算得回来；
+# 若误用当前城市的 net_monthly_expense（北京 ¥3,361），公式与结果会对不上。
+_f = data_bj["fire"]
+ok(
+    "切到北京 profile 时目标公式仍自洽（base = ¥738，不是 ¥3,361）",
+    abs(_f["target_net_monthly_expense"] * 12 / _f["withdrawal_rate"] - _f["target_cny"]) < 0.01,
+    f'base {_f.get("target_net_monthly_expense")} vs net {_f.get("net_monthly_expense")}',
+)
+ok(
+    "北京 profile 下 target_net_monthly_expense 与 net_monthly_expense 确实不同",
+    abs(_f["target_net_monthly_expense"] - _f["net_monthly_expense"]) > 1.0,
+    f'{_f["target_net_monthly_expense"]} vs {_f["net_monthly_expense"]}',
+)
 ok(
     "切到北京 profile 不污染牡丹江目标",
     abs(data["fire"]["target_cny"] - target) < 0.01,

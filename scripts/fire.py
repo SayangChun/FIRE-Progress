@@ -576,7 +576,11 @@ def compute(
         "fire": {
             "monthly_expense": monthly,
             # 组合需要覆盖的月开销（已扣兼职净收入）；没配兼职时等于 monthly_expense
+            # ⚠️ 这是「当前城市」口径，用于阶段 A 与出发门槛。
             "net_monthly_expense": net_monthly,
+            # 不工作门槛用的净支出（按 life_plan.target_profile）。
+            # 两者只有在 profile ≠ target_profile 时才不同，见 lifeplan.target_profile_name。
+            "target_net_monthly_expense": round(target_net, 2),
             "labor_income": (plan_summary or {}).get("labor_income"),
             "withdrawal_rate": rate,
             "annual_expense": monthly * 12,
