@@ -501,9 +501,19 @@ def compute(
         # （房租/取暖/物业费/食品/饮用水），个人只付通讯、交通、探亲、医疗缓冲等。
         # ⚠️ 这一步只影响「阶段 A 盈余」的分母，**绝不改变 target_cny**（见下方不变量测试）。
         _spec = ((cfg.get("fire") or {}).get(_key)) or {}
-        stage_a = monthly
+        # 阶段 A 个人开销按「这个岗位所在城市」的 profile 算，不是按当前激活 profile。
+        # 否则同一个北京岗的盈余会随「你把 profile 切到哪」而变（牡丹江 ¥556 → ¥2,901；
+        # 北京 ¥569 → ¥2,887），看板上会莫名跳 ¥13。
+        _spec_profile = _spec.get("life_plan_profile")
         if _spec.get("room_and_board_covered"):
-            stage_a = lifeplan_mod.monthly_excluding(cfg, _spec.get("covered_keys"))
+            stage_a = lifeplan_mod.monthly_excluding(
+                cfg, _spec.get("covered_keys"), _spec_profile
+            )
+        elif _spec_profile:
+            # 不包吃住：用岗位所在城市的完整月开销，而不是当前激活 profile 的
+            stage_a = lifeplan_mod.monthly_total(cfg, _spec_profile)
+        else:
+            stage_a = monthly
         _surplus = ft["net_monthly_cny"] - stage_a
         _res = {
             **ft,

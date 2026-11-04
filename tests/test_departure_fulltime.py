@@ -168,18 +168,20 @@ data = fire_mod.compute(
 ok("compute 带 departure", isinstance(data.get("departure"), dict))
 ok("compute 带 fulltime", isinstance(data.get("fulltime"), dict))
 ok("compute 的目标未被全职影响", abs(data["fire"]["target_cny"] - target) < 0.01)
-# 关掉包吃住必须精确退回「自付全款」的盈余（¥1,995.67），且目标仍不变
+# 关掉包吃住后必须退回「自付全款」的盈余（北京：¥3,456.67 − ¥4,084 = −¥627.33），且目标仍不变
 no_rb = variant(**{"fire.fulltime.room_and_board_covered": False})
 data_no_rb = fire_mod.compute(no_rb, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
 ok(
-    "关掉包吃住后阶段 A 盈余退回 ¥1,995.67",
-    abs(data_no_rb["fulltime"]["surplus_monthly_cny"] - 1995.67) < 0.05,
+    "关掉包吃住后阶段 A 盈余退回 −¥627.33（北京自付全款）",
+    # 不包吃住时用「岗位所在城市」的完整月开销（北京 ¥4,084），
+    # 不是当前激活 profile 的牡丹江 ¥1,461。
+    abs(data_no_rb["fulltime"]["surplus_monthly_cny"] - (-627.33)) < 0.05,
     str(data_no_rb["fulltime"]["surplus_monthly_cny"]),
 )
 ok("关掉包吃住后目标仍不变", abs(data_no_rb["fire"]["target_cny"] - 205953.49) < 0.01)
 ok(
-    "compute 的 fulltime 带 stage_a_monthly_expense 且≈¥556",
-    abs(data["fulltime"]["stage_a_monthly_expense"] - 556) < 1.0,
+    "compute 的 fulltime 阶段 A 开销按北京 profile 算 ≈¥569（不是牡丹江 ¥556）",
+    abs(data["fulltime"]["stage_a_monthly_expense"] - 569) < 1.0,
     str(data["fulltime"]["stage_a_monthly_expense"]),
 )
 ok(
@@ -187,8 +189,8 @@ ok(
     data["fulltime"]["room_and_board_covered"] is True,
 )
 ok(
-    "包吃住后盈余 ≈ ¥2,901（净收入 ¥3,457 − 阶段 A ¥556）",
-    abs(data["fulltime"]["surplus_monthly_cny"] - 2900.67) < 1.0,
+    "包吃住后盈余 ≈ ¥2,887.67（净 ¥3,456.67 − 北京阶段 A ¥569）",
+    abs(data["fulltime"]["surplus_monthly_cny"] - 2887.67) < 1.0,
     str(data["fulltime"]["surplus_monthly_cny"]),
 )
 ok(
@@ -312,6 +314,23 @@ ok(
     "显式切 target_profile 时，北京独自不工作参考目标 ≈ ¥937,953",
     abs(tgt_bj_ref - 937953.49) < 5.0,
     str(tgt_bj_ref),
+)
+# 岗位块必须按「岗位所在城市」算阶段 A 开销，不随激活 profile 变。
+# 否则同一个北京岗的盈余会在 ¥2,901 与 ¥2,888 之间无故跳动。
+ok(
+    "切激活 profile 后，北京块盈余不变（仍 ¥2,887.67）",
+    abs(data_bj["fulltime"]["surplus_monthly_cny"] - data["fulltime"]["surplus_monthly_cny"]) < 0.01
+    and abs(data_bj["fulltime"]["surplus_monthly_cny"] - 2887.67) < 1.0,
+    f'{data_bj["fulltime"]["surplus_monthly_cny"]} vs {data["fulltime"]["surplus_monthly_cny"]}',
+)
+ok(
+    "切激活 profile 后，牡丹江块盈余不变（仍 ¥2,183.33）",
+    abs(
+        data_bj["fulltime_mudanjiang"]["surplus_monthly_cny"]
+        - data["fulltime_mudanjiang"]["surplus_monthly_cny"]
+    )
+    < 0.01
+    and abs(data_bj["fulltime_mudanjiang"]["surplus_monthly_cny"] - 2183.33) < 1.0,
 )
 # 出发门槛用当前 profile 的月开销算空窗期，所以换城市会改变门槛。
 # 北京月开销 ¥4,084 → 空窗 3–6 月 ¥12,252–24,504 → 门槛 ¥77,252–139,504。

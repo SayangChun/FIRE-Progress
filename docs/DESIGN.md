@@ -95,12 +95,16 @@ FIRE 目标资产 = 组合需覆盖 × 12 ÷ 提取率
 ```
 出发门槛 low  = 医疗应急 low  + 一次性搬家 + 月开销 × 空窗月数 low
 出发门槛 high = 医疗应急 high + 一次性搬家 + 月开销 × 空窗月数 high
-全职盈余      = 全职净收入 − 阶段 A 个人开销   # 包吃住时 ≈ ¥556；不包时 = 月开销 ¥1,461
+全职盈余      = 全职净收入 − 阶段 A 个人开销   # 包吃住时 北京 ¥569 / 牡丹江 ¥556；不包时 = 该城市完整月开销
 ```
 
 > ⚠️ 两个城市变体共用同一套算法，只有 `hourly_wage` / 通勤 / 餐补不同：
 > 北京 ¥20/h、宿舍在馆内 → 通勤与餐补 0；牡丹江 ¥17/h、通勤 ¥2/日、餐补 ¥154/月。
-> 阶段 A 个人开销两者相同（≈¥556），因为 `covered_keys` 一样。
+> ⚠️ 阶段 A 个人开销**两城不同**（牡丹江 ¥556、北京 ¥569）：`covered_keys` 一样，
+> 但未覆盖的项按城市不同（北京交通 ¥100 vs 牡丹江 ¥30 等）。
+> 所以 `fire.fulltime` / `fire.fulltime_mudanjiang` 各自写了 `life_plan_profile`，
+> 阶段 A 开销按「岗位所在城市」算，不随当前激活 profile 变——
+> 否则同一个北京岗的盈余会在 ¥2,901 与 ¥2,888 之间无故跳动。
 
 **`profile` 与 `target_profile` 的分工（2026-11-03）**
 
@@ -469,8 +473,6 @@ README 中 `<!-- FIRE:START -->` 与 `<!-- FIRE:END -->` 之间由脚本重写�
 
 ## 6. 代码结构与数据流
 
-## 6. 代码结构与数据流
-
 ```
 FIRE-Progress/
 ├── README.md                    # 展示层（自动区块 + 人工说明）
@@ -637,4 +639,5 @@ git push -u origin main
 | **2026-10-31** | **阶段 A 备选位置建模：北京图书馆保安（住宿舍不回家）**（§3.5.8）。`config.yaml` 新增 `fire.fulltime_beijing`（enabled，工资/通勤为**占位假设**：¥20/h、宿舍在馆内＝通勤与餐补 0，包吃住同牡丹江）；`lifeplan.fulltime_income()` 支持 `key` 参数读取不同全职变体；`fire.compute()` 用同一套逻辑构建 `fulltime`（牡丹江）与 `fulltime_beijing`（北京），二者都**不参与 `target_cny`**，`render._fulltime_block` 支持 `key/primary` 渲染「备选方案」小节并补占位假设提示，外推段补北京第二条线。占位假设下北京岗净收入 ¥3,456.67、盈余 ¥2,900.67、对照到 ¥205,953 约 2.4 年（比牡丹江 2.7 年略快）。⚠️ **目标 ¥205,953.49 与月开销 ¥1,461 不变**；北京不工作真实目标未建模，外推对照尺沿用牡丹江口径。 | ¥205,953.49 不变 |
 | **2026-11-03** | **阶段 A 工作形态定死为图书馆保安，城市放开为多城市（北京起点）**。判据从「独立」改为「降低内耗、躺平、保健康」——这是他自己的表述，路线图 §1.3 据此重写。`config.yaml` 的 `fire.fulltime` 改为**北京口径**（¥20/h、宿舍在馆内 → 通勤/餐补 0、净 ¥3,456.67、盈余 ¥2,900.67）；原 `fire.fulltime_beijing` **重命名为 `fire.fulltime_mudanjiang`**（¥17/h、含通勤、净 ¥2,739.33、盈余 ¥2,183.33），由「备选位置」降为「备选城市」。`fire.compute()` 输出键同步改名；`blocks._fulltime_block` 的备选标题改为「阶段 A 备选城市」；`render.py` 调用点与外推文案同步。⚠️ **`target_cny` 仍 ¥205,953.49**，两个变体都仍不进目标计算。路线图 §1.2 / §1.3 / §3 标题 / §3.5 引言 / §4.1 同步，新增 §3.5.9（城市反转 + 失业缓冲：¥10 万 ÷ ¥4,084 ≈ 24.5 个月北京、÷ ¥1,461 ≈ 68 个月牡丹江）。规划书 §2 标题改为「从牡丹江到多城市」。 | ¥205,953.49 不变 |
 | **2026-11-03** | **拆开 `life_plan.profile` 与 `life_plan.target_profile`**。原实现里 `summary()` 用同一个 profile 同时算月开销与 `target_cny`，导致「换阶段 A 城市」会把进度条分母一起拖走：切到 `beijing-rent-minimal` 时目标从 ¥205,953 跳到 ¥937,953、进度从 9.55% 塌到 2.10%。新增 `lifeplan.target_profile_name()`（默认回落到 `profile`）与 `_profile_by_name()`；`items()` / `monthly_total()` 增加可选 `profile_name` 参数；`summary()` 返回 `target_profile` 与 `target_net_monthly_expense`；`fire.compute()` 用后者算 `target_cny`。config 显式钉 `target_profile: mudanjiang-rent-minimal`。顺带修手工覆盖路径漏更新 `target_net_monthly_expense`（会让 `fire.compute()` 读到 `summary()` 留下的旧值）。测试同步：`test_life_plan.py` 的自洽检查改为同时切 `target_profile`，并新增「钉住时换 profile 不改目标 / 月开销确实换成北京口径」两条；`test_departure_fulltime.py` 的北京段改为「目标不变、月开销变 ¥4,084」，另加「显式切 target_profile 才得 ¥937,953」参考值断言。 | ¥205,953.49 不变 |
+| **2026-11-04** | **岗位块的阶段 A 开销改按「岗位所在城市」算**（同一类 bug 的第二处）。原 `fire.compute()` 用当前激活 profile 算 `stage_a_monthly_expense`，导致同一个北京岗的盈余随 profile 切换而变（¥556→¥2,901 / ¥569→¥2,888）。`config.fire.fulltime` 与 `fulltime_mudanjiang` 各增 `life_plan_profile`；`lifeplan.monthly_excluding()` / `monthly_total()` 增加可选 `profile_name`；`fire.compute()` 用它算阶段 A，不包吃住时用该城市完整月开销（北京 −¥627.33，而不是牡丹江口径的 ¥1,995.67）。测试更新：北京阶段 A ¥569、盈余 ¥2,887.67、关掉包吃住 −¥627.33，并新增「切 profile 后两城块盈余都不变」两条。顺带修：DESIGN 重复的 `## 6. 代码结构与数据流` 标题、支出清单「定居城市为牡丹江」的过时表述。 | ¥205,953.49 不变 |
 | 2026-11-01 | **渲染层拆成四个模块**（纯重构，不动任何数字）：`render.py` 1304 行拆为 `fmt.py`（金额格式化）、`charts.py`（三张 SVG）、`blocks.py`（README 小节文案）、`render.py`（组装，450 行）；`site.py` 删掉自己那份 `money()`，改用 `fmt.money`，避免两份实现分叉。拆分前后用同一份 `latest.json` 跑过，`render_block` / `curve` / `profit` / `progress` / `dual` / `default_readme` 六个输出**逐字一致**。另删除两个代码里从未引用的配置键（`display.curve_days`、`timeline.one_off_reference`）。**FIRE 目标 ¥205,953.49、月开销、完成度全部不变** |

@@ -141,7 +141,9 @@ def monthly_total(cfg, profile_name: str | None = None) -> float:
     return round(sum(it["monthly"] for it in items(cfg, profile_name)), 2)
 
 
-def monthly_excluding(cfg, covered_keys: list[str] | None) -> float:
+def monthly_excluding(
+    cfg, covered_keys: list[str] | None, profile_name: str | None = None
+) -> float:
     """阶段 A 个人月开销：从完整月开销中扣掉被「包吃住」覆盖的项。
 
     仅 fire.fulltime.room_and_board_covered 为 true 时使用。覆盖项
@@ -151,10 +153,19 @@ def monthly_excluding(cfg, covered_keys: list[str] | None) -> float:
 
     ⚠️ 返回值只用于计算阶段 A 盈余，**不进入 FIRE 目标**——目标是不工作、
     自己负担全部开销的状态，与阶段 A 是否被包吃住无关。
+
+    profile_name 为空时用当前 profile；传名字可按「岗位所在城市」算——
+    否则同一个北京岗的盈余会随「当前激活 profile 切到哪」而变
+    （牡丹江 ¥556 → 盈余 ¥2,901；北京 ¥569 → 盈余 ¥2,888）。
     """
     skip = set(covered_keys or [])
     return round(
-        sum(it["monthly"] for it in items(cfg) if it.get("key") not in skip), 2
+        sum(
+            it["monthly"]
+            for it in items(cfg, profile_name)
+            if it.get("key") not in skip
+        ),
+        2,
     )
 
 
