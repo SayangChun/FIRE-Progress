@@ -158,10 +158,10 @@ if len(profile_names) >= 2:
             abs(alt_plan["target_cny"] - alt_plan["net_monthly_expense"] * 12 / RATE) < 0.01,
         )
 
-    # target_profile 钉住时，换「阶段 A 所在城市」不应改变目标——
-    # 否则切到北京会让进度条分母从 ¥205,953 跳到 ¥937,953。
+    # target_profile 钉住时，换「阶段 A 所在档位」不应改变目标——
+    # 否则临时试算常规档会让进度条分母跟着跳。
     base_target = lifeplan_mod.summary(cfg)["target_cny"]
-    pinned = variant(**{"life_plan.profile": "beijing-rent-minimal"})
+    pinned = variant(**{"life_plan.profile": "mudanjiang-rent-normal"})
     _, pinned_plan = lifeplan_mod.resolve_monthly(pinned)
     check(
         "target_profile 钉住时，换 profile 不改目标",
@@ -169,8 +169,8 @@ if len(profile_names) >= 2:
         f'{pinned_plan["target_cny"]} vs {base_target}',
     )
     check(
-        "但月开销确实换成了北京口径",
-        abs(pinned_plan["monthly_expense"] - 4084) < 1.0,
+        "但月开销确实换成了常规档",
+        abs(pinned_plan["monthly_expense"] - 2754) < 1.0,
         str(pinned_plan["monthly_expense"]),
     )
 else:

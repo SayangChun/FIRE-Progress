@@ -87,9 +87,10 @@ def target_profile_name(cfg) -> str:
       - `profile` 决定「阶段 A 在哪个城市」，影响月开销、阶段 A 个人开销与出发门槛；
       - `target_profile` 决定「不工作门槛按哪个城市算」。
 
-    2026-11-03 起阶段 A 可能是多城市，但他真正会「独自不工作」的城市只有牡丹江。
-    若不留这一项，切到 `beijing-rent-minimal` 会把目标从 ¥205,953 拉到 ¥937,953，
-    进度条从 9.5% 塌到 2.1%——那个数不是目标，是「独自在北京不工作」的假设值。
+    2026-11-05 起阶段 A 只做牡丹江、北京已排除，两者正常情况下一致。
+    但字段仍然保留：临时切到常规档（`mudanjiang-rent-normal`）试算时，
+    月开销会变成 ¥2,754 用于出发门槛，目标仍应钉在极简档 ¥205,953.49——
+    否则进度条分母会被试算值一起拖走。
     """
     plan = _plan(cfg)
     return plan.get("target_profile") or plan.get("profile")
@@ -151,12 +152,14 @@ def monthly_excluding(
     不计入阶段 A 个人现金开销；其余项（通讯、交通、探亲、医疗缓冲等）
     无论是否包吃住都要自己掏，全部保留。
 
+    ⚠️ 2026-11-05 起他不接受包吃住（要独自租房），所以当前配置下这个函数
+    不会被触发；保留它是因为岗位形态可能再变，且测试仍覆盖这条路径。
+
     ⚠️ 返回值只用于计算阶段 A 盈余，**不进入 FIRE 目标**——目标是不工作、
     自己负担全部开销的状态，与阶段 A 是否被包吃住无关。
 
-    profile_name 为空时用当前 profile；传名字可按「岗位所在城市」算——
-    否则同一个北京岗的盈余会随「当前激活 profile 切到哪」而变
-    （牡丹江 ¥556 → 盈余 ¥2,901；北京 ¥569 → 盈余 ¥2,888）。
+    profile_name 为空时用当前 profile；传名字可按「岗位所在城市」算，
+    否则同一个岗位的盈余会随「当前激活 profile 切到哪」而变。
     """
     skip = set(covered_keys or [])
     return round(
@@ -316,10 +319,10 @@ def labor_income(cfg) -> dict | None:
 def fulltime_income(cfg, key: str = "fulltime") -> dict | None:
     """全职净收入。fire.<key>.enabled 为 false 时返回 None。
 
-    默认 key="fulltime" 读取北京起点方案；传入 "fulltime_mudanjiang" 等
-    其它 key 可读取备选城市（见 config.yaml 的 fulltime_mudanjiang 与
-    docs/FIRE-ROADMAP.md §3.5.8）。所有变体共用同一套现金流算法，
-    且**都不参与 FIRE 目标计算**。
+    默认 key="fulltime" 读取牡丹江方案（2026-11-05 起唯一城市）。
+    传入其它 key 可读取别的变体；变体不存在时返回 None（不是报错），
+    方便下游在「只配了一个城市」时优雅降级。所有变体共用同一套现金流
+    算法，且**都不参与 FIRE 目标计算**。
 
     ⚠️ 不参与 FIRE 目标计算，原因见 config.yaml 的注释：
     全职净收入必然大于月开销，代进 (月开销 − 净收入) × 12 ÷ 提取率
@@ -344,7 +347,7 @@ def departure_gate(cfg) -> dict | None:
 
     真正决定「能不能走」的是三笔钱：
       1. 医疗专项应急金 —— 零医保、住院 100% 自付，唯一防线（规划书 §5.4）
-      2. 一次性搬家     —— 押金、运费、家具、过冬装备，取自 life_plan.one_off
+      2. 一次性搬家     —— 包吃住+极简下只剩跨省行李托运（约 ¥800），取自 life_plan.one_off
       3. 空窗期月开销   —— 到牡丹江后到第一笔工资之间
 
     给出 low / high 两档：下沿是出发前必须到位的，上沿差额可以边工作边补。

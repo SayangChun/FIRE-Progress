@@ -54,9 +54,9 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
     所以这里只展示三件事：净收入多少、每月盈余多少、以及
     「若这笔盈余从今天起就并入定投，达标会提前多久」。
 
-    key 指定读取 data 里的哪个全职变体（"fulltime" 北京起点，
-    "fulltime_mudanjiang" 备选城市）；primary=False 时标题改为「备选城市」
-    并追加一条「备选城市、岗位数量待确认」的提示。
+    key 指定读取 data 里的哪个全职变体（2026-11-05 起只有 "fulltime"，
+    即牡丹江独自租房方案）；primary=False 时标题改为「备选变体」并追加
+    一条「岗位数量待确认」的提示。变体不存在时返回空串，调用方跳过。
     """
     ft = data.get(key)
     if not ft:
@@ -93,11 +93,10 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
 
     if not primary:
         out.append(
-            "> ⚠️ 这是**备选城市**（牡丹江），尚未取代北京起点方案；"
+            "> ⚠️ 这是**备选变体**，尚未取代当前主方案；"
         )
         out.append(
-            "> 牡丹江保安真实月薪 ¥1,800–4,500，取 ¥17/h 为保守下限；"
-            "但当地图书馆岗位数量未知，需实地确认。"
+            "> 工资取当地同类岗位的保守下限，岗位数量需实地确认。"
         )
         out.append(
             "> 外推仍沿用 ¥205,953.49 作对照尺（这是「牡丹江不工作」的口径，仅供对照）。"
