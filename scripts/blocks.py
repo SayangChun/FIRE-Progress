@@ -59,7 +59,7 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
 
     out: list[str] = []
     out.append("<details>")
-    prefix = "阶段 A 首选方案" if primary else "阶段 A 备选城市"
+    prefix = "阶段 A 工作情景" if primary else "阶段 A 备选情景"
     out.append(f"<summary>{prefix} · {ft.get('label') or '全职'}</summary>")
     out.append("")
     out.append(
@@ -90,7 +90,7 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
         )
         if not primary:
             out.append(">")
-            out.append("> ⚠️ 这是备选变体，尚未取代主方案；工资取当地同类岗位的保守下限，岗位数量需实地确认。")
+            out.append("> ⚠️ 这是备选情景，尚未取代主口径；工资取轻松岗的保守占位，按实际岗位改。")
     out.append("")
     out.append("</details>")
     return "\n".join(out)

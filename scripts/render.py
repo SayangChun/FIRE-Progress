@@ -337,7 +337,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                 out.append(">")
                 out.append("> 在这个尺度上外推结果已无参考意义——真正决定进度的是月定投额，不是等待。")
             # 全职情景的第二条外推。口径与上面完全一致，只换了定投额，
-            # 所以两条可以直接比。细节在「阶段 A 首选方案」那个折叠块里。
+            # 所以两条可以直接比。细节在「阶段 A 工作情景」那个折叠块里。
             ft = data.get("fulltime") or {}
             ftp = ft.get("projection") or {}
             if ftp.get("days_to_target"):
@@ -353,10 +353,10 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                 if ftmp.get("days_to_target"):
                     out.append(">")
                     out.append(
-                        f"> **备选城市：牡丹江图书馆保安**（净 {money(ftm['net_monthly_cny'], cfg)}/月，"
+                        f"> **备选情景：牡丹江轻松工作**（净 {money(ftm['net_monthly_cny'], cfg)}/月，"
                         f"盈余 {money(ftm['surplus_monthly_cny'], cfg)} 并入定投 → 月投 "
                         f"{money(ftmp['monthly_cny'], cfg)}），同一口径下 **{_horizon(ftmp['days_to_target'])}**"
-                        f"（{ftmp['eta']}）。工资取 ¥17/h 保守下限，当地图书馆岗位数量待确认。"
+                        f"（{ftmp['eta']}）。工资取 ¥17/h 保守占位，按实际岗位改。"
                     )
         else:
             out.append(f"暂不可外推：{proj.get('reason') or '数据不足'}")

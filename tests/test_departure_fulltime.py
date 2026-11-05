@@ -3,7 +3,7 @@
 这两段都不是口径的微调，是**计划结构变了**：
 
     旧：攒够 ¥205,953 再出发（阶段 A 靠兼职 + 消耗本金）
-    新：毕业后就出发，阶段 A 有工作（牡丹江图书馆保安，独自租房）
+    新：毕业后就出发，阶段 A 有工作（牡丹江任一轻松工作，独自租房）
 
 ⚠️ 2026-11-05 他明确：只去牡丹江 FIRE、排除北京，且要一个人租房住、
 不接受包吃住。所以全职只有一个变体（牡丹江、¥17/h、阶段 A 开销 ¥1,461），
@@ -63,6 +63,16 @@ def variant(**overrides):
 
 monthly = lifeplan_mod.monthly_total(cfg)
 target = lifeplan_mod.summary(cfg)["target_cny"]
+
+print("工作形态：判据优先于岗位名字（2026-11-05）")
+# 他明确：不局限于图书馆保安，任何一个适合自己的轻松工作都算。
+# 这里钉住 config 的 label / note 不把某个岗位写死成唯一答案。
+ft_cfg = cfg.fire.fulltime
+ok("label 不写死图书馆", "图书馆" not in str(ft_cfg.get("label") or ""))
+ok("label 说明是轻松工作", "轻松" in str(ft_cfg.get("label") or ""))
+ok("note 不把图书馆当唯一形态", "图书馆保安" not in str(ft_cfg.get("note") or "") or "不局限" in str(ft_cfg.get("note") or ""))
+ok("note 明确判据是轻松工作", "轻松" in str(ft_cfg.get("note") or ""))
+ok("工资占位假设未变（¥17/h）", abs(float(ft_cfg["hourly_wage"]) - 17) < 0.01)
 
 print("出发门槛")
 gate = lifeplan_mod.departure_gate(cfg)
@@ -302,7 +312,7 @@ ok("没有 goals 时返回 None（调用方退回单条）", render_mod.dual_pro
 block = render_mod.render_block(data, cfg, [])
 ok("README 出现三级门槛", all(k in block for k in ("出发门槛", "咖啡师 FIRE", "完全 FIRE")))
 ok("README 标出主进度", "主进度" in block)
-ok("README 出现全职小节", "阶段 A 首选方案" in block)
+ok("README 出现全职小节", "阶段 A 工作情景" in block)
 ok("README 明说全职不改变目标", "全职**不改变** FIRE 目标" in block)
 ok(
     "外推文案说「咖啡师 FIRE 门槛」而不是含糊的「不工作门槛」",
@@ -314,7 +324,7 @@ ok(
 )
 # 断言绑在「小节里有没有这个数」上，而不是某一行长什么样——
 # 2026-11-05 把表格压成一句话时，这条曾经因为格式变了而误报失败。
-ft_section = block.split("阶段 A 首选方案", 1)[1].split("</details>", 1)[0]
+ft_section = block.split("阶段 A 工作情景", 1)[1].split("</details>", 1)[0]
 ok(
     "README 全职小节显示完整月开销（不包吃住）",
     "月开销 ¥1,461.00" in ft_section and "包吃住" not in ft_section,
@@ -396,7 +406,7 @@ ok(
 no_ft = dict(data)
 no_ft.pop("fulltime")
 block2 = render_mod.render_block(no_ft, cfg, [])
-ok("没有 fulltime 时不出空表", "阶段 A 首选方案" not in block2)
+ok("没有 fulltime 时不出空表", "阶段 A 工作情景" not in block2)
 
 print("\n进度曲线：两条线")
 HIST = [
