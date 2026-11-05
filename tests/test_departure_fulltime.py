@@ -184,6 +184,32 @@ data = fire_mod.compute(
 )
 ok("compute 带 departure", isinstance(data.get("departure"), dict))
 ok("compute 带 fulltime", isinstance(data.get("fulltime"), dict))
+
+print("\n主进度开关（display.primary_progress）")
+# 主进度只改展示位排序与标记，三个门槛的金额和完成度一律不变。
+for key in ("departure", "coffee_fire", "full_fire"):
+    alt_cfg = variant(**{"display.primary_progress": key})
+    alt = fire_mod.compute(alt_cfg, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
+    items = (alt.get("goals") or {}).get("items") or []
+    ok(
+        f"主进度设为 {key} 时排在第一位",
+        alt["goals"]["primary"] == key and bool(items) and items[0]["key"] == key and items[0]["is_primary"],
+    )
+    ok(
+        f"主进度设为 {key} 时三个门槛金额不变",
+        {g["key"]: g["target_cny"] for g in items} == {g["key"]: g["target_cny"] for g in data["goals"]["items"]},
+    )
+    ok(
+        f"主进度设为 {key} 时 FIRE 目标与完成度不变",
+        abs(alt["fire"]["target_cny"] - data["fire"]["target_cny"]) < 0.01
+        and abs(alt["assets"]["progress_pct"] - data["assets"]["progress_pct"]) < 0.0001,
+    )
+bad_cfg = variant(**{"display.primary_progress": "not_a_goal"})
+try:
+    fire_mod.compute(bad_cfg, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
+    ok("主进度写错名字必须报错，不静默回落", False, "没有报错")
+except ValueError:
+    ok("主进度写错名字必须报错，不静默回落", True)
 ok("compute 的目标未被全职影响", abs(data["fire"]["target_cny"] - target) < 0.01)
 ok(
     "compute 的 fulltime 阶段 A 开销 = 完整月开销 ¥1,461（独自租房）",
@@ -236,20 +262,51 @@ ok(
 )
 ok("备选变体不改变 FIRE 目标", abs(data["fire"]["target_cny"] - target) < 0.01)
 
-print("\n渲染降级")
+print("\n三级门槛与主进度")
 svg = render_mod.dual_progress_svg(data, cfg)
-ok("有 departure 时画出双线", isinstance(svg, str) and "出发门槛" in svg and "不工作门槛" in svg)
-no_dep = dict(data)
-no_dep.pop("departure")
-ok("没有 departure 时返回 None（调用方退回单条）", render_mod.dual_progress_svg(no_dep, cfg) is None)
+ok(
+    "进度条画出三条门槛",
+    isinstance(svg, str)
+    and all(k in svg for k in ("出发门槛", "咖啡师 FIRE", "完全 FIRE")),
+)
+ok("进度条标出主进度", isinstance(svg, str) and "主进度" in svg)
+# 主进度由 display.primary_progress 决定，默认出发门槛。
+ok("主进度是出发门槛", (data.get("goals") or {}).get("primary") == "departure")
+goals = (data.get("goals") or {}).get("items") or []
+ok("goals 有三条且主进度排第一", len(goals) == 3 and goals[0]["is_primary"])
+by_key = {g["key"]: g for g in goals}
+ok(
+    "完全 FIRE 门槛 = 全额月开销 × 12 ÷ 提取率",
+    abs(by_key["full_fire"]["target_cny"] - 1461 * 12 / 0.043) < 0.01,
+    str(by_key["full_fire"]["target_cny"]),
+)
+ok(
+    "完全 FIRE 门槛 > 咖啡师 FIRE 门槛 > 出发门槛",
+    by_key["full_fire"]["target_cny"] > by_key["coffee_fire"]["target_cny"] > by_key["departure"]["target_cny"],
+)
+ok(
+    "完全 FIRE 完成度 < 咖啡师 FIRE 完成度",
+    by_key["full_fire"]["progress_pct"] < by_key["coffee_fire"]["progress_pct"],
+)
+ok(
+    "完全 FIRE 门槛不依赖兼职收入（与 coffee 差 = 兼职 × 12 ÷ 提取率）",
+    abs(
+        (by_key["full_fire"]["target_cny"] - by_key["coffee_fire"]["target_cny"])
+        - 723 * 12 / 0.043
+    ) < 0.01,
+)
+no_goals = dict(data)
+no_goals.pop("goals")
+ok("没有 goals 时返回 None（调用方退回单条）", render_mod.dual_progress_svg(no_goals, cfg) is None)
 
 block = render_mod.render_block(data, cfg, [])
-ok("README 出现两条门槛", "出发门槛" in block and "不工作门槛" in block)
+ok("README 出现三级门槛", all(k in block for k in ("出发门槛", "咖啡师 FIRE", "完全 FIRE")))
+ok("README 标出主进度", "主进度" in block)
 ok("README 出现全职小节", "阶段 A 首选方案" in block)
 ok("README 明说全职不改变目标", "全职**不改变** FIRE 目标" in block)
 ok(
-    "外推文案说「不工作门槛」而不是含糊的「目标」",
-    "后达到**不工作门槛**" in block,
+    "外推文案说「咖啡师 FIRE 门槛」而不是含糊的「不工作门槛」",
+    "后达到**咖啡师 FIRE 门槛**" in block,
 )
 ok(
     "外推段给出全职的第二条外推",
@@ -369,6 +426,12 @@ ok(
         [{**r, "departure_cny": 80000.0} for r in HIST], cfg
     ),
 )
+three = render_mod.curve_svg(HIST, cfg, gate["low_cny"], 1461 * 12 / 0.043)
+ok(
+    "给完全 FIRE 门槛时画出第三条线",
+    'class="line-full"' in three and 'class="line-dep"' in three and 'class="line-fire"' in three,
+)
+ok("三条线各有末端标注", three.count('r="3.5"') == 3, str(three.count('r="3.5"')))
 
 print("\nhistory 逐日留档")
 from scripts import update as update_mod  # noqa: E402
@@ -377,6 +440,11 @@ snap = update_mod.upsert_snapshot([], data)
 ok("upsert_snapshot 写入 departure_cny", snap[0].get("departure_cny") == gate["low_cny"],
    str(snap[0].get("departure_cny")))
 ok("upsert_snapshot 仍写 target_cny", snap[0].get("target_cny") == data["fire"]["target_cny"])
+ok(
+    "upsert_snapshot 写入 full_fire_cny（完全 FIRE 逐日留档）",
+    snap[0].get("full_fire_cny") == data["full_fire"]["target_cny"],
+    str(snap[0].get("full_fire_cny")),
+)
 
 print("\n静态页卡片")
 from scripts import site as site_mod  # noqa: E402
@@ -388,8 +456,13 @@ with tempfile.TemporaryDirectory() as tmp:
 # 页面上显示成 0.28%。这里按「和 README 一致」钉死。
 want_dep = f'{data["departure"]["progress_low"] * 100:.2f}%'
 ok("静态页出发门槛完成度按百分数显示", f"<dd>{want_dep}</dd>" in html, want_dep)
-ok("静态页不工作门槛完成度仍在", f'<dd>{data["assets"]["progress_pct"]:.2f}%</dd>' in html)
-ok("静态页出现出发门槛卡片", "<dt>出发门槛</dt>" in html)
+ok("静态页咖啡师 FIRE 完成度仍在", f'<dd>{data["assets"]["progress_pct"]:.2f}%</dd>' in html)
+ok("静态页出现三级门槛", all(k in html for k in ("出发门槛", "咖啡师 FIRE", "完全 FIRE")))
+ok("静态页标出主进度", "★" in html)
+ok(
+    "静态页完全 FIRE 完成度出现",
+    f'<dd>{data["full_fire"]["progress_pct"]:.2f}%</dd>' in html,
+)
 
 print()
 if failures:

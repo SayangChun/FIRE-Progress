@@ -173,6 +173,10 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
         # 旧记录没有这个字段，读的时候要容忍缺失（用 .get）。
         "ndx100_cny": (data["assets"].get("ndx100") or {}).get("value_cny"),
         "target_cny": data["fire"]["target_cny"],
+        # 完全 FIRE 门槛（2026-11-05 新增）：完全不工作，资产覆盖全额月开销。
+        # 与 target_cny 同源但**不扣兼职净收入**，两者都要逐日留档。
+        # 旧记录没有这个字段，读的时候要容忍缺失（用 .get + 按当前门槛折算）。
+        "full_fire_cny": (data.get("full_fire") or {}).get("target_cny"),
         # 出发门槛（2026-10-31 新增）：与 target_cny 同理，逐日留档。
         # 它只由医疗应急、搬家、月开销决定，不含行情——但月开销会改，
         # 所以今天不记，事后同样无法精确重建。
@@ -231,6 +235,7 @@ def is_material(
     # 更新成新口径，而 history 当天那条还是旧值——只看前者会漏。
     cur_target = (data.get("fire") or {}).get("target_cny")
     cur_dep = (data.get("departure") or {}).get("low_cny")
+    cur_full = (data.get("full_fire") or {}).get("target_cny")
 
     def _changed(old, new) -> bool:
         # 「有 → 无」（例如关掉出发门槛）也算变化：当天记录必须重写，
@@ -246,24 +251,32 @@ def is_material(
 
     prev_target = (previous.get("fire") or {}).get("target_cny")
     prev_dep = (previous.get("departure") or {}).get("low_cny")
+    prev_full = (previous.get("full_fire") or {}).get("target_cny")
     # target_cny 在正常输出里一定存在；只有测试用的极简夹具可能缺，
     # 缺的时候不拿它做「有→无」判断（那不是口径变化，是数据没带）。
     if cur_target is not None and _changed(prev_target, cur_target):
-        return True, f"不工作门槛变化（{_fmt(prev_target)} → {_fmt(cur_target)}）"
+        return True, f"咖啡师 FIRE 门槛变化（{_fmt(prev_target)} → {_fmt(cur_target)}）"
     if _changed(prev_dep, cur_dep):
         return True, f"出发门槛变化（{_fmt(prev_dep)} → {_fmt(cur_dep)}）"
+    if cur_full is not None and _changed(prev_full, cur_full):
+        return True, f"完全 FIRE 门槛变化（{_fmt(prev_full)} → {_fmt(cur_full)}）"
 
     last = (history or [])[-1] if history else None
     if last and last.get("date") == data["as_of_date"]:
         if cur_target is not None and _changed(last.get("target_cny"), cur_target):
             return True, (
-                "当天历史记录的不工作门槛过期"
+                "当天历史记录的咖啡师 FIRE 门槛过期"
                 f"（{_fmt(last.get('target_cny'))} → {_fmt(cur_target)}）"
             )
         if _changed(last.get("departure_cny"), cur_dep):
             return True, (
                 "当天历史记录的出发门槛过期"
                 f"（{_fmt(last.get('departure_cny'))} → {_fmt(cur_dep)}）"
+            )
+        if cur_full is not None and _changed(last.get("full_fire_cny"), cur_full):
+            return True, (
+                "当天历史记录的完全 FIRE 门槛过期"
+                f"（{_fmt(last.get('full_fire_cny'))} → {_fmt(cur_full)}）"
             )
 
     prev_total = ((previous.get("assets") or {}).get("total_cny")) or 0.0
@@ -380,7 +393,10 @@ def main() -> int:
 
     if cfg.display.get("show_curve", True):
         svg = rendermod.curve_svg(
-            history, cfg, (data.get("departure") or {}).get("low_cny")
+            history,
+            cfg,
+            (data.get("departure") or {}).get("low_cny"),
+            (data.get("full_fire") or {}).get("target_cny"),
         )
         (cfgmod.REPORTS_DIR / "curve.svg").write_text(svg, encoding="utf-8")
         print(f"→ 已写出 reports/curve.svg（{len(history)} 个数据点）")

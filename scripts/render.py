@@ -62,8 +62,9 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("![FIRE 进度曲线](reports/curve.svg)")
         out.append("")
         out.append(
-            "> 两条线回答两个问题：**出发门槛**（能不能走）= 医疗应急 + 搬家 + 空窗期月开销；"
-            "**不工作门槛**（能不能不工作）= 组合需覆盖 × 12 ÷ 提取率。别把它们混成一个百分比。"
+            "> 三条线回答三个问题：**出发门槛**（能不能走，主进度）= 医疗应急 + 搬家 + 空窗；"
+            "**咖啡师 FIRE**（有兼职）= (月开销 − 兼职净收入) × 12 ÷ 提取率；"
+            "**完全 FIRE**（完全不工作）= 月开销 × 12 ÷ 提取率。别把它们混成一个百分比。"
         )
         out.append(">")
         out.append(
@@ -82,7 +83,9 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("")
 
     if cfg.display.get("show_progress_bar", True):
-        if data.get("departure"):
+        if data.get("goals"):
+            out.append("![三级门槛进度](reports/progress.svg)")
+        elif data.get("departure"):
             out.append("![双线进度](reports/progress.svg)")
         else:
             out.append("![FIRE 完成度](reports/progress.svg)")
@@ -96,30 +99,61 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append("| 指标 | 数值 |")
     out.append("| --- | ---: |")
     dep = data.get("departure")
-    if dep:
-        # 有出发门槛时，表头按「两个问题」排序：先能不能走，再能不能不工作。
-        out.append(
-            f"| 🚪 出发门槛（能不能走） | {money(dep['low_cny'], cfg)}–{money(dep['high_cny'], cfg)} |"
-        )
-        out.append(f"| 🎯 不工作门槛（能不能不工作） | {money(fire['target_cny'], cfg)} |")
+    goals = (data.get("goals") or {}).get("items") or []
+    if goals:
+        # 三级门槛并列（2026-11-05）：出发门槛 / 咖啡师 FIRE / 完全 FIRE。
+        # 主进度那一行加 ★ 标记，由 display.primary_progress 决定，改配置即换。
+        icon = {"departure": "🚪", "coffee_fire": "☕", "full_fire": "🎯"}
+        for g in goals:
+            name = g["label"] + ("（★ 主进度）" if g.get("is_primary") else "")
+            out.append(
+                f"| {icon.get(g['key'], '🎯')} {name} · {g['subtitle']} | "
+                f"{money(g['target_cny'], cfg)} |"
+            )
+        if dep:
+            out.append(
+                f"| 🚪 出发门槛上沿（更保守） | {money(dep['high_cny'], cfg)} |"
+            )
         out.append(f"| 💰 当前资产 | {money(assets['total_cny'], cfg)} |")
-        out.append(f"| 📈 出发门槛完成度 | **{dep['progress_low'] * 100:.3f}%** |")
-        out.append(f"| 📈 不工作门槛完成度 | **{pct:.3f}%** |")
+        for g in goals:
+            name = g["label"] + "完成度" + ("（★ 主进度）" if g.get("is_primary") else "")
+            out.append(f"| 📈 {name} | **{g['progress_pct']:.3f}%** |")
     else:
-        out.append(f"| 🎯 FIRE 目标资产 | {money(fire['target_cny'], cfg)} |")
+        # 旧快照没有 goals 时，退回单门槛展示，行为与旧版一致。
+        if dep:
+            out.append(
+                f"| 🚪 出发门槛（能不能走） | {money(dep['low_cny'], cfg)}–{money(dep['high_cny'], cfg)} |"
+            )
+            out.append(f"| 🎯 不工作门槛（能不能不工作） | {money(fire['target_cny'], cfg)} |")
+            out.append(f"| 📈 出发门槛完成度 | **{dep['progress_low'] * 100:.3f}%** |")
+            out.append(f"| 📈 不工作门槛完成度 | **{pct:.3f}%** |")
+        else:
+            out.append(f"| 🎯 FIRE 目标资产 | {money(fire['target_cny'], cfg)} |")
+            out.append(f"| 📈 完成度 | **{pct:.3f}%** |")
         out.append(f"| 💰 当前资产 | {money(assets['total_cny'], cfg)} |")
-        out.append(f"| 📈 完成度 | **{pct:.3f}%** |")
     labor = fire.get("labor_income")
     if labor:
         out.append(f"| ☕ 兼职净收入（月） | {money(labor['net_monthly_cny'], cfg)} |")
-        out.append(f"| 🧾 组合需覆盖（月） | {money(fire['net_monthly_expense'], cfg)} |")
-    out.append(f"| ⏳ 距离不工作门槛 | {money(assets['remaining_cny'], cfg)} |")
+        out.append(f"| 🧾 组合需覆盖（月，咖啡师 FIRE） | {money(fire['net_monthly_expense'], cfg)} |")
+    out.append(f"| ⏳ 距离咖啡师 FIRE 门槛 | {money(assets['remaining_cny'], cfg)} |")
+    if goals:
+        primary = next((g for g in goals if g.get("is_primary")), goals[0])
+        out.append(f"| ⏳ 距离主进度（{primary['label']}） | {money(primary['remaining_cny'], cfg)} |")
     pi = data.get("passive_income")
     if pi:
         out.append(
             f"| ⏱️ 每小时被动收入（按预期年化） | {money(pi['hourly_cny'], cfg, decimals=2)} |"
         )
     out.append("")
+    if goals:
+        out.append(
+            "> **三个门槛别混成一个百分比。** 出发门槛答「能不能动身」（阶段 A 有工作，"
+            "只需医疗应急 + 搬家 + 空窗）；咖啡师 FIRE 答「能不能只做兼职」"
+            "（资产覆盖 ¥738/月）；**完全 FIRE 答「能不能完全不工作」"
+            "（资产覆盖全额 ¥1,461/月，不依赖任何劳动收入）**。"
+            "主进度由 `display.primary_progress` 指定，改一行即可切换。"
+        )
+        out.append("")
 
     ft_block = _fulltime_block(data, cfg)
     if ft_block:
@@ -279,7 +313,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                 f"（月 {money(proj['monthly_cny'], cfg)}，比特币 {proj['btc_usdt_per_day']:g} USDT"
                 f" + 标普500 {money(proj['sp500_cny_per_day'], cfg)}），"
                 f"叠加当前持仓按加权预期年化 **{proj['weighted_rate'] * 100:.2f}%** 增长，"
-                f"**{_horizon(days)}**后达到**不工作门槛**（{proj['eta']}）。"
+                f"**{_horizon(days)}**后达到**咖啡师 FIRE 门槛**（{proj['eta']}）。"
             )
             out.append("")
             out.append(
@@ -388,10 +422,13 @@ def default_readme(
 {gate_rows}| 月开销 | ¥{monthly:,.0f} |
 | 组合需覆盖（月开销 − 兼职净收入） | ¥{net:,.0f} |
 | 提取率 | {rate * 100:.1f}% |
-| **不工作门槛**（能不能不工作） | **¥{net * 12 / rate:,.2f}** |
+| **咖啡师 FIRE 门槛**（有兼职） | **¥{net * 12 / rate:,.2f}** |
+| **完全 FIRE 门槛**（完全不工作） | **¥{monthly * 12 / rate:,.2f}** |
 
-公式：`不工作门槛 = 组合需覆盖 × 12 ÷ 提取率`，`完成度 = 当前资产 ÷ 不工作门槛`。
-组合需覆盖 = 月开销 − 兼职净收入（咖啡师 FIRE，见 `fire.labor_income`；关掉就退回传统 FIRE）。
+公式：`咖啡师 FIRE = (月开销 − 兼职净收入) × 12 ÷ 提取率`；
+`完全 FIRE = 月开销 × 12 ÷ 提取率`，不扣任何劳动收入。
+**「不工作」这个词以前被含糊地用在第一行的数字上，但那其实是有兼职的口径**——
+2026-11-05 起两条并列，谁都不许再含糊。
 {gate_note}
 月开销由 [config.yaml](config.yaml) 的 `life_plan` 逐项推导，依据见
 [docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。

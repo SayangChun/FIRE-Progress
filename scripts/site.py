@@ -202,23 +202,37 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
     stale = (assets.get("btc") or {}).get("stale_days")
     nav_date = (assets.get("sp500") or {}).get("latest_nav_date") or "—"
 
-    cards = [
-        ("不工作门槛", money(target, cfg)),
-        ("当前资产", money(total, cfg)),
-        ("距离不工作门槛", money(remaining, cfg)),
-        ("不工作门槛完成度", pct(progress, 2)),
-    ]
-    # 出发门槛（2026-10-31）：有数据时补一张卡，口径与 README 的双线进度条一致。
-    # ⚠️ progress_low 是**比率**（0.2811），而 pct() 只负责格式化、不乘 100，
-    #    与本函数里 progress 用的是 progress_pct（已是百分数）不同，必须显式 ×100。
-    dep = data.get("departure")
-    if dep:
-        cards.insert(0, ("出发门槛", f'{money(dep["low_cny"], cfg)}–{money(dep["high_cny"], cfg)}'))
-        cards.append(("出发门槛完成度", pct((dep.get("progress_low") or 0.0) * 100, 2)))
+    goals = (data.get("goals") or {}).get("items") or []
+    if goals:
+        # 三级门槛并列（2026-11-05）：每个门槛一张金额卡 + 一张完成度卡。
+        # 主进度那张加 ★ 标记，由 display.primary_progress 决定。
+        cards = []
+        for g in goals:
+            star = "★ " if g.get("is_primary") else ""
+            cards.append((f'{star}{g["label"]}', money(g["target_cny"], cfg)))
+        cards.append(("当前资产", money(total, cfg)))
+        for g in goals:
+            star = "★ " if g.get("is_primary") else ""
+            cards.append((f'{star}{g["label"]}完成度', pct(g["progress_pct"], 2)))
+    else:
+        # 旧快照没有 goals：退回单门槛展示，行为与旧版一致。
+        cards = [
+            ("咖啡师 FIRE 门槛", money(target, cfg)),
+            ("当前资产", money(total, cfg)),
+            ("距离咖啡师 FIRE 门槛", money(remaining, cfg)),
+            ("咖啡师 FIRE 门槛完成度", pct(progress, 2)),
+        ]
+        # 出发门槛（2026-10-31）：有数据时补一张卡。
+        # ⚠️ progress_low 是**比率**（0.2811），而 pct() 只负责格式化、不乘 100，
+        #    与本函数里 progress 用的是 progress_pct（已是百分数）不同，必须显式 ×100。
+        dep = data.get("departure")
+        if dep:
+            cards.insert(0, ("出发门槛", f'{money(dep["low_cny"], cfg)}–{money(dep["high_cny"], cfg)}'))
+            cards.append(("出发门槛完成度", pct((dep.get("progress_low") or 0.0) * 100, 2)))
     labor = fire.get("labor_income")
     if labor:
         cards.append(("兼职净收入（月）", money(labor.get("net_monthly_cny"), cfg)))
-        cards.append(("组合需覆盖（月）", money(fire.get("net_monthly_expense"), cfg)))
+        cards.append(("组合需覆盖（月，咖啡师 FIRE）", money(fire.get("net_monthly_expense"), cfg)))
 
     card_html = "".join(
         f'<div><dt>{name}</dt><dd>{value}</dd></div>' for name, value in cards

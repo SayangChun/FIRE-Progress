@@ -73,69 +73,83 @@ def progress_svg(data: dict, cfg) -> str:
 
 
 def dual_progress_svg(data: dict, cfg) -> str | None:
-    """双线进度条：出发门槛 / 不工作门槛。没有 departure 数据时返回 None。
+    """三级门槛进度条：出发门槛 / 咖啡师 FIRE / 完全 FIRE。
 
-    为什么是两条
-    ------------
-    2026-10-31 起，阶段 A 有全职工作，现金流为正，
-    「攒够 ¥205,953 才能走」不再成立——那是「靠资产覆盖净支出」的永续要求。
+    为什么是三条（2026-11-05）
+    --------------------------
+    原来第二条叫「不工作门槛」，但它算的是 (月开销 − 兼职净收入) × 12 ÷ 提取率，
+    **并不是完全不工作**——仍假设每周做 3 天兼职。名实不符，容易误读。
 
-    真正卡住出发的是三笔钱（医疗应急 + 搬家 + 空窗），
-    而 ¥205,953 回答的是另一个问题：能不能不工作。
+    现在并列三条，各自回答一个明确的问题：
+      1. 出发门槛   ¥56,183  能不能动身（阶段 A 有工作，只需医疗应急+搬家+空窗）
+      2. 咖啡师 FIRE ¥205,953 能不能只靠兼职 + 资产（有兼职）
+      3. 完全 FIRE   ¥407,721 能不能完全不工作（不依赖任何劳动收入）
 
-    两条线画在同一张图里，是为了避免任何一条被当成「唯一标准」：
-    只看上面那条会以为「到了就能躺平」，只看下面那条会以为「永远走不了」。
+    哪条排在第一行、被标成「主进度」，由 display.primary_progress 决定；
+    三条的金额和完成度一律照常计算，不随主进度开关变化。
     """
-    dep = data.get("departure")
-    if not dep:
+    goals = data.get("goals")
+    items = (goals or {}).get("items") or []
+    if not items:
         return None
 
-    assets = data["assets"]
-    fire = data["fire"]
-    cur = float(assets.get("total_cny") or 0.0)
+    cur = float(data["assets"].get("total_cny") or 0.0)
+    # 颜色按门槛固定，不随排序漂移：出发=蓝，咖啡师=橙，完全 FIRE=紫。
+    palette = {
+        "departure": ("fill-a", "#2563eb", "#60a5fa"),
+        "coffee_fire": ("fill-b", "#d97706", "#f0b429"),
+        "full_fire": ("fill-c", "#7c3aed", "#a78bfa"),
+    }
 
-    rows = [
-        ("出发门槛", float(dep["low_cny"]), float(dep.get("progress_low") or 0.0), "#2563eb", "#60a5fa"),
-        ("不工作门槛", float(fire["target_cny"]), float(assets.get("progress") or 0.0), "#d97706", "#f0b429"),
-    ]
-
-    width, height = 680, 140
+    width = 680
+    height = 8 + len(items) * 62 + 6
     track_h = 10
     parts: list[str] = []
-    for i, (name, target, ratio, color, color_dark) in enumerate(rows):
+    for i, g in enumerate(items):
         top = 8 + i * 62
-        ratio = max(min(ratio, 1.0), 0.0)
+        ratio = max(min(float(g["progress"]), 1.0), 0.0)
+        target = float(g["target_cny"])
         pct = ratio * 100
         fill_w = max(width * ratio, 1.0) if ratio > 0 else 0.0
         fill_r = min(track_h / 2, fill_w / 2) if fill_w else 0.0
         remain = max(target - cur, 0.0)
-        cls = "fill-a" if i == 0 else "fill-b"
+        cls = palette.get(g["key"], palette["departure"])[0]
+        badge = " · 主进度" if g.get("is_primary") else ""
+        sub = g.get("subtitle") or ""
         parts.append(
-            f'  <text class="fg-muted" x="0" y="{top + 12}" font-size="12">{name}</text>\n'
+            f'  <text class="fg-muted" x="0" y="{top + 12}" font-size="12">{g["label"]}{badge}</text>\n'
             f'  <text class="fg" x="{width}" y="{top + 14}" text-anchor="end" font-size="18" font-weight="600">{pct:.1f}%</text>\n'
             f'  <rect class="track" x="0" y="{top + 24}" width="{width}" height="{track_h}" rx="{track_h / 2}"/>\n'
             f'  <rect class="{cls}" x="0" y="{top + 24}" width="{fill_w:.1f}" height="{track_h}" rx="{fill_r:.1f}"/>\n'
-            f'  <text class="fg-muted" x="0" y="{top + 52}" font-size="11">目标 {money(target, cfg)}</text>\n'
+            f'  <text class="fg-muted" x="0" y="{top + 52}" font-size="11">目标 {money(target, cfg)} · {sub}</text>\n'
             f'  <text class="fg-muted" x="{width}" y="{top + 52}" text-anchor="end" font-size="11">'
             f'已积累 {money(cur, cfg)} · 还差 {money(remain, cfg)}</text>'
         )
 
     body = "\n".join(parts)
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="出发门槛与不工作门槛的双线进度">
-  <title>出发门槛 {rows[0][2] * 100:.1f}% · 不工作门槛 {rows[1][2] * 100:.1f}%</title>
-  <desc>两条线回答两个不同问题：出发门槛 {money(rows[0][1], cfg)}（能不能走），不工作门槛 {money(rows[1][1], cfg)}（能不能不工作）。当前资产 {money(cur, cfg)}。</desc>
+    title = " · ".join(f'{g["label"]} {g["progress_pct"]:.1f}%' for g in items)
+    desc = "；".join(
+        f'{g["label"]} {money(g["target_cny"], cfg)}（{g.get("subtitle") or ""}）'
+        for g in items
+    )
+    primary_label = next((g["label"] for g in items if g.get("is_primary")), items[0]["label"])
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="三级门槛进度：出发门槛、咖啡师 FIRE、完全 FIRE">
+  <title>{title}（主进度：{primary_label}）</title>
+  <desc>三条线回答三个不同问题：{desc}。当前资产 {money(cur, cfg)}。主进度为{primary_label}。</desc>
   <style>
     .fg {{ fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
     .fg-muted {{ fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
     .track {{ fill: #e7ebef; }}
     .fill-a {{ fill: #2563eb; }}
     .fill-b {{ fill: #d97706; }}
+    .fill-c {{ fill: #7c3aed; }}
     @media (prefers-color-scheme: dark) {{
       .fg {{ fill: #e6edf3; }}
       .fg-muted {{ fill: #8b949e; }}
       .track {{ fill: #21262d; }}
       .fill-a {{ fill: #60a5fa; }}
       .fill-b {{ fill: #f0b429; }}
+      .fill-c {{ fill: #a78bfa; }}
     }}
   </style>
 {body}
@@ -146,21 +160,28 @@ def dual_progress_svg(data: dict, cfg) -> str | None:
 # ---------------------------------------------------------------- 曲线 SVG
 
 
-def curve_svg(history: list[dict], cfg, departure_cny: float | None = None) -> str:
-    """进度曲线：两条线，回答两个不同问题。
+def curve_svg(
+    history: list[dict],
+    cfg,
+    departure_cny: float | None = None,
+    full_fire_cny: float | None = None,
+) -> str:
+    """进度曲线：三条线，回答三个不同问题（2026-11-05 起）。
 
-    - **不工作门槛**完成度 = 资产 ÷ FIRE 目标（`target_cny`，逐日留档）
-    - **出发门槛**完成度   = 资产 ÷ 出发门槛（`departure_cny`，2026-10-31 起）
+    - **出发门槛**完成度   = 资产 ÷ 出发门槛（`departure_cny`）——主进度
+    - **咖啡师 FIRE**完成度 = 资产 ÷ `target_cny`（有兼职，逐日留档）
+    - **完全 FIRE**完成度   = 资产 ÷ 全额月开销 × 12 ÷ 提取率（完全不工作）
 
-    为什么画两条
+    为什么画三条
     ------------
-    阶段 A 有工作后，「攒够 ¥205,953 才能走」不再成立。两条线的距离就是
-    「离能走还有多远」与「离能不工作还有多远」的差——只画一条会把两者混成一个数。
+    原来第二条叫「不工作门槛」，但它其实是**有兼职**的口径，名实不符。
+    现在把「完全不工作」单列一条，三者距离就是「离能走 / 离能只做兼职 /
+    离能完全不工作还有多远」——只画一条会把三个问题混成一个数。
 
-    ⚠️ 出发门槛是 2026-10-31 才定义的概念，此前的记录里没有 `departure_cny`，
-    这段按**当前门槛**折算，不是当时记录的值。图注里会写明。
-    门槛只由医疗应急、搬家、月开销决定，不含行情，所以折算段是一条平滑线；
-    而 FIRE 目标逐日留档，因此有台阶——**两条线形状的差异本身就是信息**。
+    ⚠️ 出发门槛（2026-10-31 起）与完全 FIRE 门槛（2026-11-05 起）都是后来
+    定义的概念，此前的记录里没有对应字段，这段按**当前门槛**折算，是反事实，
+    不是当时记录的值。图注里会写明。门槛只由月开销/应急/搬家决定，不含行情，
+    所以折算段是平滑线；而 `target_cny` 逐日留档，因此有台阶。
     """
     width, height = 680, 262
     pad_l, pad_r, pad_t, pad_b = 58, 62, 48, 34
@@ -171,12 +192,14 @@ def curve_svg(history: list[dict], cfg, departure_cny: float | None = None) -> s
             continue
         total = float(row.get("total_cny") or 0.0)
         gate = row.get("departure_cny") or departure_cny
+        full = row.get("full_fire_cny") or full_fire_cny
         rows.append(
             {
                 "date": row["date"],
                 "target": row.get("target_cny"),
                 "fire": float(row["progress_pct"]),
                 "dep": (total / float(gate) * 100.0) if gate else None,
+                "full": (total / float(full) * 100.0) if full else None,
             }
         )
 
@@ -194,14 +217,20 @@ def curve_svg(history: list[dict], cfg, departure_cny: float | None = None) -> s
 
     rows.sort(key=lambda r: r["date"])
     has_dep = all(r["dep"] is not None for r in rows)
-    # 出发门槛折算的起点：第一条自带 departure_cny 的记录（没有则视为全程折算）
+    has_full = all(r["full"] is not None for r in rows)
+    # 折算起点：第一条自带门槛值的记录（没有则视为全程折算）
     derived_from = next(
         (r["date"] for r in history if r.get("departure_cny")), None
+    )
+    full_from = next(
+        (r["date"] for r in history if r.get("full_fire_cny")), None
     )
 
     values = [r["fire"] for r in rows]
     if has_dep:
         values += [r["dep"] for r in rows]
+    if has_full:
+        values += [r["full"] for r in rows]
     y_max = max(values) if values else 0.0
     y_max = y_max * 1.15 if y_max > 0 else 1.0
 
@@ -225,6 +254,7 @@ def curve_svg(history: list[dict], cfg, departure_cny: float | None = None) -> s
 
     fire_path, fire_end = path_of("fire")
     dep_path, dep_end = path_of("dep") if has_dep else ("", None)
+    full_path, full_end = path_of("full") if has_full else ("", None)
 
     grid: list[str] = []
     for step in range(5):
@@ -254,9 +284,11 @@ def curve_svg(history: list[dict], cfg, departure_cny: float | None = None) -> s
 
     legend = (
         f'<rect x="{pad_l}" y="12" width="10" height="10" rx="2" fill="#2563eb"/>'
-        f'<text class="fg-muted" x="{pad_l + 16}" y="21" font-size="11">出发门槛</text>'
-        f'<rect x="{pad_l + 86}" y="12" width="10" height="10" rx="2" fill="#d97706"/>'
-        f'<text class="fg-muted" x="{pad_l + 102}" y="21" font-size="11">不工作门槛</text>'
+        f'<text class="fg-muted" x="{pad_l + 16}" y="21" font-size="11">出发门槛（主进度）</text>'
+        f'<rect x="{pad_l + 158}" y="12" width="10" height="10" rx="2" fill="#d97706"/>'
+        f'<text class="fg-muted" x="{pad_l + 174}" y="21" font-size="11">咖啡师 FIRE（有兼职）</text>'
+        f'<rect x="{pad_l + 330}" y="12" width="10" height="10" rx="2" fill="#7c3aed"/>'
+        f'<text class="fg-muted" x="{pad_l + 346}" y="21" font-size="11">完全 FIRE（完全不工作）</text>'
     )
 
     end_labels = ""
@@ -272,6 +304,12 @@ def curve_svg(history: list[dict], cfg, departure_cny: float | None = None) -> s
             f'<text class="fg-muted" x="{dep_end[0] + 7:.1f}" y="{dep_end[1] + 4:.1f}" '
             f'font-size="11" font-weight="500" fill="#2563eb">{rows[-1]["dep"]:.2f}%</text>'
         )
+    if full_end:
+        end_labels += (
+            f'<circle cx="{full_end[0]:.1f}" cy="{full_end[1]:.1f}" r="3.5" fill="#7c3aed"/>'
+            f'<text class="fg-muted" x="{full_end[0] + 7:.1f}" y="{full_end[1] + 4:.1f}" '
+            f'font-size="11" font-weight="500" fill="#7c3aed">{rows[-1]["full"]:.2f}%</text>'
+        )
 
     note = "竖虚线处为 FIRE 目标变化（分母变了），不是资产变动。"
     if has_dep and derived_from:
@@ -279,27 +317,35 @@ def curve_svg(history: list[dict], cfg, departure_cny: float | None = None) -> s
             f" 出发门槛自 {derived_from} 起逐日记录，之前按当前门槛折算，"
             "因此那一段是平滑线——它不是历史记录，是反事实。"
         )
+    if has_full:
+        if full_from:
+            note += f" 完全 FIRE 门槛自 {full_from} 起逐日记录，之前按当前门槛折算（反事实）。"
+        else:
+            note += " 完全 FIRE 门槛 2026-11-05 才定义，全程按当前门槛折算，是反事实而非历史记录。"
     extra = str(cfg.display.get("capital_change_note") or "").strip()
     if extra:
         note = f"{note} {extra}".strip()
 
     dep_desc = f"，出发门槛 {rows[-1]['dep']:.2f}%" if has_dep else ""
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="进度曲线：出发门槛与不工作门槛">
-  <title>进度曲线：出发门槛与不工作门槛</title>
-  <desc>从 {rows[0]['date']} 到 {rows[-1]['date']}，不工作门槛完成度 {rows[-1]['fire']:.2f}%{dep_desc}。{note}</desc>
+    full_desc = f"，完全 FIRE {rows[-1]['full']:.2f}%" if has_full else ""
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="进度曲线：出发门槛、咖啡师 FIRE 与完全 FIRE">
+  <title>进度曲线：出发门槛、咖啡师 FIRE、完全 FIRE</title>
+  <desc>从 {rows[0]['date']} 到 {rows[-1]['date']}，咖啡师 FIRE 完成度 {rows[-1]['fire']:.2f}%{dep_desc}{full_desc}。{note}</desc>
   <defs>
     <style>
       .fg-muted {{ fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
       .grid {{ stroke: #d8dee4; stroke-width: 1; stroke-dasharray: 3 4; }}
       .mark {{ stroke: #b9c0c8; stroke-width: 1; stroke-dasharray: 2 3; }}
-      .line-dep {{ fill: none; stroke: #2563eb; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
+      .line-dep {{ fill: none; stroke: #2563eb; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }}
       .line-fire {{ fill: none; stroke: #d97706; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
+      .line-full {{ fill: none; stroke: #7c3aed; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }}
       @media (prefers-color-scheme: dark) {{
         .fg-muted {{ fill: #8b949e; }}
         .grid {{ stroke: #30363d; }}
         .mark {{ stroke: #4d545c; }}
         .line-dep {{ stroke: #60a5fa; }}
         .line-fire {{ stroke: #f0b429; }}
+        .line-full {{ stroke: #a78bfa; }}
       }}
     </style>
   </defs>
@@ -308,6 +354,7 @@ def curve_svg(history: list[dict], cfg, departure_cny: float | None = None) -> s
   {''.join(marks)}
   {f'<path d="{dep_path}" class="line-dep"/>' if dep_path else ''}
   <path d="{fire_path}" class="line-fire"/>
+  {f'<path d="{full_path}" class="line-full"/>' if full_path else ''}
   {end_labels}
   <text class="fg-muted" x="{pad_l}" y="{height - 12}" font-size="10">{rows[0]['date']}</text>
   <text class="fg-muted" x="{pad_l + plot_w}" y="{height - 12}" text-anchor="end" font-size="10">{rows[-1]['date']}</text>

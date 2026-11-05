@@ -79,7 +79,7 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
         out.append(
             f"> 盈余若从现在起并入定投（月投 {money(proj['monthly_cny'], cfg)}），"
             f"按基准年化 **{proj['weighted_rate'] * 100:.2f}%** 外推，约 "
-            f"**{proj['days_to_target'] / 365:.2f} 年**后达到不工作门槛（{proj['eta']}）；"
+            f"**{proj['days_to_target'] / 365:.2f} 年**后达到咖啡师 FIRE 门槛（{proj['eta']}）；"
             f"不做全职则 {data['projection']['days_to_target'] / 365:.2f} 年"
             f"（{data['projection']['eta']}）。"
         )

@@ -454,6 +454,12 @@ def compute(
     # 但 target 仍按极简档 ¥1,461 算 ¥205,953.49。
     target_net = (plan_summary or {}).get("target_net_monthly_expense", net_monthly)
     target = target_cny(target_net, rate)
+    # 完全 FIRE 门槛（2026-11-05）：完全不工作，不扣兼职收入。
+    # life_plan 未启用时退回「全额月开销 × 12 ÷ 提取率」，行为与旧口径一致。
+    full_fire_target = float(
+        (plan_summary or {}).get("full_fire_target_cny")
+        or target_cny(monthly, rate)
+    )
 
     btc_qty = float(btc.get("total_btc") or 0.0)
     btc_value = btc_qty * float(price["btc_cny"])
@@ -583,6 +589,60 @@ def compute(
                     cfg.get("expected_return"),
                 )
 
+    # --- 三个门槛 + 主进度（2026-11-05）---
+    # 以前只有一条「不工作门槛」，实为咖啡师 FIRE（含兼职）。现在并列三条：
+    #   出发门槛   → 能不能动身（阶段 A 有工作，现金流为正）
+    #   咖啡师 FIRE → 有兼职，资产只覆盖 (月开销 − 兼职净收入)
+    #   完全 FIRE   → 完全不工作，资产覆盖全额月开销
+    # ⚠️ 只新增展示层数据；target_cny / progress / remaining / 外推的既有语义
+    #    一律不动，避免污染 history.json 的逐日留档和既有结论。
+    def _goal(key: str, label: str, subtitle: str, value: float, note: str) -> dict:
+        ratio = (total / value) if value else 0.0
+        return {
+            "key": key,
+            "label": label,
+            "subtitle": subtitle,
+            "target_cny": round(value, 2),
+            "progress": ratio,
+            "progress_pct": round(ratio * 100, 4),
+            "remaining_cny": round(max(value - total, 0.0), 2),
+            "reached": total >= value,
+            "note": note,
+        }
+
+    dep_low = float((departure or {}).get("low_cny") or 0.0)
+    dep_high = float((departure or {}).get("high_cny") or 0.0)
+    goal_items = [
+        _goal(
+            "departure", "出发门槛", "能不能动身",
+            dep_low,
+            "医疗应急 + 搬家 + 空窗期月开销；区间上沿 "
+            f"{dep_high:,.2f}（更保守的医疗额度与更长空窗）",
+        ),
+        _goal(
+            "coffee_fire", "咖啡师 FIRE 门槛", "有兼职（每周 3 天 × 4h）",
+            float(target),
+            f"资产覆盖 (月开销 − 兼职净收入) = {target_net:,.2f}/月",
+        ),
+        _goal(
+            "full_fire", "完全 FIRE 门槛", "完全不工作",
+            full_fire_target,
+            "资产覆盖全额月开销，不依赖任何劳动收入",
+        ),
+    ]
+    primary_key = str(cfg.display.get("primary_progress") or "departure").strip()
+    valid_keys = {g["key"] for g in goal_items}
+    if primary_key not in valid_keys:
+        raise ValueError(
+            f"display.primary_progress 只能是 {sorted(valid_keys)}，当前 {primary_key!r}。"
+            "不静默回落——回落会让主进度悄悄换一个门槛。"
+        )
+    for g in goal_items:
+        g["is_primary"] = g["key"] == primary_key
+    # 主进度排第一，其余按出发 → 咖啡师 → 完全的自然顺序。
+    goal_items.sort(key=lambda g: (not g["is_primary"], ["departure", "coffee_fire", "full_fire"].index(g["key"])))
+    primary = next(g for g in goal_items if g["is_primary"])
+
     return {
         "as_of": stamp,
         "as_of_date": now.strftime("%Y-%m-%d"),
@@ -597,7 +657,10 @@ def compute(
             "labor_income": (plan_summary or {}).get("labor_income"),
             "withdrawal_rate": rate,
             "annual_expense": monthly * 12,
+            # 咖啡师 FIRE 门槛（有兼职）—— 既有 target_cny，语义未变。
             "target_cny": round(target, 2),
+            # 完全 FIRE 门槛（完全不工作）—— 新增。
+            "full_fire_target_cny": round(full_fire_target, 2),
             "target_with_one_off": (plan_summary or {}).get("target_with_one_off"),
             "monthly_override": bool((plan_summary or {}).get("override")),
         },
@@ -661,6 +724,19 @@ def compute(
         # 出发门槛与全职情景（2026-10-31）。两者都**不改变上面的 target_cny**：
         # 出发门槛回答「能不能走」，全职情景回答「走之后攒得多快」。
         "departure": departure,
+        # 三级门槛汇总（2026-11-05）：items 已按主进度优先排序，
+        # primary 是配置指定的那一条；三个门槛的金额都在这里，渲染层不重算。
+        "goals": {
+            "primary": primary_key,
+            "items": goal_items,
+        },
+        "full_fire": {
+            "target_cny": round(full_fire_target, 2),
+            "monthly_expense": round(float((plan_summary or {}).get("full_fire_monthly_expense") or monthly), 2),
+            "progress_pct": round(total / full_fire_target * 100, 4) if full_fire_target else 0.0,
+            "remaining_cny": round(max(full_fire_target - total, 0.0), 2),
+            "reached": total >= full_fire_target,
+        },
         "fulltime": fulltime,
         "fulltime_mudanjiang": fulltime_mudanjiang,
         "sources": {

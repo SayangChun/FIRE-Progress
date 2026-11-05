@@ -28,6 +28,7 @@
     "withdrawal_rate": 0.043,
     "annual_expense": 17532.0,
     "target_cny": 205953.49,
+    "full_fire_target_cny": 407720.93,
     "target_with_one_off": 207753.49,
     "monthly_override": false
   },
@@ -66,6 +67,8 @@
     },
     "annual_expense": 17532.0,
     "target_cny": 205953.49,
+    "full_fire_target_cny": 407720.93,
+    "full_fire_monthly_expense": 1461.0,
     "groups": [
       {
         "group": "住房与水电燃气",
@@ -339,9 +342,9 @@
     "ndx100": {
       "value_cny": 4306.75,
       "invested_cny": 4177.22,
-      "profit_cny": 129.53,
-      "return_rate": 0.03100866126275359,
-      "latest_nav_date": "2026-11-03",
+      "profit_cny": 0.0,
+      "return_rate": null,
+      "latest_nav_date": null,
       "funds": [
         {
           "code": "018043",
@@ -503,6 +506,54 @@
     "remaining_high_cny": 90101.15,
     "reached_low": false,
     "reached_high": false
+  },
+  "goals": {
+    "primary": "departure",
+    "items": [
+      {
+        "key": "departure",
+        "label": "出发门槛",
+        "subtitle": "能不能动身",
+        "target_cny": 56183.0,
+        "progress": 0.3642533815054589,
+        "progress_pct": 36.4253,
+        "remaining_cny": 35718.15,
+        "reached": false,
+        "note": "医疗应急 + 搬家 + 空窗期月开销；区间上沿 110,566.00（更保守的医疗额度与更长空窗）",
+        "is_primary": true
+      },
+      {
+        "key": "coffee_fire",
+        "label": "咖啡师 FIRE 门槛",
+        "subtitle": "有兼职（每周 3 天 × 4h）",
+        "target_cny": 205953.49,
+        "progress": 0.09936635642775649,
+        "progress_pct": 9.9366,
+        "remaining_cny": 185488.64,
+        "reached": false,
+        "note": "资产覆盖 (月开销 − 兼职净收入) = 738.00/月",
+        "is_primary": false
+      },
+      {
+        "key": "full_fire",
+        "label": "完全 FIRE 门槛",
+        "subtitle": "完全不工作",
+        "target_cny": 407720.93,
+        "progress": 0.05019327247468311,
+        "progress_pct": 5.0193,
+        "remaining_cny": 387256.08,
+        "reached": false,
+        "note": "资产覆盖全额月开销，不依赖任何劳动收入",
+        "is_primary": false
+      }
+    ]
+  },
+  "full_fire": {
+    "target_cny": 407720.93,
+    "monthly_expense": 1461.0,
+    "progress_pct": 5.0193,
+    "remaining_cny": 387256.08,
+    "reached": false
   },
   "fulltime": {
     "enabled": true,

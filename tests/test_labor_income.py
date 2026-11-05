@@ -199,6 +199,37 @@ ok(
     "关闭后组合需覆盖 == 月开销",
     abs(off_plan["net_monthly_expense"] - monthly) < 0.01,
 )
+ok(
+    "关闭兼职后咖啡师 FIRE 门槛 == 完全 FIRE 门槛",
+    abs(off_plan["target_cny"] - off_plan["full_fire_target_cny"]) < 0.01,
+    f'{off_plan["target_cny"]} vs {off_plan["full_fire_target_cny"]}',
+)
+
+print()
+print("完全 FIRE 门槛：不依赖任何劳动收入")
+base_full = plan["full_fire_target_cny"]
+ok(
+    "完全 FIRE 门槛 == 月开销 × 12 ÷ 提取率",
+    abs(base_full - monthly * 12 / rate) < 0.01,
+    str(base_full),
+)
+# 改兼职时薪只影响咖啡师 FIRE，不该动完全 FIRE —— 这是「完全不工作」的定义。
+rich = variant(**{"fire.labor_income.hourly_wage": 18})
+_, rich_plan = lifeplan_mod.resolve_monthly(rich)
+ok(
+    "兼职时薪翻倍 -> 完全 FIRE 门槛不变",
+    abs(rich_plan["full_fire_target_cny"] - base_full) < 0.01,
+    f'{rich_plan["full_fire_target_cny"]} vs {base_full}',
+)
+ok(
+    "兼职时薪翻倍 -> 咖啡师 FIRE 门槛下降",
+    rich_plan["target_cny"] < plan["target_cny"],
+    f'{rich_plan["target_cny"]} vs {plan["target_cny"]}',
+)
+ok(
+    "完全 FIRE 门槛 > 咖啡师 FIRE 门槛（有兼职时）",
+    base_full > plan["target_cny"],
+)
 
 print()
 print("线性：工时翻倍，净收入不等于翻倍（消耗不随工时变）")

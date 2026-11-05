@@ -432,6 +432,12 @@ def summary(cfg) -> dict:
         target_net = _net_after_labor(monthly_total(cfg, target_name), labor)
     target = _target(target_net, rate)
 
+    # 完全 FIRE 门槛（2026-11-05 新增）：**完全不工作**，不扣兼职收入。
+    # 资产要覆盖全额月开销，所以分母比咖啡师 FIRE 门槛大。
+    # 与 target 一样按 target_profile 算，避免切档位试算时漂移。
+    target_full_monthly = monthly_total(cfg, target_name)
+    full_fire_target = _target(target_full_monthly, rate)
+
     return {
         "enabled": True,
         "profile": prof["profile_name"],
@@ -450,7 +456,11 @@ def summary(cfg) -> dict:
         "target_net_monthly_expense": round(target_net, 2),
         "labor_income": labor,
         "annual_expense": round(monthly * 12, 2),
+        # 咖啡师 FIRE 门槛：有兼职，资产只覆盖 (月开销 − 兼职净收入)。
         "target_cny": round(target, 2),
+        # 完全 FIRE 门槛：完全不工作，资产覆盖全额月开销。
+        "full_fire_target_cny": round(full_fire_target, 2),
+        "full_fire_monthly_expense": round(target_full_monthly, 2),
         "groups": by_group(cfg),
         "one_off": one_off(cfg),
         "one_off_total": extra,
@@ -493,6 +503,9 @@ def resolve_monthly(cfg) -> tuple[float, dict | None]:
                 "target_net_monthly_expense": round(net_monthly, 2),
                 "annual_expense": round(monthly * 12, 2),
                 "target_cny": round(target, 2),
+                # 完全 FIRE 不扣兼职：覆盖值就是全额月开销，直接算。
+                "full_fire_target_cny": round(_target(monthly, rate), 2),
+                "full_fire_monthly_expense": round(monthly, 2),
                 "target_with_one_off": round(target + data["one_off_total"], 2),
                 "override": True,
             }
