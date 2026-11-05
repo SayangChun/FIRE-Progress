@@ -189,13 +189,16 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
     return kept
 
 
-def is_material(previous: dict, data: dict, cfg) -> tuple[bool, str]:
+def is_material(
+    previous: dict, data: dict, cfg, history: list[dict] | None = None
+) -> tuple[bool, str]:
     """判断本次结果是否值得提交。
 
-    三类情况必提交：
+    四类情况必提交：
       1. 首次生成
       2. 跨天（保证进度曲线每天至少一个点）
       3. **数据源告警状态发生变化**（新增或消除）
+      4. **门槛口径发生变化**（`target_cny` 或 `departure.low_cny`）
 
     其余情况按阈值判断：阈值 = max(绝对下限, 上次总资产 × 比例)。
 
@@ -219,6 +222,49 @@ def is_material(previous: dict, data: dict, cfg) -> tuple[bool, str]:
         added = len(cur_warnings - prev_warnings)
         removed = len(prev_warnings - cur_warnings)
         return True, f"数据源告警状态变化（新增 {added} 条、消除 {removed} 条）"
+
+    # 口径变更也必须提交：门槛变了，曲线末端就该出现台阶。
+    # ⚠️ 2026-11-05 实际踩过：出发门槛从 ¥69,383 改成 ¥56,183，
+    #    但资产没动、又是同一天，门控判「不值得写」→ history 当天记录
+    #    一直停在旧门槛，曲线末端画的是错的数。
+    # 两个来源都要比：previous（latest.json）可能已被手工/上一次运行
+    # 更新成新口径，而 history 当天那条还是旧值——只看前者会漏。
+    cur_target = (data.get("fire") or {}).get("target_cny")
+    cur_dep = (data.get("departure") or {}).get("low_cny")
+
+    def _changed(old, new) -> bool:
+        # 「有 → 无」（例如关掉出发门槛）也算变化：当天记录必须重写，
+        # 否则 history 里会留着一条已经失效的 departure_cny。
+        if old is None and new is None:
+            return False
+        if old is None or new is None:
+            return True
+        return abs(float(old) - float(new)) > 0.01
+
+    def _fmt(value) -> str:
+        return "—" if value is None else f"¥{float(value):,.2f}"
+
+    prev_target = (previous.get("fire") or {}).get("target_cny")
+    prev_dep = (previous.get("departure") or {}).get("low_cny")
+    # target_cny 在正常输出里一定存在；只有测试用的极简夹具可能缺，
+    # 缺的时候不拿它做「有→无」判断（那不是口径变化，是数据没带）。
+    if cur_target is not None and _changed(prev_target, cur_target):
+        return True, f"不工作门槛变化（{_fmt(prev_target)} → {_fmt(cur_target)}）"
+    if _changed(prev_dep, cur_dep):
+        return True, f"出发门槛变化（{_fmt(prev_dep)} → {_fmt(cur_dep)}）"
+
+    last = (history or [])[-1] if history else None
+    if last and last.get("date") == data["as_of_date"]:
+        if cur_target is not None and _changed(last.get("target_cny"), cur_target):
+            return True, (
+                "当天历史记录的不工作门槛过期"
+                f"（{_fmt(last.get('target_cny'))} → {_fmt(cur_target)}）"
+            )
+        if _changed(last.get("departure_cny"), cur_dep):
+            return True, (
+                "当天历史记录的出发门槛过期"
+                f"（{_fmt(last.get('departure_cny'))} → {_fmt(cur_dep)}）"
+            )
 
     prev_total = ((previous.get("assets") or {}).get("total_cny")) or 0.0
     cur_total = data["assets"]["total_cny"]
@@ -311,7 +357,7 @@ def main() -> int:
         print(f"  纳指100 = ¥{assets['ndx100']['value_cny']:,.2f}")
     print(f"  合计 = ¥{assets['total_cny']:,.2f}　完成度 = {assets['progress_pct']:.4f}%")
 
-    material, reason = is_material(previous, data, cfg)
+    material, reason = is_material(previous, data, cfg, history)
     if not material and not args.force:
         print(f"→ 跳过写入：{reason}")
         return 0

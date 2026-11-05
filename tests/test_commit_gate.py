@@ -27,16 +27,33 @@ FLOOR = float(cfg.automation.get("min_commit_delta_cny", 1.0))
 failures: list[str] = []
 
 
-def make(total: float, date: str = "2026-09-24", warnings=None) -> dict:
-    return {
+def make(
+    total: float,
+    date: str = "2026-09-24",
+    warnings=None,
+    target: float | None = None,
+    departure: float | None = None,
+) -> dict:
+    data = {
         "as_of_date": date,
         "assets": {"total_cny": total, "progress_pct": total / TARGET * 100},
         "warnings": list(warnings or []),
     }
+    if target is not None:
+        data["fire"] = {"target_cny": target}
+    if departure is not None:
+        data["departure"] = {"low_cny": departure}
+    return data
 
 
-def check(label: str, previous: dict, data: dict, expect: bool) -> None:
-    got, reason = is_material(previous, data, cfg)
+def check(
+    label: str,
+    previous: dict,
+    data: dict,
+    expect: bool,
+    history: list[dict] | None = None,
+) -> None:
+    got, reason = is_material(previous, data, cfg, history)
     if got == expect:
         print(f"  ok   {label}")
     else:
@@ -93,6 +110,54 @@ check(
     True,
 )
 check("告警为空、变动不足 -> 跳过", make(BASE, warnings=[]), make(BASE + 1.0), False)
+
+print("门槛口径变化必须提交（否则曲线末端会停在旧门槛）")
+GATE_OLD, GATE_NEW = 69383.0, 56183.0
+TARGET_OLD, TARGET_NEW = TARGET, TARGET * 1.1
+# 2026-11-05 实际踩的就是这一种：latest.json 已被手工改成新门槛，
+# 但 history 当天那条还是旧值 → 只看 previous 会漏，曲线画错。
+check(
+    "previous 新、history 旧（出发门槛） -> 提交",
+    make(BASE, departure=GATE_NEW),
+    make(BASE, departure=GATE_NEW),
+    True,
+    history=[{"date": "2026-09-24", "target_cny": TARGET, "departure_cny": GATE_OLD}],
+)
+check(
+    "previous 新、history 旧（不工作门槛） -> 提交",
+    make(BASE, target=TARGET_NEW),
+    make(BASE, target=TARGET_NEW),
+    True,
+    history=[{"date": "2026-09-24", "target_cny": TARGET_OLD, "departure_cny": GATE_NEW}],
+)
+check(
+    "previous 旧、history 旧 -> 提交",
+    make(BASE, departure=GATE_OLD),
+    make(BASE, departure=GATE_NEW),
+    True,
+    history=[{"date": "2026-09-24", "target_cny": TARGET, "departure_cny": GATE_OLD}],
+)
+check(
+    "previous 新、history 也新、资产未动 -> 跳过",
+    make(BASE, departure=GATE_NEW),
+    make(BASE, departure=GATE_NEW),
+    False,
+    history=[{"date": "2026-09-24", "target_cny": TARGET, "departure_cny": GATE_NEW}],
+)
+check(
+    "门槛从有到无（关掉 departure） -> 提交",
+    make(BASE, departure=GATE_OLD),
+    make(BASE),
+    True,
+    history=[{"date": "2026-09-24", "target_cny": TARGET, "departure_cny": GATE_OLD}],
+)
+check(
+    "history 是昨天、门槛不同 -> 不据此提交（交给跨天规则）",
+    make(BASE, departure=GATE_NEW),
+    make(BASE, departure=GATE_NEW),
+    False,
+    history=[{"date": "2026-09-23", "target_cny": TARGET, "departure_cny": GATE_OLD}],
+)
 
 print()
 if failures:
