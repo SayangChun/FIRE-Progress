@@ -246,7 +246,7 @@ ok("没有 departure 时返回 None（调用方退回单条）", render_mod.dual
 block = render_mod.render_block(data, cfg, [])
 ok("README 出现两条门槛", "出发门槛" in block and "不工作门槛" in block)
 ok("README 出现全职小节", "阶段 A 首选方案" in block)
-ok("README 明说全职不改变目标", "全职**不改变**上面的 FIRE 目标" in block)
+ok("README 明说全职不改变目标", "全职**不改变** FIRE 目标" in block)
 ok(
     "外推文案说「不工作门槛」而不是含糊的「目标」",
     "后达到**不工作门槛**" in block,
@@ -255,9 +255,12 @@ ok(
     "外推段给出全职的第二条外推",
     "阶段 A 若有全职收入" in block,
 )
+# 断言绑在「小节里有没有这个数」上，而不是某一行长什么样——
+# 2026-11-05 把表格压成一句话时，这条曾经因为格式变了而误报失败。
+ft_section = block.split("阶段 A 首选方案", 1)[1].split("</details>", 1)[0]
 ok(
     "README 全职小节显示完整月开销（不包吃住）",
-    "| 月开销 | ¥1,461.00 |" in block,
+    "月开销 ¥1,461.00" in ft_section and "包吃住" not in ft_section,
 )
 ok("README 不再出现「备选城市」小节", "阶段 A 备选城市" not in block)
 

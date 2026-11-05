@@ -45,18 +45,13 @@ def _positions_table(positions: list[dict], cfg) -> str:
 
 
 def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True) -> str:
-    """全职情景：阶段 A 首选/备选方案的现金流。
+    """全职情景：阶段 A 的现金流。
 
-    ⚠️ 这一节**不参与 FIRE 目标**。全职净收入大于月开销，
-    代进 (月开销 − 净收入) × 12 ÷ 提取率 会得到负数——
-    负数不是「超额完成」，是那个公式在这里没有答案。
+    ⚠️ 这一节不参与 FIRE 目标。全职净收入大于月开销，代进
+    (月开销 − 净收入) × 12 ÷ 提取率 会得到负数——负数不是「超额完成」，
+    是那个公式在这里没有答案。所以只展示：净收入、月盈余、达标会提前多久。
 
-    所以这里只展示三件事：净收入多少、每月盈余多少、以及
-    「若这笔盈余从今天起就并入定投，达标会提前多久」。
-
-    key 指定读取 data 里的哪个全职变体（2026-11-05 起只有 "fulltime"，
-    即牡丹江独自租房方案）；primary=False 时标题改为「备选变体」并追加
-    一条「岗位数量待确认」的提示。变体不存在时返回空串，调用方跳过。
+    变体不存在时返回空串，调用方跳过。
     """
     ft = data.get(key)
     if not ft:
@@ -69,59 +64,33 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
     out.append("")
     out.append(
         f"**{money(ft['hourly_wage'], cfg, decimals=0)}/小时 × "
-        f"{ft['hours_per_week']:.0f} 小时/周 = "
-        f"毛收入 {money(ft['gross_monthly_cny'], cfg)}/月**，"
-        f"扣掉工作增量消耗 {money(ft['cost_monthly_cny'], cfg)}"
-        f"（交通 {money(ft['transport_cny'], cfg)} + 餐食 {money(ft['meal_cny'], cfg)}"
-        f" + 装备 {money(ft['gear_cny'], cfg)}），"
-        f"净收入 **{money(ft['net_monthly_cny'], cfg)}/月**。"
+        f"{ft['hours_per_week']:.0f} 小时/周 = 毛收入 {money(ft['gross_monthly_cny'], cfg)}/月**，"
+        f"扣交通 {money(ft['transport_cny'], cfg)}、餐食 {money(ft['meal_cny'], cfg)}、"
+        f"装备 {money(ft['gear_cny'], cfg)}，净 **{money(ft['net_monthly_cny'], cfg)}/月**。"
+        f"月开销 {money(ft.get('stage_a_monthly_expense') or ft['monthly_expense'], cfg)}，"
+        f"**盈余 {money(ft['surplus_monthly_cny'], cfg)}**"
+        f"（等效时薪 {money(ft['effective_hourly_cny'], cfg, decimals=2)}，"
+        f"每月占用 {ft['occupied_hours_per_month']:.0f} 小时）。"
     )
     out.append("")
-    out.append("| 项目 | 数值 |")
-    out.append("| --- | ---: |")
-    out.append(f"| 月净收入 | {money(ft['net_monthly_cny'], cfg)} |")
-    if ft.get("room_and_board_covered"):
-        out.append(
-            f"| 阶段 A 个人月开销（包吃住，已扣房租/伙食） | {money(ft['stage_a_monthly_expense'], cfg)} |"
-        )
-    else:
-        out.append(f"| 月开销 | {money(ft['monthly_expense'], cfg)} |")
-    out.append(f"| **月盈余** | **{money(ft['surplus_monthly_cny'], cfg)}** |")
-    out.append(f"| 等效时薪（含通勤） | {money(ft['effective_hourly_cny'], cfg, decimals=2)} |")
-    out.append(f"| 每月占用工时 | {ft['occupied_hours_per_month']:.0f} 小时 |")
-    out.append("")
-
-    if not primary:
-        out.append(
-            "> ⚠️ 这是**备选变体**，尚未取代当前主方案；"
-        )
-        out.append(
-            "> 工资取当地同类岗位的保守下限，岗位数量需实地确认。"
-        )
-        out.append(
-            "> 外推仍沿用 ¥205,953.49 作对照尺（这是「牡丹江不工作」的口径，仅供对照）。"
-        )
-        out.append("")
 
     proj = ft.get("projection")
     if proj and proj.get("eta"):
         out.append(
-            f"> 若这份盈余从现在起并入定投（月投 {money(proj['monthly_cny'], cfg)}），"
-            f"按基准年化 **{proj['weighted_rate'] * 100:.2f}%** 外推，"
-            f"约 **{proj['days_to_target'] / 365:.2f} 年**后达到不工作门槛（{proj['eta']}）；"
-            f"不做全职则要 {data['projection']['days_to_target'] / 365:.2f} 年"
+            f"> 盈余若从现在起并入定投（月投 {money(proj['monthly_cny'], cfg)}），"
+            f"按基准年化 **{proj['weighted_rate'] * 100:.2f}%** 外推，约 "
+            f"**{proj['days_to_target'] / 365:.2f} 年**后达到不工作门槛（{proj['eta']}）；"
+            f"不做全职则 {data['projection']['days_to_target'] / 365:.2f} 年"
             f"（{data['projection']['eta']}）。"
         )
         out.append(">")
         out.append(
-            "> ⚠️ 这是**敏感性测算**，不是承诺：它假设这份工作从今天就有、"
-            "且盈余全部存下。实际要到 2029-06 毕业才可能开始。"
+            "> ⚠️ 敏感性测算，不是承诺：假设这份工作今天就有、盈余全部存下"
+            "（实际要到 2029-06 毕业才可能开始）。全职**不改变** FIRE 目标，只影响「多久到」。"
         )
-        out.append(">")
-        out.append(
-            "> ⚠️ 全职**不改变**上面的 FIRE 目标。目标只由「月开销 − 兼职净收入」决定；"
-            "全职只影响「多久到」，不影响「到多少」。"
-        )
+        if not primary:
+            out.append(">")
+            out.append("> ⚠️ 这是备选变体，尚未取代主方案；工资取当地同类岗位的保守下限，岗位数量需实地确认。")
     out.append("")
     out.append("</details>")
     return "\n".join(out)
@@ -130,11 +99,9 @@ def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True
 def _life_plan_block(data: dict, cfg) -> str:
     """FIRE 后月开销明细：让「目标资产」的来历可追溯。
 
-    分两层展示，避免「分类行和明细行长得一样、只靠加粗区分」：
-      1. 分类汇总表 —— 先看清钱花在哪几个大类、各占多少
-      2. 每类一张独立小表 —— 分类名单独成行，不再混进表格当行
-
-    这里的金额不做隐私遮蔽——它是未来生活预算，不是持仓金额。
+    一张表列完 17 项，分类只在每类第一行出现，不再分四张小表——
+    同样的信息，行数少一半。
+    金额不做隐私遮蔽：这是未来生活预算，不是持仓金额。
     """
     plan = data.get("life_plan")
     if not plan or not plan.get("groups"):
@@ -150,89 +117,43 @@ def _life_plan_block(data: dict, cfg) -> str:
     out.append("")
     out.append(f"共 **{n_items} 项**，合计 **{money(plan['monthly_expense'], cfg)}/月**。")
     out.append("")
-
-    out.append("**分类汇总**")
-    out.append("")
-    out.append("| 分类 | 月支出 | 占比 |")
-    out.append("| --- | ---: | ---: |")
+    out.append("| 分类 | 项目 | 月支出 |")
+    out.append("| --- | --- | ---: |")
     for group in plan["groups"]:
-        out.append(
-            f"| {group['group']} | {money(group['subtotal'], cfg)} | "
-            f"{group['subtotal'] / total * 100:.1f}% |"
-        )
-    out.append(f"| **合计** | **{money(plan['monthly_expense'], cfg)}** | 100.0% |")
+        for i, item in enumerate(group["items"]):
+            name = group["group"] if i == 0 else ""
+            out.append(f"| {name} | {item['label']} | {money(item['monthly'], cfg)} |")
+    out.append(f"| **合计** |  | **{money(plan['monthly_expense'], cfg)}** |")
     out.append("")
-
-    out.append("**逐项明细**")
-    out.append("")
-    for group in plan["groups"]:
-        share = group["subtotal"] / total * 100
-        out.append(
-            f"**{group['group']}** · {money(group['subtotal'], cfg)}/月 · 占 {share:.1f}%"
-        )
-        out.append("")
-        out.append("| 项目 | 月支出 | 占总计 |")
-        out.append("| --- | ---: | ---: |")
-        for item in group["items"]:
-            out.append(
-                f"| {item['label']} | {money(item['monthly'], cfg)} | "
-                f"{item['monthly'] / total * 100:.1f}% |"
-            )
-        out.append("")
 
     labor = plan.get("labor_income")
     if labor:
-        out.append(f"**兼职收入** · {labor['label']}")
-        out.append("")
         out.append(
-            f"{labor['hourly_wage']} 元/小时 × 每周 {labor['hours_per_week']:.0f} 小时"
-            f" = {labor['hours_per_month']:.1f} 小时/月"
-            f"（{labor['work_days_per_month']:.1f} 个工作日）"
-        )
-        out.append("")
-        out.append("| 项目 | 金额 |")
-        out.append("| --- | ---: |")
-        out.append(f"| 毛收入 | {money(labor['gross_monthly_cny'], cfg)} |")
-        out.append(f"| 减：交通（往返公交） | −{money(labor['transport_cny'], cfg)} |")
-        out.append(f"| 减：餐食增量 | −{money(labor['meal_cny'], cfg)} |")
-        out.append(f"| 减：装备摊销 | −{money(labor['gear_cny'], cfg)} |")
-        out.append(f"| **净收入** | **{money(labor['net_monthly_cny'], cfg)}** |")
-        out.append("")
-        out.append(
-            f"> 组合需要覆盖：{money(plan['monthly_expense'], cfg)} − "
-            f"{money(labor['net_monthly_cny'], cfg)} = "
-            f"**{money(plan['net_monthly_expense'], cfg)}/月**。"
-        )
-        out.append(">")
-        out.append(
-            "> 只扣上班多出来的开销：餐食算的是「在外面吃比在家做贵多少」，不是整顿饭钱，"
-            "家里那顿已经算在食品里，全额扣等于把生活费算两遍。"
-        )
-        if labor.get("effective_hourly_cny"):
-            out.append(">")
-            out.append(
-                f"> 通勤 {labor['commute_hours_per_day']:.1f} 小时不算工资，但要占时间："
-                f"每月实际占用 {labor['occupied_hours_per_month']:.1f} 小时，"
-                f"等效时薪 {money(labor['effective_hourly_cny'], cfg)}"
-                f"（名义净时薪 {money(labor['net_hourly_cny'], cfg)}）。"
-            )
-        out.append("")
-
-    if plan.get("override"):
-        out.append(
-            f"> ⚠️ 当前为**手工覆盖值**（`fire.monthly_expense`），"
-            f"逐项预算推导值为 {money(plan.get('derived_monthly_expense'), cfg)}。"
+            f"兼职 {money(labor['hourly_wage'], cfg, decimals=0)}/小时 × 每周 "
+            f"{labor['hours_per_week']:.0f} 小时：毛 {money(labor['gross_monthly_cny'], cfg)} − "
+            f"交通 {money(labor['transport_cny'], cfg)} − 餐食 {money(labor['meal_cny'], cfg)} − "
+            f"装备 {money(labor['gear_cny'], cfg)} = 净 **{money(labor['net_monthly_cny'], cfg)}/月**，"
+            f"组合需覆盖 **{money(plan['net_monthly_expense'], cfg)}/月**。"
         )
         out.append("")
 
     if plan.get("one_off"):
-        out.append("**一次性支出**（不进入 FIRE 目标，落地那年发生一次）：")
+        parts = " + ".join(f"{row['label']} {money(row['amount'], cfg)}" for row in plan["one_off"])
+        extra = (
+            f"，含一次性支出共 **{money(plan['target_with_one_off'], cfg)}**"
+            if plan.get("target_with_one_off")
+            else ""
+        )
+        out.append(
+            f"一次性支出（不摊进月开销）：{parts} = **{money(plan['one_off_total'], cfg)}**{extra}。"
+        )
         out.append("")
-        out.append("| 项目 | 金额 |")
-        out.append("| --- | ---: |")
-        for row in plan["one_off"]:
-            out.append(f"| {row['label']} | {money(row['amount'], cfg)} |")
-        out.append(f"| **合计** | **{money(plan['one_off_total'], cfg)}** |")
+
+    if plan.get("override"):
+        out.append(
+            f"> ⚠️ 当前为手工覆盖值（`fire.monthly_expense`），逐项推导值为 "
+            f"{money(plan.get('derived_monthly_expense'), cfg)}。"
+        )
         out.append("")
 
     formula = (
@@ -241,19 +162,14 @@ def _life_plan_block(data: dict, cfg) -> str:
         else "`FIRE 目标 = 月开销 × 12 ÷ 提取率`"
     )
     out.append(
-        f"> 月开销 = 上面各项相加；{formula}。"
-        "每项的依据见 [config.yaml](config.yaml) 和 "
-        "[docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。"
+        "> 只扣上班多出来的开销：餐食算的是「在外面吃比在家做贵多少」，"
+        "家里那顿已经算在食品里，全额扣等于把生活费算两遍。"
     )
     out.append(">")
     out.append(
-        "> 一次性支出不摊进月开销：它不产生持续现金流，摊进去会同时抬高月开销和目标。"
+        f"> 月开销 = 各项相加，{formula}。每项依据见 "
+        "[config.yaml](config.yaml) 与 [docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。"
     )
-    if plan.get("target_with_one_off"):
-        out.append(">")
-        out.append(
-            f"> 加上一次性支出，总共需要 **{money(plan['target_with_one_off'], cfg)}**。"
-        )
     out.append("")
     out.append("</details>")
     out.append("")

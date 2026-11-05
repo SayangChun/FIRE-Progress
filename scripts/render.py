@@ -62,50 +62,28 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("![FIRE 进度曲线](reports/curve.svg)")
         out.append("")
         out.append(
-            "> 两条线：**出发门槛**（能不能走）与**不工作门槛**（能不能不工作）。"
-            "每个点是当天的完成度原值，按 `data/history.json` 连线，不回填、不重算。"
+            "> 两条线回答两个问题：**出发门槛**（能不能走）= 医疗应急 + 搬家 + 空窗期月开销；"
+            "**不工作门槛**（能不能不工作）= 组合需覆盖 × 12 ÷ 提取率。别把它们混成一个百分比。"
         )
         out.append(">")
         out.append(
-            "> 竖虚线是口径调整日：那天 FIRE 目标变了，不工作门槛那条线因此出现台阶。"
-            "目标值逐日记在 `data/history.json` 里，可以查到。"
+            "> 每个点是当天的完成度原值，按 `data/history.json` 连线，不回填、不重算。"
+            "竖虚线是口径调整日——那天目标变了，所以出现台阶。"
         )
         out.append(">")
         out.append(
-            "> ⚠️ **出发门槛是 2026-10-31 才定义的概念**，此前的记录里没有它，"
-            "那段按当前门槛折算，所以是平滑线——**它是反事实，不是历史记录**。"
-            "它只由医疗应急、搬家、月开销决定，不含行情；两条线形状的差异本身就是信息。"
+            "> ⚠️ 出发门槛 2026-10-31 才定义，此前的点是按当前门槛折算的**反事实**，不是历史记录；"
+            "它不含行情，只由医疗应急、搬家、月开销决定。"
         )
         cap_note = str(cfg.display.get("capital_change_note") or "").strip()
         if cap_note:
             out.append(">")
-            out.append(
-                f"> ⚠️ **分子口径也有过变化**，但不会画竖线（竖线只标分母）：{cap_note}"
-                "纳入后分子变大、进度跳升，那不是资产增长。"
-            )
+            out.append(f"> ⚠️ 分子口径也变过，但不画竖线（竖线只标分母）：{cap_note}")
         out.append("")
 
     if cfg.display.get("show_progress_bar", True):
         if data.get("departure"):
             out.append("![双线进度](reports/progress.svg)")
-            out.append("")
-            out.append("> **两条线回答两个不同问题，别把它们混成一个百分比。**")
-            out.append(">")
-            out.append(
-                "> - **出发门槛** = 医疗专项应急金 + 一次性搬家 + 空窗期月开销。"
-                "它决定「能不能出发」——因为阶段 A 有工作、有现金流，"
-                "不需要资产覆盖生活费。"
-            )
-            out.append(
-                "> - **不工作门槛** = 组合需覆盖 × 12 ÷ 提取率。"
-                "它决定「能不能不工作」，也就是兼职兜底的永续线。"
-            )
-            out.append(">")
-            out.append(
-                "> 2026-10-31 之前只有第二条，因为假设「攒够才走」。"
-                "阶段 A 改为全职优先后，出发条件换成第一条，"
-                "第二条降级为长期目标。"
-            )
         else:
             out.append("![FIRE 完成度](reports/progress.svg)")
             out.append("")
