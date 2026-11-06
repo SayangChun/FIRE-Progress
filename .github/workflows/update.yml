@@ -126,7 +126,13 @@ jobs:
             exit 0
           fi
           echo "尝试开启 Pages（source: gh-pages）…"
-          curl -s -X POST \
+          # 必须带 Content-Type: application/json，否则 GitHub API 把 JSON 体当成
+          # 表单拒绝（415），自愈会静默失败。原写法漏了这个头。
+          resp=$(curl -s -o /tmp/pages_enable.json -w "HTTP %{http_code}" \
+            -X POST \
             -H "Authorization: Bearer $GH_TOKEN" \
             -H "Accept: application/vnd.github+json" \
-            -d '{"source":{"branch":"gh-pages","path":"/"}}' "$api" | head -20
+            -H "Content-Type: application/json" \
+            -d '{"source":{"branch":"gh-pages","path":"/"}}' "$api")
+          echo "POST $api -> $resp"
+          head -c 500 /tmp/pages_enable.json 2>/dev/null || true
