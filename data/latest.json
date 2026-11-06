@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-11-06T03:42:15+08:00",
+  "as_of": "2026-11-06T15:43:40+08:00",
   "as_of_date": "2026-11-06",
   "fire": {
     "monthly_expense": 1461.0,
@@ -227,13 +227,13 @@
     "override": false
   },
   "two_phase": {
-    "capital_cny": 19719.25,
+    "capital_cny": 19597.63,
     "annual_net_expense_cny": 8856.0,
     "rate": 0.043,
     "years": 2.4,
     "perpetual": false,
     "exhaust_age": 24.4,
-    "critical_rate": 0.4491,
+    "critical_rate": 0.4519,
     "graduation": "2029-06",
     "start_age": 22,
     "monthly_contribution": 2584,
@@ -271,10 +271,10 @@
     ]
   },
   "allocation": {
-    "btc_pct": 0.7281,
-    "sp500_pct": 0.0515,
-    "ndx100_pct": 0.2204,
-    "non_btc_pct": 0.2719,
+    "btc_pct": 0.7264,
+    "sp500_pct": 0.0518,
+    "ndx100_pct": 0.2218,
+    "non_btc_pct": 0.2736,
     "sp500_target_range": [
       0.25,
       0.3
@@ -283,16 +283,16 @@
     "note": "再平衡走场内标普500 ETF，不受场外每日 20 元限购约束"
   },
   "assets": {
-    "total_cny": 19719.25,
-    "progress": 0.09574612137410528,
-    "progress_pct": 9.5746,
-    "remaining_cny": 186234.24,
+    "total_cny": 19597.63,
+    "progress": 0.09515562852782009,
+    "progress_pct": 9.5156,
+    "remaining_cny": 186355.85,
     "btc": {
       "qty": 0.02812354,
-      "price_cny": 510525.62,
-      "value_cny": 14357.79,
+      "price_cny": 506201.34,
+      "value_cny": 14236.17,
       "snapshot_date": "2026-11-01",
-      "stale_days": 4,
+      "stale_days": 5,
       "positions": [
         {
           "venue": "币安",
@@ -383,47 +383,47 @@
     }
   },
   "cost_basis": {
-    "btc_cny": 13138.49,
+    "btc_cny": 13132.8,
     "btc_estimated": true,
     "sp500_cny": 1019.49,
     "ndx100_cny": 4177.22,
-    "total_cny": 18335.2,
-    "profit_cny": 1384.05
+    "total_cny": 18329.51,
+    "profit_cny": 1268.13
   },
   "price": {
-    "btc_usdt": 76364.02,
-    "usd_cny": 6.685421,
-    "btc_cny": 510525.62,
+    "btc_usdt": 75750.01,
+    "usd_cny": 6.682525,
+    "btc_cny": 506201.34,
     "btc_source": "binance:data-api.binance.vision",
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-11-05T19:42:13+00:00"
+    "fetched_at": "2026-11-06T07:43:37+00:00"
   },
   "passive_income": {
     "hours_per_year": 8760,
-    "total_value_cny": 19719.25,
-    "weighted_rate": 0.10368663306098658,
-    "annual_cny": 2044.62,
-    "monthly_cny": 170.39,
-    "daily_cny": 5.601698630136987,
-    "hourly_cny": 0.23340410958904112,
-    "rate_low": 0.0081566904826704,
-    "rate_high": 0.20649767998060659,
-    "hourly_low_cny": 0.01836116438356164,
-    "hourly_high_cny": 0.46483777397260273,
+    "total_value_cny": 19597.63,
+    "weighted_rate": 0.10358536331271007,
+    "annual_cny": 2030.03,
+    "monthly_cny": 169.17,
+    "daily_cny": 5.561726027397261,
+    "hourly_cny": 0.23173858447488585,
+    "rate_low": 0.00820730721920923,
+    "rate_high": 0.20622764847906852,
+    "hourly_low_cny": 0.018361164383561644,
+    "hourly_high_cny": 0.46136688356164385,
     "monthly_expense": 1461.0,
-    "coverage": 0.11662217659137579,
+    "coverage": 0.11578998402920374,
     "withdrawal_rate": 0.043,
-    "monthly_at_withdrawal_cny": 70.66,
-    "hourly_at_withdrawal_cny": 0.09679539393710916,
+    "monthly_at_withdrawal_cny": 70.22,
+    "hourly_at_withdrawal_cny": 0.09619842993634414,
     "assets": [
       {
         "key": "btc",
         "label": "比特币",
-        "value_cny": 14357.79,
-        "weight": 0.72811031724432,
+        "value_cny": 14236.17,
+        "weight": 0.7264230926930257,
         "rate": 0.12,
-        "annual_cny": 1722.93,
-        "hourly_cny": 0.1966820232204767,
+        "annual_cny": 1708.34,
+        "hourly_cny": 0.19501607717183014,
         "rate_low": 0.0,
         "rate_high": 0.25
       },
@@ -431,7 +431,7 @@
         "key": "sp500",
         "label": "标普500基金",
         "value_cny": 1014.95,
-        "weight": 0.05147001628528003,
+        "weight": 0.051789415955954834,
         "rate": 0.06,
         "annual_cny": 60.9,
         "hourly_cny": 0.006951712328767123,
@@ -442,7 +442,7 @@
         "key": "ndx100",
         "label": "纳指100基金",
         "value_cny": 4346.51,
-        "weight": 0.2204196664704,
+        "weight": 0.22178749135101952,
         "rate": 0.06,
         "annual_cny": 260.79,
         "hourly_cny": 0.029770616438356164,
@@ -455,36 +455,36 @@
     "btc_usdt_per_day": 9.9,
     "sp500_cny_per_day": 20.0,
     "ndx100_cny_per_day": 0.0,
-    "usd_cny": 6.6854,
-    "btc_cny_per_day": 66.19,
-    "daily_cny": 86.19,
-    "monthly_cny": 2585.57,
-    "assets_cny": 19719.25,
+    "usd_cny": 6.6825,
+    "btc_cny_per_day": 66.16,
+    "daily_cny": 86.16,
+    "monthly_cny": 2584.71,
+    "assets_cny": 19597.63,
     "weights": {
-      "btc": 0.7281,
-      "sp500": 0.0515,
-      "ndx100": 0.2204
+      "btc": 0.7264,
+      "sp500": 0.0518,
+      "ndx100": 0.2218
     },
-    "weighted_rate": 0.1037,
+    "weighted_rate": 0.1036,
     "scenarios": {
       "low": {
         "rate": 0.0082,
-        "days": 2100,
-        "eta": "2032-08-06"
+        "days": 2101,
+        "eta": "2032-08-07"
       },
       "base": {
-        "rate": 0.1037,
-        "days": 1621,
-        "eta": "2031-04-15"
+        "rate": 0.1036,
+        "days": 1623,
+        "eta": "2031-04-17"
       },
       "high": {
-        "rate": 0.2065,
-        "days": 1342,
-        "eta": "2030-07-10"
+        "rate": 0.2062,
+        "days": 1344,
+        "eta": "2030-07-12"
       }
     },
-    "days_to_target": 1621,
-    "eta": "2031-04-15",
+    "days_to_target": 1623,
+    "eta": "2031-04-17",
     "reason": null
   },
   "departure": {
@@ -499,11 +499,11 @@
     "low_cny": 56183.0,
     "high_cny": 110566.0,
     "note": "双线进度条的第一条。它回答「能不能走」，¥205,953 回答「能不能不工作」。",
-    "assets_cny": 19719.25,
-    "progress_low": 0.3509824625793354,
-    "progress_high": 0.17834820555229275,
-    "remaining_low_cny": 36463.75,
-    "remaining_high_cny": 90846.75,
+    "assets_cny": 19597.63,
+    "progress_low": 0.3488178565321111,
+    "progress_high": 0.1772482827771973,
+    "remaining_low_cny": 36585.37,
+    "remaining_high_cny": 90968.37,
     "reached_low": false,
     "reached_high": false
   },
@@ -515,9 +515,9 @@
         "label": "出发门槛",
         "subtitle": "能不能动身",
         "target_cny": 56183.0,
-        "progress": 0.3509824625793354,
-        "progress_pct": 35.0982,
-        "remaining_cny": 36463.75,
+        "progress": 0.3488178565321111,
+        "progress_pct": 34.8818,
+        "remaining_cny": 36585.37,
         "reached": false,
         "note": "医疗应急 + 搬家 + 空窗期月开销；区间上沿 110,566.00（更保守的医疗额度与更长空窗）",
         "is_primary": true
@@ -527,9 +527,9 @@
         "label": "咖啡师 FIRE 门槛",
         "subtitle": "有兼职（每周 3 天 × 4h）",
         "target_cny": 205953.49,
-        "progress": 0.09574612137410528,
-        "progress_pct": 9.5746,
-        "remaining_cny": 186234.24,
+        "progress": 0.09515562852782009,
+        "progress_pct": 9.5156,
+        "remaining_cny": 186355.85,
         "reached": false,
         "note": "资产覆盖 (月开销 − 兼职净收入) = 738.00/月",
         "is_primary": false
@@ -539,9 +539,9 @@
         "label": "完全 FIRE 门槛",
         "subtitle": "完全不工作",
         "target_cny": 407720.93,
-        "progress": 0.04836457057795586,
-        "progress_pct": 4.8365,
-        "remaining_cny": 388001.68,
+        "progress": 0.04806629287719814,
+        "progress_pct": 4.8066,
+        "remaining_cny": 388123.3,
         "reached": false,
         "note": "资产覆盖全额月开销，不依赖任何劳动收入",
         "is_primary": false
@@ -551,8 +551,8 @@
   "full_fire": {
     "target_cny": 407720.93,
     "monthly_expense": 1461.0,
-    "progress_pct": 4.8365,
-    "remaining_cny": 388001.68,
+    "progress_pct": 4.8066,
+    "remaining_cny": 388123.3,
     "reached": false
   },
   "fulltime": {
@@ -583,36 +583,36 @@
       "btc_usdt_per_day": 9.9,
       "sp500_cny_per_day": 62.03,
       "ndx100_cny_per_day": 0.0,
-      "usd_cny": 6.6854,
-      "btc_cny_per_day": 66.19,
-      "daily_cny": 128.21,
-      "monthly_cny": 3846.39,
-      "assets_cny": 19719.25,
+      "usd_cny": 6.6825,
+      "btc_cny_per_day": 66.16,
+      "daily_cny": 128.18,
+      "monthly_cny": 3845.53,
+      "assets_cny": 19597.63,
       "weights": {
-        "btc": 0.7281,
-        "sp500": 0.0515,
-        "ndx100": 0.2204
+        "btc": 0.7264,
+        "sp500": 0.0518,
+        "ndx100": 0.2218
       },
-      "weighted_rate": 0.1037,
+      "weighted_rate": 0.1036,
       "scenarios": {
         "low": {
           "rate": 0.0082,
-          "days": 1424,
-          "eta": "2030-09-30"
+          "days": 1425,
+          "eta": "2030-10-01"
         },
         "base": {
-          "rate": 0.1037,
-          "days": 1183,
-          "eta": "2030-02-01"
+          "rate": 0.1036,
+          "days": 1184,
+          "eta": "2030-02-02"
         },
         "high": {
-          "rate": 0.2065,
-          "days": 1023,
-          "eta": "2029-08-25"
+          "rate": 0.2062,
+          "days": 1024,
+          "eta": "2029-08-26"
         }
       },
-      "days_to_target": 1183,
-      "eta": "2030-02-01",
+      "days_to_target": 1184,
+      "eta": "2030-02-02",
       "reason": null
     }
   },
