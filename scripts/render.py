@@ -73,13 +73,13 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         )
         out.append(">")
         out.append(
-            "> ⚠️ 出发门槛 2026-10-31 才定义，此前的点是按当前门槛折算的**反事实**，不是历史记录；"
-            "它不含行情，只由医疗应急、搬家、月开销决定。"
+            "> ⚠️ 出发门槛不含行情，只由医疗应急、搬家、月开销决定；"
+            "没有对应字段的早期记录按当前门槛折算，是**反事实**，不是历史实测。"
         )
         cap_note = str(cfg.display.get("capital_change_note") or "").strip()
         if cap_note:
             out.append(">")
-            out.append(f"> ⚠️ 分子口径也变过，但不画竖线（竖线只标分母）：{cap_note}")
+            out.append(f"> ⚠️ {cap_note}")
         out.append("")
 
     if cfg.display.get("show_progress_bar", True):
@@ -427,8 +427,8 @@ def default_readme(
 
 公式：`咖啡师 FIRE = (月开销 − 兼职净收入) × 12 ÷ 提取率`；
 `完全 FIRE = 月开销 × 12 ÷ 提取率`，不扣任何劳动收入。
-**「不工作」这个词以前被含糊地用在第一行的数字上，但那其实是有兼职的口径**——
-2026-11-05 起两条并列，谁都不许再含糊。
+**「不工作」不能含糊地套在第一行的数字上，那一行是有兼职的口径**——
+两条门槛并列，谁都不许混。
 {gate_note}
 月开销由 [config.yaml](config.yaml) 的 `life_plan` 逐项推导，依据见
 [docs/FIRE-LIFE-PLAN.md](docs/FIRE-LIFE-PLAN.md)。

@@ -321,7 +321,7 @@ def curve_svg(
         if full_from:
             note += f" 完全 FIRE 门槛自 {full_from} 起逐日记录，之前按当前门槛折算（反事实）。"
         else:
-            note += " 完全 FIRE 门槛 2026-11-05 才定义，全程按当前门槛折算，是反事实而非历史记录。"
+            note += " 完全 FIRE 门槛没有对应的逐日字段，全程按当前门槛折算，是反事实而非历史实测。"
     extra = str(cfg.display.get("capital_change_note") or "").strip()
     if extra:
         note = f"{note} {extra}".strip()
