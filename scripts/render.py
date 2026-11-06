@@ -124,9 +124,9 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             out.append(
                 f"| 🚪 出发门槛（能不能走） | {money(dep['low_cny'], cfg)}–{money(dep['high_cny'], cfg)} |"
             )
-            out.append(f"| 🎯 不工作门槛（能不能不工作） | {money(fire['target_cny'], cfg)} |")
+            out.append(f"| 🎯 咖啡师 FIRE 门槛（能不能不工作） | {money(fire['target_cny'], cfg)} |")
             out.append(f"| 📈 出发门槛完成度 | **{dep['progress_low'] * 100:.3f}%** |")
-            out.append(f"| 📈 不工作门槛完成度 | **{pct:.3f}%** |")
+            out.append(f"| 📈 咖啡师 FIRE 门槛完成度 | **{pct:.3f}%** |")
         else:
             out.append(f"| 🎯 FIRE 目标资产 | {money(fire['target_cny'], cfg)} |")
             out.append(f"| 📈 完成度 | **{pct:.3f}%** |")
