@@ -33,6 +33,7 @@ def make(
     warnings=None,
     target: float | None = None,
     departure: float | None = None,
+    projection: dict | None = None,
 ) -> dict:
     data = {
         "as_of_date": date,
@@ -43,6 +44,8 @@ def make(
         data["fire"] = {"target_cny": target}
     if departure is not None:
         data["departure"] = {"low_cny": departure}
+    if projection is not None:
+        data["projection"] = projection
     return data
 
 
@@ -157,6 +160,43 @@ check(
     make(BASE, departure=GATE_NEW),
     False,
     history=[{"date": "2026-09-23", "target_cny": TARGET, "departure_cny": GATE_OLD}],
+)
+
+print("外推输入变化必须提交（否则 README 会一直挂着旧定投额与旧达成年限）")
+P_OLD = {"daily_cny": 86.19, "weighted_rate": 0.1043}
+P_NEW_DCA = {"daily_cny": 60.12, "weighted_rate": 0.1043}
+P_NEW_RATE = {"daily_cny": 86.19, "weighted_rate": 0.1100}
+# 要防的情形：只改 config 里的定投额，同一天、资产没动，
+# 前四类判定（跨天/告警/门槛/资产阈值）一个都不命中。
+check(
+    "只改定投额、资产与门槛都没动 -> 提交",
+    make(BASE, projection=P_OLD),
+    make(BASE, projection=P_NEW_DCA),
+    True,
+)
+check(
+    "只改预期年化 -> 提交",
+    make(BASE, projection=P_OLD),
+    make(BASE, projection=P_NEW_RATE),
+    True,
+)
+check(
+    "外推输入没变、资产也没动 -> 跳过",
+    make(BASE, projection=P_OLD),
+    make(BASE, projection=P_OLD),
+    False,
+)
+check(
+    "汇率带来的日额微变（不足 1 分）-> 不触发",
+    make(BASE, projection=P_OLD),
+    make(BASE, projection={"daily_cny": 86.195, "weighted_rate": 0.1043}),
+    False,
+)
+check(
+    "两边都缺外推字段（极简夹具）-> 不误判",
+    make(BASE),
+    make(BASE),
+    False,
 )
 
 print()

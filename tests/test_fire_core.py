@@ -159,12 +159,12 @@ ASSETS = {"btc": 14_562.22, "sp500": 900.0, "ndx100": 4_500.0}
 proj = firemod.projection(185_828.10, FX, CONTRIB, ASSETS, ER)
 ok(
     "比特币定投折人民币 = USDT × 汇率",
-    abs(proj["btc_cny_per_day"] - 9.9 * FX) < 0.01,
+    abs(proj["btc_cny_per_day"] - 6.0 * FX) < 0.01,
     str(proj["btc_cny_per_day"]),
 )
 ok(
     "日定投合计 = 比特币 + 标普500 + 纳指100",
-    abs(proj["daily_cny"] - (9.9 * FX + 20.0)) < 0.01,
+    abs(proj["daily_cny"] - (6.0 * FX + 20.0)) < 0.01,
     str(proj["daily_cny"]),
 )
 ok(
@@ -187,10 +187,14 @@ ok(
     str({k: v["rate"] for k, v in proj["scenarios"].items()}),
 )
 only_dca = firemod.projection(185_828.10, FX, CONTRIB)
+# projection() 内部用未四舍五入的日定投额求解，daily_cny 展示值则保留到分，
+# 两者在整数天上可能差 1（定投额改小后更容易撞上）。用未取整的日额做基准，
+# 钉住「退化成纯定投」这个性质，而不是分币级取整。
+_daily_raw = 6.0 * FX + 20.0
 ok(
     "不给资产时退化为纯定投（天数 = 剩余 ÷ 日定投）",
-    only_dca["days_to_target"] == int(185_828.10 / only_dca["daily_cny"]),
-    str(only_dca["days_to_target"]),
+    only_dca["days_to_target"] == int(185_828.10 / _daily_raw),
+    f'{only_dca["days_to_target"]} vs {int(185_828.10 / _daily_raw)}',
 )
 ok(
     "计入资产增值后，天数比纯定投更短",
@@ -219,9 +223,17 @@ ok(
 ok("已达标（剩余 ≤ 0）返回 None", firemod.projection(0, FX, CONTRIB) is None)
 ok(
     "compute() 里的外推用的是配置中的定投额与预期回报",
-    abs(data["projection"]["daily_cny"] - (9.9 * 6.7 + 20.0)) < 0.01
+    abs(data["projection"]["daily_cny"] - (6.0 * 6.7 + 20.0)) < 0.01
     and data["projection"]["weighted_rate"] > 0,
     str(data["projection"].get("weighted_rate")),
+)
+# 每月储蓄 ¥2,584 里，只有定投那部分进分子；差额转现金缓冲，
+# 既不进资产构成也不进外推。写死这条边界，避免以后有人把两者合并。
+monthly_saving = float((cfg.get("timeline") or {}).get("monthly_contribution") or 0)
+ok(
+    "外推只算定投额，不把现金缓冲算进分子",
+    monthly_saving > data["projection"]["monthly_cny"] + 500,
+    f'储蓄 ¥{monthly_saving:,.0f} vs 定投 ¥{data["projection"]["monthly_cny"]:,.2f}',
 )
 
 print()

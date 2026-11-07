@@ -198,11 +198,12 @@ def is_material(
 ) -> tuple[bool, str]:
     """判断本次结果是否值得提交。
 
-    四类情况必提交：
+    五类情况必提交：
       1. 首次生成
       2. 跨天（保证进度曲线每天至少一个点）
       3. **数据源告警状态发生变化**（新增或消除）
       4. **门槛口径发生变化**（`target_cny` 或 `departure.low_cny`）
+      5. **外推输入发生变化**（`projection.daily_cny` / `weighted_rate`）
 
     其余情况按阈值判断：阈值 = max(绝对下限, 上次总资产 × 比例)。
 
@@ -278,6 +279,23 @@ def is_material(
                 "当天历史记录的完全 FIRE 门槛过期"
                 f"（{_fmt(last.get('full_fire_cny'))} → {_fmt(cur_full)}）"
             )
+
+    # 外推的输入变了，也必须重写 README。
+    # 定投额与预期年化都直接写在 README 的「外推」段上，但它们既不改资产、
+    # 也不改三个门槛——上面四类判定一个都命中不了。改完配置若恰好遇上
+    # 同一天、行情没动，门控就会判「不值得写」，README 会一直挂着旧定投额
+    # 和旧的达成年限。这两项是**配置口径**，和门槛口径同等对待。
+    prev_proj = previous.get("projection") or {}
+    cur_proj = data.get("projection") or {}
+    for key, label, tol in (
+        ("daily_cny", "日定投额", 0.01),
+        ("weighted_rate", "加权预期年化", 1e-6),
+    ):
+        old, new = prev_proj.get(key), cur_proj.get(key)
+        if old is None or new is None:
+            continue
+        if abs(float(old) - float(new)) > tol:
+            return True, f"{label}变化（{old} → {new}）"
 
     prev_total = ((previous.get("assets") or {}).get("total_cny")) or 0.0
     cur_total = data["assets"]["total_cny"]
