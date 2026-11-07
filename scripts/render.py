@@ -149,8 +149,8 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append(
             "> **三个门槛别混成一个百分比。** 出发门槛答「能不能动身」（阶段 A 有工作，"
             "只需医疗应急 + 搬家 + 空窗）；咖啡师 FIRE 答「能不能只做兼职」"
-            "（资产覆盖 ¥738/月）；**完全 FIRE 答「能不能完全不工作」"
-            "（资产覆盖全额 ¥1,461/月，不依赖任何劳动收入）**。"
+            "（资产覆盖 ¥941/月）；**完全 FIRE 答「能不能完全不工作」"
+            "（资产覆盖全额 ¥1,664/月，不依赖任何劳动收入）**。"
             "主进度由 `display.primary_progress` 指定，改一行即可切换。"
         )
         out.append("")
@@ -353,7 +353,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                 if ftmp.get("days_to_target"):
                     out.append(">")
                     out.append(
-                        f"> **备选情景：牡丹江轻松工作**（净 {money(ftm['net_monthly_cny'], cfg)}/月，"
+                        f"> **备选情景：云南省内轻松工作**（净 {money(ftm['net_monthly_cny'], cfg)}/月，"
                         f"盈余 {money(ftm['surplus_monthly_cny'], cfg)} 并入定投 → 月投 "
                         f"{money(ftmp['monthly_cny'], cfg)}），同一口径下 **{_horizon(ftmp['days_to_target'])}**"
                         f"（{ftmp['eta']}）。工资取 ¥17/h 保守占位，按实际岗位改。"

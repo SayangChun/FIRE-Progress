@@ -25,9 +25,9 @@ def fake_data() -> dict:
     return {
         "as_of": "2026-10-28T11:44:11+08:00",
         "fire": {
-            "monthly_expense": 1461.0,
-            "net_monthly_expense": 738.0,
-            "target_cny": 205953.49,
+            "monthly_expense": 1664.0,
+            "net_monthly_expense": 941.0,
+            "target_cny": 262604.65,
             "withdrawal_rate": 0.043,
             "labor_income": {"net_monthly_cny": 723.0},
         },
@@ -64,13 +64,13 @@ def fake_data() -> dict:
             },
         },
         "life_plan": {
-            "headline": "牡丹江 · 单人 · 租房 · 极简",
-            "monthly_expense": 1461.0,
+            "headline": "云南省内 · 单人 · 租房 · 极简（城市待定）",
+            "monthly_expense": 1664.0,
             "one_off_total": 15000.0,
             "groups": [
                 {"group": "住房", "subtotal": 712.0,
                  "items": [{"label": "房租", "monthly": 500.0},
-                           {"label": "取暖费", "monthly": 75.0}]},
+                           {"label": "取暖费", "monthly": 0.0}]},
             ],
         },
         "price": {"btc_source": "binance", "fx_source": "open.er-api.com"},
@@ -110,7 +110,7 @@ assert "9.77%" in html
 assert 'style="width:9.77%"' in html, "进度条宽度与完成度不一致"
 
 # 3. 关键数字齐全
-for token in ("¥205,953.49", "¥185,828.10", "¥723.00", "¥738.00", "¥15,000.00"):
+for token in ("¥262,604.65", "¥185,828.10", "¥723.00", "¥941.00", "¥15,000.00"):
     assert token in html, f"页面缺数字：{token}"
 
 # 4. 没有漏出 Python 的占位值

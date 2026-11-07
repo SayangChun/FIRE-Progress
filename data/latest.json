@@ -1,10 +1,10 @@
 {
-  "as_of": "2026-11-06T19:48:47+08:00",
-  "as_of_date": "2026-11-06",
+  "as_of": "2026-11-07T15:42:13+08:00",
+  "as_of_date": "2026-11-07",
   "fire": {
-    "monthly_expense": 1461.0,
-    "net_monthly_expense": 738.0,
-    "target_net_monthly_expense": 738.0,
+    "monthly_expense": 1664.0,
+    "net_monthly_expense": 941.0,
+    "target_net_monthly_expense": 941.0,
     "labor_income": {
       "enabled": true,
       "label": "咖啡师 FIRE · 兼职",
@@ -26,25 +26,25 @@
       "note": "工作不只是为了赚钱，也是为了体验生活和融入社会。咖啡师在这里是隐喻：低压力、可随时停、不需要 career 的兼职。"
     },
     "withdrawal_rate": 0.043,
-    "annual_expense": 17532.0,
-    "target_cny": 205953.49,
-    "full_fire_target_cny": 407720.93,
-    "target_with_one_off": 207753.49,
+    "annual_expense": 19968.0,
+    "target_cny": 262604.65,
+    "full_fire_target_cny": 464372.09,
+    "target_with_one_off": 264804.65,
     "monthly_override": false
   },
   "life_plan": {
     "enabled": true,
-    "profile": "mudanjiang-rent-minimal",
-    "target_profile": "mudanjiang-rent-minimal",
-    "city": "牡丹江",
-    "province": "黑龙江",
+    "profile": "yunnan-rent-minimal",
+    "target_profile": "yunnan-rent-minimal",
+    "city": "云南省内（待定）",
+    "province": "云南",
     "housing": "rent",
     "household": 1,
     "lifestyle": "极简",
-    "headline": "牡丹江 · 单人 · 租房 · 极简",
-    "monthly_expense": 1461.0,
-    "net_monthly_expense": 738.0,
-    "target_net_monthly_expense": 738.0,
+    "headline": "云南省内 · 单人 · 租房 · 极简（城市待定）",
+    "monthly_expense": 1664.0,
+    "net_monthly_expense": 941.0,
+    "target_net_monthly_expense": 941.0,
     "labor_income": {
       "enabled": true,
       "label": "咖啡师 FIRE · 兼职",
@@ -65,10 +65,10 @@
       "effective_hourly_cny": 11.12,
       "note": "工作不只是为了赚钱，也是为了体验生活和融入社会。咖啡师在这里是隐喻：低压力、可随时停、不需要 career 的兼职。"
     },
-    "annual_expense": 17532.0,
-    "target_cny": 205953.49,
-    "full_fire_target_cny": 407720.93,
-    "full_fire_monthly_expense": 1461.0,
+    "annual_expense": 19968.0,
+    "target_cny": 262604.65,
+    "full_fire_target_cny": 464372.09,
+    "full_fire_monthly_expense": 1664.0,
     "groups": [
       {
         "group": "住房与水电燃气",
@@ -77,53 +77,53 @@
             "key": "rent",
             "group": "住房与水电燃气",
             "label": "房租",
-            "monthly": 500.0,
-            "note": "40㎡ 一居室。房天下 2026-10 实际挂牌：一居室区间 ¥400-850（爱民吉祥花园 50㎡ ¥400、龙门鑫家园 57㎡ ¥450 为低位）。原按均价×租售比推得 ¥534，2026-10-08 结合真实房源取 ¥500。⚠️ 2026-10-29 复核：四个区 ¥450-550 档都能租到 50㎡ 以上，¥500 是偏保守的取值，保留作为安全垫；区级选址见 docs/FIRE-LIFE-PLAN.md §2.5（爱民区）"
+            "monthly": 610.0,
+            "note": "40㎡ 一居室。中国房价行情 2026-08 红塔区挂牌 ¥5,497/㎡、售租比 30 年 → ¥5,497×40÷(30×12)≈¥611。安居客 2026-11 挂牌 ¥5,928-6,117/㎡ 为上沿（月租约 ¥659-680）。估算，实地核价后调整"
           },
           {
             "key": "heating",
             "group": "住房与水电燃气",
             "label": "取暖费",
-            "monthly": 75.0,
-            "note": "居民供热 ¥28/㎡ 按【使用面积】计收（约合建筑面积 80%）。40㎡ × 80% × ¥28 ÷ 12 ≈ ¥75。⚠️ 2026-10-08 查证：是否含在租金内【因房源而异】（房天下把「房租包含取暖费吗」做成逐套问答字段），无「大部分包」的证据；且即使房东包，成本通常已折算进租金。故按租客自付保守建模——看房时务必逐套问清并写进合同"
+            "monthly": 0.0,
+            "note": "云南无集中供暖。中国天气网玉溪气象数据：最冷月均温 9℃、最热月 21-22℃、极端最高不超过 32℃，不需空调与暖气"
           },
           {
             "key": "property_fee",
             "group": "住房与水电燃气",
             "label": "物业费",
-            "monthly": 15.0,
-            "note": "¥0.375/㎡·月 × 40㎡。牡丹江物业费实行政府指导价并按服务分级，有电梯与无电梯差约一倍；原按 ¥0.6/㎡（≈二级无电梯）建模，2026-10-08 下调到三级无电梯档。⚠️ 与取暖费同理：房天下把「房租包含物业费吗」做成逐套问答字段，即使房东交也可能折算进租金——看房时逐套问清并写进合同"
+            "monthly": 20.0,
+            "note": "地级市有物业小区，估算。⚠️ 逐套问清是否含在租金内并写进合同"
           },
           {
             "key": "water",
             "group": "住房与水电燃气",
             "label": "水费",
             "monthly": 12.0,
-            "note": "单人约 3 吨/月"
+            "note": "单人约 3 吨/月，估算"
           },
           {
             "key": "electricity",
             "group": "住房与水电燃气",
             "label": "电费",
-            "monthly": 55.0,
-            "note": "约 110 度/月。冬季靠集中供暖，不需要电暖器，用电量低于南方。峰谷分时经评估后未采用"
+            "monthly": 75.0,
+            "note": "无集中供暖，且 5-10 月雨季相对湿度 79-80% 需除湿。约 150 度/月，估算"
           },
           {
             "key": "gas",
             "group": "住房与水电燃气",
             "label": "燃气/液化气",
             "monthly": 35.0,
-            "note": "自己做饭；牡丹江管道燃气覆盖较好，可能低于此值"
+            "note": "自己做饭，估算"
           },
           {
             "key": "appliance",
             "group": "住房与水电燃气",
             "label": "家电维修与更换摊销",
             "monthly": 20.0,
-            "note": "改买二手（约 ¥200-300）。按 10 年摊销，无保修"
+            "note": "二手家电按 10 年摊销。⚠️ 除湿机属一次性支出，不进月开销"
           }
         ],
-        "subtotal": 712.0
+        "subtotal": 772.0
       },
       {
         "group": "日常开销",
@@ -139,8 +139,8 @@
             "key": "food",
             "group": "日常开销",
             "label": "食品",
-            "monthly": 300.0,
-            "note": "偏紧档 ¥300，实付约 ¥284（余 ¥16）。⚠️ 2026-10-26 改为【线上为主】：16:8 两餐、不炒菜、全部一锅煮。面包 ¥0.40/包、牛奶 ¥0.625/袋、挂面 ¥0（券价，均约零售价 20%）；生鲜走多多买菜。购物篮：面包 60 包 + 牛奶 60 袋 + 挂面 6kg + 鸡蛋 120 个 + 北豆腐 4.5kg + 西红柿 4.5kg + 韭菜 3.6kg + 大白菜 6kg + 橙子 6kg。逐项清单与营养评估见规划书 §4.2–4.3，品类汇总见 §6.5。⚠️ 券价部分脆弱：面包/奶/挂面回到零售价，食品会跳到约 ¥400"
+            "monthly": 340.0,
+            "note": "16:8 两餐、不炒菜、一锅煮（购物篮见规划书 §4.2）。⚠️ 雨季 5-10 月湿度 79-80%，囤挂面/面包/干货易霉变，改少量勤买；叠加券价脆弱。多多买菜已覆盖云南（全国 30 个省级行政区、约 70% 行政村），具体住址自提点步行可达仍待出发前打开 App 核实。云南本地蔬果价格偏低已作部分抵消。估算"
           },
           {
             "key": "drinking_water",
@@ -153,39 +153,39 @@
             "key": "supplies",
             "group": "日常开销",
             "label": "日用品",
-            "monthly": 22.0,
-            "note": "极限档 ¥22：香皂替代洗发水与沐浴露、洗衣皂替代洗衣液、小苏打+白醋替代专用清洁剂。含洗护、清洁、垃圾袋与杂项摊销。理发已改为自理，不再计入。⚠️ 2026-10-13 由 ¥28 下调：纸巾部分（原 ¥6/月）不再占用本预算，本项只剩非纸品部分"
+            "monthly": 30.0,
+            "note": "含洗护、清洁、垃圾袋，另加除湿袋/防霉与防晒用品（年日照 2100-2300h、夏季紫外线 11-13 级）。理发自理。估算"
           },
           {
             "key": "transport",
             "group": "日常开销",
             "label": "交通",
             "monthly": 30.0,
-            "note": "牡丹江市区面积较大，公交月卡与骑车并用。冬季约 −25℃，11-3 月需留公交余量"
+            "note": "玉溪全年温和可骑车是利好，与偶尔去昆明（动车单程 ¥29-40）相抵。估算"
           },
           {
             "key": "home_visit",
             "group": "日常开销",
             "label": "探亲与返乡交通",
-            "monthly": 100.0,
-            "note": "每年 1-2 次往返，单次火车往返约 ¥1000，折算 ≈ ¥100/月。牡丹江是铁路枢纽（哈牡、牡佳高铁交汇），往返便利"
+            "monthly": 200.0,
+            "note": "玉溪→昆明南动车 32-39 分钟 ¥29-40；昆明→北京高铁二等座 ¥1,370（10h40）、淡季直飞往返约 ¥1,200-1,600。按每年 1-2 次、单次往返约 ¥1,500 折算。⚠️ 紧急临时购票属一次性应急支出，由 ¥4 万流动性覆盖，不摊进本项"
           },
           {
             "key": "clothing",
             "group": "日常开销",
             "label": "衣物",
-            "monthly": 30.0,
-            "note": "按年摊销，含冬装更新。东北冬装单价高但更新慢"
+            "monthly": 25.0,
+            "note": "按年摊销。无厚重冬装；雨季换洗频繁与防晒衣部分抵消"
           },
           {
             "key": "misc",
             "group": "日常开销",
             "label": "杂项（快递与小额）",
             "monthly": 5.0,
-            "note": "2026-09-29 拆细后确认：无域名、无代理订阅、无视频音乐会员、无云存储、付费 AI 为 ¥0、娱乐与外食为 ¥0。仅保留快递与零星小额支出。⚠️ 若实际有代理订阅需加回 ¥10-30"
+            "note": "无域名、无代理订阅、无会员、无云存储、娱乐与外食为 ¥0。仅快递与零星小额。⚠️ 若实际有代理订阅需加回 ¥10-30"
           }
         ],
-        "subtotal": 532.0
+        "subtotal": 675.0
       },
       {
         "group": "医疗与应急",
@@ -195,14 +195,14 @@
             "group": "医疗与应急",
             "label": "医疗自付预留",
             "monthly": 80.0,
-            "note": "门诊与小病自付。⚠️ 已无任何医保：住院费用 100% 自付，本项 ¥80/月只够小病，唯一防线是规划书 §5.4 的专项应急金（¥50k–100k）。不建议压缩"
+            "note": "门诊与小病自付。⚠️ 已无任何医保：住院 100% 自付，本项只够小病，唯一防线是规划书 §5.4 的专项应急金（¥50k-100k）。玉溪市人民医院（昆医大第六附属医院）三甲，2025 年通过复审。不建议压缩"
           },
           {
             "key": "buffer",
             "group": "医疗与应急",
             "label": "应急与物价缓冲",
             "monthly": 137.0,
-            "note": "按月留一笔机动钱，应付物价波动与临时支出；经确认不下调，这是安全垫，不建议压缩"
+            "note": "按月留一笔机动钱，应付物价波动与临时支出；这是安全垫，不建议压缩"
           }
         ],
         "subtotal": 217.0
@@ -218,54 +218,54 @@
       {
         "key": "moving",
         "label": "搬家与长途运输",
-        "amount": 800.0,
-        "note": "从北京到牡丹江，物品少：仅跨省行李托运（快递/物流），不含家具；估算，待核实"
+        "amount": 1200.0,
+        "note": "从北京到云南，物品少：仅跨省行李托运（快递/物流），不含家具；以玉溪为样本估算，选定城市后复核"
       }
     ],
-    "one_off_total": 1800.0,
-    "target_with_one_off": 207753.49,
+    "one_off_total": 2200.0,
+    "target_with_one_off": 264804.65,
     "override": false
   },
   "two_phase": {
     "capital_cny": 19487.54,
-    "annual_net_expense_cny": 8856.0,
+    "annual_net_expense_cny": 11292.0,
     "rate": 0.043,
-    "years": 2.4,
+    "years": 1.8,
     "perpetual": false,
-    "exhaust_age": 24.4,
-    "critical_rate": 0.4544,
+    "exhaust_age": 23.8,
+    "critical_rate": 0.5794,
     "graduation": "2029-06",
     "start_age": 22,
     "monthly_contribution": 2584,
     "horizon": [
       {
         "years": 5,
-        "capital_cny": 39095.27,
+        "capital_cny": 49849.11,
         "covered": false
       },
       {
         "years": 10,
-        "capital_cny": 70769.25,
+        "capital_cny": 90235.58,
         "covered": false
       },
       {
         "years": 15,
-        "capital_cny": 96430.69,
+        "capital_cny": 122955.66,
         "covered": false
       },
       {
         "years": 20,
-        "capital_cny": 117220.93,
+        "capital_cny": 149464.63,
         "covered": false
       },
       {
         "years": 30,
-        "capital_cny": 147711.0,
+        "capital_cny": 188341.54,
         "covered": false
       },
       {
         "years": 40,
-        "capital_cny": 167724.15,
+        "capital_cny": 213859.65,
         "covered": false
       }
     ]
@@ -284,9 +284,9 @@
   },
   "assets": {
     "total_cny": 19487.54,
-    "progress": 0.09462104930564792,
-    "progress_pct": 9.4621,
-    "remaining_cny": 186465.95,
+    "progress": 0.07420864440761761,
+    "progress_pct": 7.4209,
+    "remaining_cny": 243117.12,
     "btc": {
       "qty": 0.02812354,
       "price_cny": 509081.9,
@@ -342,9 +342,9 @@
     "ndx100": {
       "value_cny": 4155.4,
       "invested_cny": 4177.22,
-      "profit_cny": -21.82,
-      "return_rate": -0.005223569742556222,
-      "latest_nav_date": "2026-11-03",
+      "profit_cny": 0.0,
+      "return_rate": null,
+      "latest_nav_date": null,
       "funds": [
         {
           "code": "018043",
@@ -410,8 +410,8 @@
     "rate_high": 0.20754954195446165,
     "hourly_low_cny": 0.017706678082191778,
     "hourly_high_cny": 0.4617156392694064,
-    "monthly_expense": 1461.0,
-    "coverage": 0.11569016655258955,
+    "monthly_expense": 1664.0,
+    "coverage": 0.10157652243589745,
     "withdrawal_rate": 0.043,
     "monthly_at_withdrawal_cny": 69.83,
     "hourly_at_withdrawal_cny": 0.09565799231173722,
@@ -469,41 +469,41 @@
     "scenarios": {
       "low": {
         "rate": 0.008,
-        "days": 2104,
-        "eta": "2032-08-10"
+        "days": 2725,
+        "eta": "2034-04-24"
       },
       "base": {
         "rate": 0.1041,
-        "days": 1623,
-        "eta": "2031-04-17"
+        "days": 2002,
+        "eta": "2032-05-01"
       },
       "high": {
         "rate": 0.2075,
-        "days": 1342,
-        "eta": "2030-07-10"
+        "days": 1616,
+        "eta": "2031-04-11"
       }
     },
-    "days_to_target": 1623,
-    "eta": "2031-04-17",
+    "days_to_target": 2002,
+    "eta": "2032-05-01",
     "reason": null
   },
   "departure": {
     "enabled": true,
     "medical_low_cny": 50000.0,
     "medical_high_cny": 100000.0,
-    "moving_cny": 1800.0,
+    "moving_cny": 2200.0,
     "gap_months_low": 3.0,
     "gap_months_high": 6.0,
-    "gap_low_cny": 4383.0,
-    "gap_high_cny": 8766.0,
-    "low_cny": 56183.0,
-    "high_cny": 110566.0,
+    "gap_low_cny": 4992.0,
+    "gap_high_cny": 9984.0,
+    "low_cny": 57192.0,
+    "high_cny": 112184.0,
     "note": "双线进度条的第一条。它回答「能不能走」，¥205,953 回答「能不能不工作」。",
     "assets_cny": 19487.54,
-    "progress_low": 0.3468582165054554,
-    "progress_high": 0.17625251142237217,
-    "remaining_low_cny": 36695.46,
-    "remaining_high_cny": 91078.46,
+    "progress_low": 0.34073883021971607,
+    "progress_high": 0.1737104683192434,
+    "remaining_low_cny": 37704.46,
+    "remaining_high_cny": 92696.46,
     "reached_low": false,
     "reached_high": false
   },
@@ -514,34 +514,34 @@
         "key": "departure",
         "label": "出发门槛",
         "subtitle": "能不能动身",
-        "target_cny": 56183.0,
-        "progress": 0.3468582165054554,
-        "progress_pct": 34.6858,
-        "remaining_cny": 36695.46,
+        "target_cny": 57192.0,
+        "progress": 0.34073883021971607,
+        "progress_pct": 34.0739,
+        "remaining_cny": 37704.46,
         "reached": false,
-        "note": "医疗应急 + 搬家 + 空窗期月开销；区间上沿 110,566.00（更保守的医疗额度与更长空窗）",
+        "note": "医疗应急 + 搬家 + 空窗期月开销；区间上沿 112,184.00（更保守的医疗额度与更长空窗）",
         "is_primary": true
       },
       {
         "key": "coffee_fire",
         "label": "咖啡师 FIRE 门槛",
         "subtitle": "有兼职（每周 3 天 × 4h）",
-        "target_cny": 205953.49,
-        "progress": 0.09462104930564792,
-        "progress_pct": 9.4621,
-        "remaining_cny": 186465.95,
+        "target_cny": 262604.65,
+        "progress": 0.07420864440761761,
+        "progress_pct": 7.4209,
+        "remaining_cny": 243117.12,
         "reached": false,
-        "note": "资产覆盖 (月开销 − 兼职净收入) = 738.00/月",
+        "note": "资产覆盖 (月开销 − 兼职净收入) = 941.00/月",
         "is_primary": false
       },
       {
         "key": "full_fire",
         "label": "完全 FIRE 门槛",
         "subtitle": "完全不工作",
-        "target_cny": 407720.93,
-        "progress": 0.04779625901943764,
-        "progress_pct": 4.7796,
-        "remaining_cny": 388233.39,
+        "target_cny": 464372.09,
+        "progress": 0.041965345458048524,
+        "progress_pct": 4.1965,
+        "remaining_cny": 444884.55,
         "reached": false,
         "note": "资产覆盖全额月开销，不依赖任何劳动收入",
         "is_primary": false
@@ -549,15 +549,15 @@
     ]
   },
   "full_fire": {
-    "target_cny": 407720.93,
-    "monthly_expense": 1461.0,
-    "progress_pct": 4.7796,
-    "remaining_cny": 388233.39,
+    "target_cny": 464372.09,
+    "monthly_expense": 1664.0,
+    "progress_pct": 4.1965,
+    "remaining_cny": 444884.55,
     "reached": false
   },
   "fulltime": {
     "enabled": true,
-    "label": "全职 · 轻松工作（牡丹江，独自租房）",
+    "label": "全职 · 轻松工作（云南省内，独自租房）",
     "hourly_wage": 17.0,
     "hours_per_week": 40.0,
     "hours_per_day": 8.0,
@@ -574,19 +574,19 @@
     "occupied_hours_per_month": 195.0,
     "effective_hourly_cny": 14.05,
     "note": "阶段 A 的工作判据：任何一个适合自己的轻松工作（低内耗、坐岗、不轮岗、低人际、责任边界清楚、可随时停），不局限于图书馆保安。独自租房、安静生活、不包吃住。⚠️ 工资 ¥17/h 是保守占位假设，换岗位按实际改。找不到符合条件的全职才退回兼职兜底；找不到图书馆岗不等于计划失败。",
-    "monthly_expense": 1461.0,
-    "stage_a_monthly_expense": 1461.0,
+    "monthly_expense": 1664.0,
+    "stage_a_monthly_expense": 1664.0,
     "room_and_board_covered": false,
-    "surplus_monthly_cny": 1278.33,
+    "surplus_monthly_cny": 1075.33,
     "covered": true,
     "projection": {
       "btc_usdt_per_day": 9.9,
-      "sp500_cny_per_day": 62.03,
+      "sp500_cny_per_day": 55.35,
       "ndx100_cny_per_day": 0.0,
       "usd_cny": 6.6825,
       "btc_cny_per_day": 66.16,
-      "daily_cny": 128.18,
-      "monthly_cny": 3845.53,
+      "daily_cny": 121.51,
+      "monthly_cny": 3645.31,
       "assets_cny": 19487.54,
       "weights": {
         "btc": 0.7347,
@@ -597,22 +597,22 @@
       "scenarios": {
         "low": {
           "rate": 0.008,
-          "days": 1427,
-          "eta": "2030-10-03"
+          "days": 1951,
+          "eta": "2032-03-11"
         },
         "base": {
           "rate": 0.1041,
-          "days": 1184,
-          "eta": "2030-02-02"
+          "days": 1543,
+          "eta": "2031-01-28"
         },
         "high": {
           "rate": 0.2075,
-          "days": 1023,
-          "eta": "2029-08-25"
+          "days": 1297,
+          "eta": "2030-05-27"
         }
       },
-      "days_to_target": 1184,
-      "eta": "2030-02-02",
+      "days_to_target": 1543,
+      "eta": "2031-01-28",
       "reason": null
     }
   },
@@ -622,5 +622,5 @@
     "sp500": true
   },
   "warnings": [],
-  "history_days": 43
+  "history_days": 44
 }

@@ -112,7 +112,7 @@ check(
 check("告警为空、变动不足 -> 跳过", make(BASE, warnings=[]), make(BASE + 1.0), False)
 
 print("门槛口径变化必须提交（否则曲线末端会停在旧门槛）")
-GATE_OLD, GATE_NEW = 69383.0, 56183.0
+GATE_OLD, GATE_NEW = 69383.0, 56192.0
 TARGET_OLD, TARGET_NEW = TARGET, TARGET * 1.1
 # 2026-11-05 实际踩的就是这一种：latest.json 已被手工改成新门槛，
 # 但 history 当天那条还是旧值 → 只看 previous 会漏，曲线画错。
