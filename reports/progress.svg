@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 200" width="680" height="200" role="img" aria-label="三级门槛进度：出发门槛、咖啡师 FIRE、完全 FIRE">
-  <title>出发门槛 34.1% · 咖啡师 FIRE 门槛 7.4% · 完全 FIRE 门槛 4.2%（主进度：出发门槛）</title>
-  <desc>三条线回答三个不同问题：出发门槛 ¥57,192.00（能不能动身）；咖啡师 FIRE 门槛 ¥262,604.65（有兼职（每周 3 天 × 4h））；完全 FIRE 门槛 ¥464,372.09（完全不工作）。当前资产 ¥19,487.54。主进度为出发门槛。</desc>
+  <title>出发门槛 33.8% · 咖啡师 FIRE 门槛 7.4% · 完全 FIRE 门槛 4.2%（主进度：出发门槛）</title>
+  <desc>三条线回答三个不同问题：出发门槛 ¥57,192.00（能不能动身）；咖啡师 FIRE 门槛 ¥262,604.65（有兼职（每周 3 天 × 4h））；完全 FIRE 门槛 ¥464,372.09（完全不工作）。当前资产 ¥19,336.20。主进度为出发门槛。</desc>
   <style>
     .fg { fill: #1f2328; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
     .fg-muted { fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -18,21 +18,21 @@
     }
   </style>
   <text class="fg-muted" x="0" y="20" font-size="12">出发门槛 · 主进度</text>
-  <text class="fg" x="680" y="22" text-anchor="end" font-size="18" font-weight="600">34.1%</text>
+  <text class="fg" x="680" y="22" text-anchor="end" font-size="18" font-weight="600">33.8%</text>
   <rect class="track" x="0" y="32" width="680" height="10" rx="5.0"/>
-  <rect class="fill-a" x="0" y="32" width="231.7" height="10" rx="5.0"/>
+  <rect class="fill-a" x="0" y="32" width="229.9" height="10" rx="5.0"/>
   <text class="fg-muted" x="0" y="60" font-size="11">目标 ¥57,192.00 · 能不能动身</text>
-  <text class="fg-muted" x="680" y="60" text-anchor="end" font-size="11">已积累 ¥19,487.54 · 还差 ¥37,704.46</text>
+  <text class="fg-muted" x="680" y="60" text-anchor="end" font-size="11">已积累 ¥19,336.20 · 还差 ¥37,855.80</text>
   <text class="fg-muted" x="0" y="82" font-size="12">咖啡师 FIRE 门槛</text>
   <text class="fg" x="680" y="84" text-anchor="end" font-size="18" font-weight="600">7.4%</text>
   <rect class="track" x="0" y="94" width="680" height="10" rx="5.0"/>
-  <rect class="fill-b" x="0" y="94" width="50.5" height="10" rx="5.0"/>
+  <rect class="fill-b" x="0" y="94" width="50.1" height="10" rx="5.0"/>
   <text class="fg-muted" x="0" y="122" font-size="11">目标 ¥262,604.65 · 有兼职（每周 3 天 × 4h）</text>
-  <text class="fg-muted" x="680" y="122" text-anchor="end" font-size="11">已积累 ¥19,487.54 · 还差 ¥243,117.11</text>
+  <text class="fg-muted" x="680" y="122" text-anchor="end" font-size="11">已积累 ¥19,336.20 · 还差 ¥243,268.45</text>
   <text class="fg-muted" x="0" y="144" font-size="12">完全 FIRE 门槛</text>
   <text class="fg" x="680" y="146" text-anchor="end" font-size="18" font-weight="600">4.2%</text>
   <rect class="track" x="0" y="156" width="680" height="10" rx="5.0"/>
-  <rect class="fill-c" x="0" y="156" width="28.5" height="10" rx="5.0"/>
+  <rect class="fill-c" x="0" y="156" width="28.3" height="10" rx="5.0"/>
   <text class="fg-muted" x="0" y="184" font-size="11">目标 ¥464,372.09 · 完全不工作</text>
-  <text class="fg-muted" x="680" y="184" text-anchor="end" font-size="11">已积累 ¥19,487.54 · 还差 ¥444,884.55</text>
+  <text class="fg-muted" x="680" y="184" text-anchor="end" font-size="11">已积累 ¥19,336.20 · 还差 ¥445,035.89</text>
 </svg>
