@@ -62,7 +62,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("![FIRE 进度曲线](reports/curve.svg)")
         out.append("")
         out.append(
-            "> 三条线回答三个问题：**出发门槛**（能不能走，主进度）= 医疗应急 + 搬家 + 空窗；"
+            "> 三条线回答三个问题：**出发门槛**（能不能走，主进度）= 医疗应急 + 空窗期月开销；"
             "**咖啡师 FIRE**（有兼职）= (月开销 − 兼职净收入) × 12 ÷ 提取率；"
             "**完全 FIRE**（完全不工作）= 月开销 × 12 ÷ 提取率。别把它们混成一个百分比。"
         )
@@ -73,7 +73,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         )
         out.append(">")
         out.append(
-            "> ⚠️ 出发门槛不含行情，只由医疗应急、搬家、月开销决定；"
+            "> ⚠️ 出发门槛不含行情，只由医疗应急、空窗期月开销决定；"
             "没有对应字段的早期记录按当前门槛折算，是**反事实**，不是历史实测。"
         )
         cap_note = str(cfg.display.get("capital_change_note") or "").strip()
@@ -148,9 +148,9 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     if goals:
         out.append(
             "> **三个门槛别混成一个百分比。** 出发门槛答「能不能动身」（阶段 A 有工作，"
-            "只需医疗应急 + 搬家 + 空窗）；咖啡师 FIRE 答「能不能只做兼职」"
-            "（资产覆盖 ¥941/月）；**完全 FIRE 答「能不能完全不工作」"
-            "（资产覆盖全额 ¥1,664/月，不依赖任何劳动收入）**。"
+            "只需医疗应急 + 空窗期月开销）；咖啡师 FIRE 答「能不能只做兼职」"
+            "（资产覆盖 ¥731/月）；**完全 FIRE 答「能不能完全不工作」"
+            "（资产覆盖全额 ¥1,454/月，不依赖任何劳动收入）**。"
             "主进度由 `display.primary_progress` 指定，改一行即可切换。"
         )
         out.append("")
@@ -406,7 +406,7 @@ def default_readme(
             f"| **出发门槛**（能不能走） | **¥{departure['low_cny']:,.0f} – ¥{departure['high_cny']:,.0f}** |\n"
         )
         gate_note = (
-            "\n出发门槛 = 医疗专项应急金 + 一次性搬家 + 空窗期月开销。"
+            "\n出发门槛 = 医疗专项应急金 + 空窗期月开销（**不含**搬家/押金等一次性支出）。"
             "阶段 A 有工作、有现金流，出发不需要资产覆盖生活费。\n"
         )
     return f"""# FIRE-Progress

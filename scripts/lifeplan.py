@@ -18,9 +18,9 @@ FIRE 之后仍做低压力、可随时停的兼职，收入覆盖一部分开销
 
 1. `fulltime_income()` —— 全职净收入。只做现金流展示，**不参与目标计算**。
    全职净收入必然大于月开销，代进公式会得负数，那个负数没有意义。
-2. `departure_gate()` —— 出发门槛 = 医疗专项 + 一次性搬家 + 空窗期开销。
-   全职方案下它才是「能不能走」的约束，比 ¥262,605 更早成为瓶颈。
-   ¥262,605 保留原义：**能不能不工作**（兼职兜底的永续线）。
+2. `departure_gate()` —— 出发门槛 = 医疗专项 + 空窗期开销（默认不含一次性支出）。
+   全职方案下它才是「能不能走」的约束，比 ¥204,000 更早成为瓶颈。
+   ¥204,000 保留原义：**能不能不工作**（兼职兜底的永续线）。
 
 为什么一次性支出不进月开销
 --------------------------
@@ -89,7 +89,7 @@ def target_profile_name(cfg) -> str:
 
     阶段 A 落在云南省内、北京已排除，两者正常情况下一致。
     但字段仍然保留：临时切到常规档（`mudanjiang-rent-normal`）试算时，
-    月开销会变成 ¥2,754 用于出发门槛，目标仍应钉在极简档 ¥262,604.65——
+    月开销会变成 ¥2,754 用于出发门槛，目标仍应钉在极简档 ¥204,000.00——
     否则进度条分母会被试算值一起拖走。
     """
     plan = _plan(cfg)
@@ -338,17 +338,20 @@ def fulltime_income(cfg, key: str = "fulltime") -> dict | None:
 
 
 def departure_gate(cfg) -> dict | None:
-    """出发门槛 = 医疗专项应急金 + 一次性搬家 + 空窗期月开销。
+    """出发门槛 = 医疗专项应急金 + 空窗期月开销（默认不含一次性支出）。
 
     为什么需要它
     ------------
-    旧口径把「攒够 ¥262,605」当成出发条件。但那是「靠资产覆盖净支出」的
+    旧口径把「攒够 ¥204,000」当成出发条件。但那是「靠资产覆盖净支出」的
     永续要求；一旦阶段 A 有全职工作，现金流为正，这个门槛就不再是出发条件。
 
-    真正决定「能不能走」的是三笔钱：
+    真正决定「能不能走」的是两笔钱：
       1. 医疗专项应急金 —— 零医保、住院 100% 自付，唯一防线（规划书 §5.4）
-      2. 一次性搬家     —— 包吃住+极简下只剩跨省行李托运（约 ¥800），取自 life_plan.one_off
-      3. 空窗期月开销   —— 到落脚城市后到第一笔工资之间
+      2. 空窗期月开销   —— 到落脚城市后到第一笔工资之间
+
+    一次性支出（搬家/押金等）默认**不计入**出发门槛：2026-11-07 起
+    departure.include_one_off 为 false（用户明确「出发门槛中不要设置搬家成本」）。
+    它们单列在 life_plan.one_off，只进 FIRE 落地目标的 target_with_one_off。
 
     给出 low / high 两档：下沿是出发前必须到位的，上沿差额可以边工作边补。
     """
@@ -357,7 +360,9 @@ def departure_gate(cfg) -> dict | None:
         return None
 
     monthly = monthly_total(cfg)
-    moving = one_off_total(cfg)
+    # 2026-11-07 起默认不含一次性支出（搬家/押金）：用户明确「出发门槛中不要设置搬家成本」。
+    # include_one_off 为 true 时才把 one_off 算进门槛（当前配置为 false → moving = 0）。
+    moving = one_off_total(cfg) if spec.get("include_one_off") else 0.0
     med_low = float(spec.get("medical_reserve_low") or 0.0)
     med_high = float(spec.get("medical_reserve_high") or 0.0)
     gap_low = float(spec.get("gap_months_low") or 0.0)
@@ -366,7 +371,7 @@ def departure_gate(cfg) -> dict | None:
     if med_low <= 0 or gap_low <= 0:
         raise LifePlanError(
             "departure.medical_reserve_low / gap_months_low 必须为正数，"
-            "否则出发门槛会静默算成只有搬家费"
+            "否则出发门槛会静默算成 0（缺了医疗与空窗两项核心）"
         )
     if med_high < med_low or gap_high < gap_low:
         raise LifePlanError("departure 的上沿不能小于下沿")

@@ -25,16 +25,16 @@ def fake_data() -> dict:
     return {
         "as_of": "2026-10-28T11:44:11+08:00",
         "fire": {
-            "monthly_expense": 1664.0,
-            "net_monthly_expense": 941.0,
-            "target_cny": 262604.65,
+            "monthly_expense": 1454.0,
+            "net_monthly_expense": 731.0,
+            "target_cny": 204000.0,
             "withdrawal_rate": 0.043,
             "labor_income": {"net_monthly_cny": 723.0},
         },
         "assets": {
             "total_cny": 20125.39,
-            "progress_pct": 9.7718,
-            "remaining_cny": 185828.10,
+            "progress_pct": 9.8669,
+            "remaining_cny": 183874.61,
             "btc": {"value_cny": 14780.99, "snapshot_date": "2026-10-25", "stale_days": 3},
             "sp500": {"value_cny": 873.12, "latest_nav_date": "2026-10-26"},
             "ndx100": {"value_cny": 4471.28},
@@ -65,8 +65,8 @@ def fake_data() -> dict:
         },
         "life_plan": {
             "headline": "云南省内 · 单人 · 租房 · 极简（城市待定）",
-            "monthly_expense": 1664.0,
-            "one_off_total": 15000.0,
+            "monthly_expense": 1454.0,
+            "one_off_total": 1000.0,
             "groups": [
                 {"group": "住房", "subtotal": 712.0,
                  "items": [{"label": "房租", "monthly": 500.0},
@@ -106,11 +106,11 @@ assert "¥20,125.39" in html, "合计没出现"
 assert html.count("¥14,780.99") >= 1 and html.count("¥4,471.28") >= 1
 
 # 2. 完成度与进度条一致
-assert "9.77%" in html
-assert 'style="width:9.77%"' in html, "进度条宽度与完成度不一致"
+assert "9.87%" in html
+assert 'style="width:9.87%"' in html, "进度条宽度与完成度不一致"
 
 # 3. 关键数字齐全
-for token in ("¥262,604.65", "¥185,828.10", "¥723.00", "¥941.00", "¥15,000.00"):
+for token in ("¥204,000.00", "¥183,874.61", "¥723.00", "¥731.00", "¥1,000.00"):
     assert token in html, f"页面缺数字：{token}"
 
 # 4. 没有漏出 Python 的占位值
