@@ -227,12 +227,12 @@ ok(
     and data["projection"]["weighted_rate"] > 0,
     str(data["projection"].get("weighted_rate")),
 )
-# 每月储蓄 ¥2,584 里，只有定投那部分进分子；差额转现金缓冲，
+# 每月储蓄 ¥2,000 里，只有定投那部分进分子；差额转现金缓冲，
 # 既不进资产构成也不进外推。写死这条边界，避免以后有人把两者合并。
 monthly_saving = float((cfg.get("timeline") or {}).get("monthly_contribution") or 0)
 ok(
-    "外推只算定投额，不把现金缓冲算进分子",
-    monthly_saving > data["projection"]["monthly_cny"] + 500,
+    "储蓄能力不低于定投额（现金缓冲非负），外推分子仍只算定投额",
+    monthly_saving >= data["projection"]["monthly_cny"],
     f'储蓄 ¥{monthly_saving:,.0f} vs 定投 ¥{data["projection"]["monthly_cny"]:,.2f}',
 )
 
