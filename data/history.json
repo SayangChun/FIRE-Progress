@@ -594,18 +594,18 @@
   },
   {
     "date": "2026-11-08",
-    "as_of": "2026-11-08T03:56:44+08:00",
-    "total_cny": 19322.82,
-    "progress_pct": 9.472,
-    "btc_cny": 14252.53,
+    "as_of": "2026-11-08T12:52:23+08:00",
+    "total_cny": 19346.62,
+    "progress_pct": 9.4836,
+    "btc_cny": 14276.33,
     "btc_qty": 0.02812354,
     "sp500_cny": 993.54,
     "ndx100_cny": 4076.75,
     "target_cny": 204000.0,
     "full_fire_cny": 405767.44,
     "departure_cny": 54362.0,
-    "basis_cny": 18356.54,
-    "profit_cny": 966.29,
-    "fx_usd_cny": 6.686107
+    "basis_cny": 18365.81,
+    "profit_cny": 980.81,
+    "fx_usd_cny": 6.690826
   }
 ]
