@@ -3,10 +3,10 @@
 这两段都不是口径的微调，是**计划结构变了**：
 
     永续门槛要攒够才「不工作」；实际是毕业后就出发，
-    阶段 A 有工作（云南省内任一轻松工作，独自租房，城市待定）。
+    阶段 A 有工作（牡丹江任一轻松工作，独自租房）。
 
-当前口径：阶段 A 在云南省内（城市待定），排除北京，且要一个人租房住、
-不接受包吃住。所以全职只有一个变体（¥17/h、阶段 A 开销 ¥1,454），
+当前口径：阶段 A 在牡丹江，排除北京，且要一个人租房住、
+不接受包吃住。所以全职只有一个变体（¥17/h、阶段 A 开销 ¥1,461），
 出发门槛默认不含一次性支出（押金等单列在 one_off，不进门槛），moving_cny = 0。
 
 所以最要紧的一条是第 4 条——**加全职不能让 FIRE 目标动一分钱**。
@@ -99,7 +99,7 @@ ok("下沿落在 ¥5–6 万区间", 50000 < gate["low_cny"] < 60000, str(gate["
 off_gate = variant(**{"departure.enabled": False})
 ok("关闭时返回 None", lifeplan_mod.departure_gate(off_gate) is None)
 
-print("\n全职净收入（云南省内，独自租房）")
+print("\n全职净收入（牡丹江，独自租房）")
 ft = lifeplan_mod.fulltime_income(cfg)
 ok("开启时返回 dict", isinstance(ft, dict))
 ok(
@@ -132,7 +132,7 @@ ok("关闭时返回 None", lifeplan_mod.fulltime_income(off_ft) is None)
 print("\n全职盈余")
 ok(
     "盈余 = 净收入 − 月开销（不是 − 净月开销）",
-    abs((ft["net_monthly_cny"] - monthly) - 1285.33) < 0.05,
+    abs((ft["net_monthly_cny"] - monthly) - 1278.33) < 0.05,
     str(ft["net_monthly_cny"] - monthly),
 )
 ok(
@@ -151,13 +151,13 @@ print("\n包吃住：monthly_excluding() 仍可用（当前配置不启用）")
 covered = ["rent", "heating", "property_fee", "food", "drinking_water"]
 stage_a = lifeplan_mod.monthly_excluding(cfg, covered)
 ok(
-    "被包吃住覆盖后阶段 A 个人开销约 ¥679",
-    abs(stage_a - 679) < 1.0,
+    "被包吃住覆盖后阶段 A 个人开销约 ¥556",
+    abs(stage_a - 556) < 1.0,
     str(stage_a),
 )
 ok(
-    "覆盖项正是房租/取暖/物业费/食品/饮用水（合计 ¥775）",
-    abs(monthly - stage_a - 775) < 1.0,
+    "覆盖项正是房租/取暖/物业费/食品/饮用水（合计 ¥905）",
+    abs(monthly - stage_a - 905) < 1.0,
     str(monthly - stage_a),
 )
 ok(
@@ -167,7 +167,7 @@ ok(
 )
 
 print("\n⚠️ 核心：全职 + 包吃住都不改变 FIRE 目标")
-ok("目标仍是 ¥204,000.00", abs(target - 204000.00) < 0.01, str(target))
+ok("目标仍是 ¥205,953.49", abs(target - 205953.49) < 0.01, str(target))
 ok(
     "目标只由「月开销 − 兼职净收入」决定",
     abs(target - (monthly - 723) * 12 / 0.043) < 0.01,
@@ -222,8 +222,8 @@ except ValueError:
     ok("主进度写错名字必须报错，不静默回落", True)
 ok("compute 的目标未被全职影响", abs(data["fire"]["target_cny"] - target) < 0.01)
 ok(
-    "compute 的 fulltime 阶段 A 开销 = 完整月开销 ¥1,454（独自租房）",
-    abs(data["fulltime"]["stage_a_monthly_expense"] - 1454) < 1.0,
+    "compute 的 fulltime 阶段 A 开销 = 完整月开销 ¥1,461（独自租房）",
+    abs(data["fulltime"]["stage_a_monthly_expense"] - 1461) < 1.0,
     str(data["fulltime"]["stage_a_monthly_expense"]),
 )
 ok(
@@ -231,22 +231,22 @@ ok(
     data["fulltime"]["room_and_board_covered"] is False,
 )
 ok(
-    "独自租房盈余 ≈ ¥1,285.33（净 ¥2,739.33 − 月开销 ¥1,454）",
-    abs(data["fulltime"]["surplus_monthly_cny"] - 1285.33) < 1.0,
+    "独自租房盈余 ≈ ¥1,278.33（净 ¥2,739.33 − 月开销 ¥1,461）",
+    abs(data["fulltime"]["surplus_monthly_cny"] - 1278.33) < 1.0,
     str(data["fulltime"]["surplus_monthly_cny"]),
 )
-# 反向验证：把包吃住打开，盈余应升到 ¥2,060.33（¥2,739.33 − ¥679），目标仍不变。
+# 反向验证：把包吃住打开，盈余应升到 ¥2,183.33（¥2,739.33 − ¥556），目标仍不变。
 rb = variant(**{
     "fire.fulltime.room_and_board_covered": True,
     "fire.fulltime.covered_keys": covered,
 })
 data_rb = fire_mod.compute(rb, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
 ok(
-    "打开包吃住后盈余回到 ¥2,060.33（仅作反向验证，非当前方案）",
-    abs(data_rb["fulltime"]["surplus_monthly_cny"] - 2060.33) < 1.0,
+    "打开包吃住后盈余回到 ¥2,183.33（仅作反向验证，非当前方案）",
+    abs(data_rb["fulltime"]["surplus_monthly_cny"] - 2183.33) < 1.0,
     str(data_rb["fulltime"]["surplus_monthly_cny"]),
 )
-ok("打开包吃住后目标仍不变", abs(data_rb["fire"]["target_cny"] - 204000.00) < 0.01)
+ok("打开包吃住后目标仍不变", abs(data_rb["fire"]["target_cny"] - 205953.49) < 0.01)
 ok(
     "departure 完成度 = 资产 ÷ 下沿",
     abs(data["departure"]["progress_low"] - data["assets"]["total_cny"] / gate["low_cny"]) < 1e-9,
@@ -287,7 +287,7 @@ ok("goals 有三条且主进度排第一", len(goals) == 3 and goals[0]["is_prim
 by_key = {g["key"]: g for g in goals}
 ok(
     "完全 FIRE 门槛 = 全额月开销 × 12 ÷ 提取率",
-    abs(by_key["full_fire"]["target_cny"] - 1454 * 12 / 0.043) < 0.01,
+    abs(by_key["full_fire"]["target_cny"] - 1461 * 12 / 0.043) < 0.01,
     str(by_key["full_fire"]["target_cny"]),
 )
 ok(
@@ -327,7 +327,7 @@ ok(
 ft_section = block.split("阶段 A 工作情景", 1)[1].split("</details>", 1)[0]
 ok(
     "README 全职小节显示完整月开销（不包吃住）",
-    "月开销 ¥1,454.00" in ft_section and "包吃住" not in ft_section,
+    "月开销 ¥1,461.00" in ft_section and "包吃住" not in ft_section,
 )
 ok("README 不再出现「备选城市」小节", "阶段 A 备选城市" not in block)
 
@@ -346,20 +346,20 @@ ok(
     str(data_normal["fire"]["monthly_expense"]),
 )
 ok(
-    "切到常规档后目标仍钉在极简档 ¥204,000.00",
-    abs(tgt_normal - 204000.00) < 0.01,
+    "切到常规档后目标仍钉在极简档 ¥205,953.49",
+    abs(tgt_normal - 205953.49) < 0.01,
     str(tgt_normal),
 )
 ok(
-    "life_plan 摘要标出 target_profile = yunnan-rent-minimal",
-    (data_normal.get("life_plan") or {}).get("target_profile") == "yunnan-rent-minimal",
+    "life_plan 摘要标出 target_profile = mudanjiang-rent-minimal",
+    (data_normal.get("life_plan") or {}).get("target_profile") == "mudanjiang-rent-minimal",
     str((data_normal.get("life_plan") or {}).get("target_profile")),
 )
 # 目标公式必须用 target_profile 的净支出反算得回来；
 # 若误用当前档位的 net_monthly_expense（常规档 ¥2,031），公式与结果会对不上。
 _f = data_normal["fire"]
 ok(
-    "切到常规档时目标公式仍自洽（base = ¥731，不是 ¥2,031）",
+    "切到常规档时目标公式仍自洽（base = ¥738，不是 ¥2,031）",
     abs(_f["target_net_monthly_expense"] * 12 / _f["withdrawal_rate"] - _f["target_cny"]) < 0.01,
     f'base {_f.get("target_net_monthly_expense")} vs net {_f.get("net_monthly_expense")}',
 )
@@ -374,9 +374,9 @@ ok(
 )
 # 岗位块必须按「岗位所在城市」算阶段 A 开销，不随激活 profile 变。
 ok(
-    "切激活 profile 后，fulltime 盈余不变（仍 ¥1,285.33）",
+    "切激活 profile 后，fulltime 盈余不变（仍 ¥1,278.33）",
     abs(data_normal["fulltime"]["surplus_monthly_cny"] - data["fulltime"]["surplus_monthly_cny"]) < 0.01
-    and abs(data_normal["fulltime"]["surplus_monthly_cny"] - 1285.33) < 1.0,
+    and abs(data_normal["fulltime"]["surplus_monthly_cny"] - 1278.33) < 1.0,
     f'{data_normal["fulltime"]["surplus_monthly_cny"]} vs {data["fulltime"]["surplus_monthly_cny"]}',
 )
 # 出发门槛用当前 profile 的月开销算空窗期，所以换档位会改变门槛。
@@ -410,9 +410,9 @@ ok("没有 fulltime 时不出空表", "阶段 A 工作情景" not in block2)
 
 print("\n进度曲线：两条线")
 HIST = [
-    {"date": "2026-10-01", "total_cny": 10000.0, "progress_pct": 4.855, "target_cny": 204000.0},
-    {"date": "2026-10-15", "total_cny": 12000.0, "progress_pct": 5.827, "target_cny": 204000.0},
-    {"date": "2026-10-31", "total_cny": 19491.38, "progress_pct": 9.464, "target_cny": 204000.0},
+    {"date": "2026-10-01", "total_cny": 10000.0, "progress_pct": 4.855, "target_cny": 205953.49},
+    {"date": "2026-10-15", "total_cny": 12000.0, "progress_pct": 5.827, "target_cny": 205953.49},
+    {"date": "2026-10-31", "total_cny": 19491.38, "progress_pct": 9.464, "target_cny": 205953.49},
 ]
 two = render_mod.curve_svg(HIST, cfg, gate["low_cny"])
 ok(
@@ -436,7 +436,7 @@ ok(
         [{**r, "departure_cny": 80000.0} for r in HIST], cfg
     ),
 )
-three = render_mod.curve_svg(HIST, cfg, gate["low_cny"], 1454 * 12 / 0.043)
+three = render_mod.curve_svg(HIST, cfg, gate["low_cny"], 1461 * 12 / 0.043)
 ok(
     "给完全 FIRE 门槛时画出第三条线",
     'class="line-full"' in three and 'class="line-dep"' in three and 'class="line-fire"' in three,

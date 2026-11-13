@@ -1,10 +1,10 @@
 {
-  "as_of": "2026-11-13T20:15:00+08:00",
+  "as_of": "2026-11-13T21:53:24+08:00",
   "as_of_date": "2026-11-13",
   "fire": {
-    "monthly_expense": 1454.0,
-    "net_monthly_expense": 731.0,
-    "target_net_monthly_expense": 731.0,
+    "monthly_expense": 1461.0,
+    "net_monthly_expense": 738.0,
+    "target_net_monthly_expense": 738.0,
     "labor_income": {
       "enabled": true,
       "label": "咖啡师 FIRE · 兼职",
@@ -26,25 +26,25 @@
       "note": "工作不只是为了赚钱，也是为了体验生活和融入社会。咖啡师在这里是隐喻：低压力、可随时停、不需要 career 的兼职。"
     },
     "withdrawal_rate": 0.043,
-    "annual_expense": 17448.0,
-    "target_cny": 204000.0,
-    "full_fire_target_cny": 405767.44,
-    "target_with_one_off": 205000.0,
+    "annual_expense": 17532.0,
+    "target_cny": 205953.49,
+    "full_fire_target_cny": 407720.93,
+    "target_with_one_off": 206953.49,
     "monthly_override": false
   },
   "life_plan": {
     "enabled": true,
-    "profile": "yunnan-rent-minimal",
-    "target_profile": "yunnan-rent-minimal",
-    "city": "云南省内（待定）",
-    "province": "云南",
+    "profile": "mudanjiang-rent-minimal",
+    "target_profile": "mudanjiang-rent-minimal",
+    "city": "牡丹江",
+    "province": "黑龙江",
     "housing": "rent",
     "household": 1,
     "lifestyle": "极简",
-    "headline": "云南省内 · 单人 · 租房 · 极简（城市待定）",
-    "monthly_expense": 1454.0,
-    "net_monthly_expense": 731.0,
-    "target_net_monthly_expense": 731.0,
+    "headline": "牡丹江 · 单人 · 租房 · 极简（当前基准方案）",
+    "monthly_expense": 1461.0,
+    "net_monthly_expense": 738.0,
+    "target_net_monthly_expense": 738.0,
     "labor_income": {
       "enabled": true,
       "label": "咖啡师 FIRE · 兼职",
@@ -65,10 +65,10 @@
       "effective_hourly_cny": 11.12,
       "note": "工作不只是为了赚钱，也是为了体验生活和融入社会。咖啡师在这里是隐喻：低压力、可随时停、不需要 career 的兼职。"
     },
-    "annual_expense": 17448.0,
-    "target_cny": 204000.0,
-    "full_fire_target_cny": 405767.44,
-    "full_fire_monthly_expense": 1454.0,
+    "annual_expense": 17532.0,
+    "target_cny": 205953.49,
+    "full_fire_target_cny": 407720.93,
+    "full_fire_monthly_expense": 1461.0,
     "groups": [
       {
         "group": "住房与水电燃气",
@@ -77,53 +77,53 @@
             "key": "rent",
             "group": "住房与水电燃气",
             "label": "房租",
-            "monthly": 400.0,
-            "note": "整租1室（独自居住硬条件）。58同城/安居客 2026-10/11 真实挂牌：红塔 40㎡ 老破小/步梯 整租 1室1厅 ¥500（2026-10-21 安居客）、50㎡ 个人房源 ¥600（7天前 58同城）；本人看 58同城 ¥300–400 整租亦可。取极简/老破小/个人直租的可行低价 ¥400。估算，出发前打开 App 核实"
+            "monthly": 500.0,
+            "note": "40㎡ 一居室。房天下 2026-10 实际挂牌：一居室区间 ¥400-850（爱民吉祥花园 50㎡ ¥400、龙门鑫家园 57㎡ ¥450 为低位）。结合真实房源取 ¥500。⚠️ 复核：四个区 ¥450-550 档都能租到 50㎡ 以上，¥500 是偏保守的取值，保留作为安全垫；区级选址见 docs/FIRE-LIFE-PLAN.md §2.5（爱民区）"
           },
           {
             "key": "heating",
             "group": "住房与水电燃气",
             "label": "取暖费",
-            "monthly": 0.0,
-            "note": "云南无集中供暖。中国天气网玉溪气象数据：最冷月均温 9℃、最热月 21-22℃、极端最高不超过 32℃，不需空调与暖气"
+            "monthly": 75.0,
+            "note": "居民供热 ¥28/㎡ 按【使用面积】计收（约合建筑面积 80%）。40㎡ × 80% × ¥28 ÷ 12 ≈ ¥75。⚠️ 查证：是否含在租金内【因房源而异】（房天下把「房租包含取暖费吗」做成逐套问答字段），无「大部分包」的证据；且即使房东包，成本通常已折算进租金。故按租客自付保守建模——看房时务必逐套问清并写进合同"
           },
           {
             "key": "property_fee",
             "group": "住房与水电燃气",
             "label": "物业费",
-            "monthly": 20.0,
-            "note": "地级市有物业小区，估算。⚠️ 逐套问清是否含在租金内并写进合同"
+            "monthly": 15.0,
+            "note": "¥0.375/㎡·月 × 40㎡。牡丹江物业费实行政府指导价并按服务分级，有电梯与无电梯差约一倍；原按 ¥0.6/㎡（≈二级无电梯）建模，下调到三级无电梯档。⚠️ 与取暖费同理：房天下把「房租包含物业费吗」做成逐套问答字段，即使房东交也可能折算进租金——看房时逐套问清并写进合同"
           },
           {
             "key": "water",
             "group": "住房与水电燃气",
             "label": "水费",
             "monthly": 12.0,
-            "note": "单人约 3 吨/月，估算"
+            "note": "单人约 3 吨/月"
           },
           {
             "key": "electricity",
             "group": "住房与水电燃气",
             "label": "电费",
-            "monthly": 75.0,
-            "note": "无集中供暖，且 5-10 月雨季相对湿度 79-80% 需除湿。约 150 度/月，估算"
+            "monthly": 55.0,
+            "note": "约 110 度/月。冬季靠集中供暖，不需要电暖器，用电量低于南方。峰谷分时经评估后未采用"
           },
           {
             "key": "gas",
             "group": "住房与水电燃气",
             "label": "燃气/液化气",
             "monthly": 35.0,
-            "note": "自己做饭，估算"
+            "note": "自己做饭；牡丹江管道燃气覆盖较好，可能低于此值"
           },
           {
             "key": "appliance",
             "group": "住房与水电燃气",
             "label": "家电维修与更换摊销",
             "monthly": 20.0,
-            "note": "二手家电按 10 年摊销。⚠️ 除湿机属一次性支出，不进月开销"
+            "note": "改买二手（约 ¥200-300）。按 10 年摊销，无保修"
           }
         ],
-        "subtotal": 562.0
+        "subtotal": 712.0
       },
       {
         "group": "日常开销",
@@ -139,8 +139,8 @@
             "key": "food",
             "group": "日常开销",
             "label": "食品",
-            "monthly": 340.0,
-            "note": "16:8 两餐、不炒菜、一锅煮（购物篮见规划书 §4.2）。⚠️ 雨季 5-10 月湿度 79-80%，囤挂面/面包/干货易霉变，改少量勤买；叠加券价脆弱。多多买菜已覆盖云南（全国 30 个省级行政区、约 70% 行政村），具体住址自提点步行可达仍待出发前打开 App 核实。云南本地蔬果价格偏低已作部分抵消。估算"
+            "monthly": 300.0,
+            "note": "偏紧档 ¥300，实付约 ¥284（余 ¥16）。⚠️ 改为【线上为主】：16:8 两餐、不炒菜、全部一锅煮。面包 ¥0.40/包、牛奶 ¥0.625/袋、挂面 ¥0（券价，均约零售价 20%）；生鲜走多多买菜。购物篮：面包 60 包 + 牛奶 60 袋 + 挂面 6kg + 鸡蛋 120 个 + 北豆腐 4.5kg + 西红柿 4.5kg + 韭菜 3.6kg + 大白菜 6kg + 橙子 6kg。逐项清单与营养评估见规划书 §4.2–4.3，品类汇总见 §6.5。⚠️ 券价部分脆弱：面包/奶/挂面回到零售价，食品会跳到约 ¥400"
           },
           {
             "key": "drinking_water",
@@ -153,39 +153,39 @@
             "key": "supplies",
             "group": "日常开销",
             "label": "日用品",
-            "monthly": 30.0,
-            "note": "含洗护、清洁、垃圾袋，另加除湿袋/防霉与防晒用品（年日照 2100-2300h、夏季紫外线 11-13 级）。理发自理。估算"
+            "monthly": 22.0,
+            "note": "极限档 ¥22：香皂替代洗发水与沐浴露、洗衣皂替代洗衣液、小苏打+白醋替代专用清洁剂。含洗护、清洁、垃圾袋与杂项摊销。理发已改为自理，不再计入。⚠️ 由 ¥28 下调：纸巾部分（原 ¥6/月）不再占用本预算，本项只剩非纸品部分"
           },
           {
             "key": "transport",
             "group": "日常开销",
             "label": "交通",
             "monthly": 30.0,
-            "note": "玉溪全年温和可骑车是利好，与偶尔去昆明（动车单程 ¥29-40）相抵。估算"
+            "note": "牡丹江市区面积较大，公交月卡与骑车并用。冬季约 −25℃，11-3 月需留公交余量"
           },
           {
             "key": "home_visit",
             "group": "日常开销",
             "label": "探亲与返乡交通",
-            "monthly": 200.0,
-            "note": "玉溪→昆明南动车 32-39 分钟 ¥29-40；昆明→北京高铁二等座 ¥1,370（10h40）、淡季直飞往返约 ¥1,200-1,600。按每年 1-2 次、单次往返约 ¥1,500 折算。⚠️ 紧急临时购票属一次性应急支出，由 ¥4 万流动性覆盖，不摊进本项"
+            "monthly": 100.0,
+            "note": "每年 1-2 次往返，单次火车往返约 ¥1000，折算 ≈ ¥100/月。牡丹江是铁路枢纽（哈牡、牡佳高铁交汇），往返便利"
           },
           {
             "key": "clothing",
             "group": "日常开销",
             "label": "衣物",
-            "monthly": 25.0,
-            "note": "按年摊销。无厚重冬装；雨季换洗频繁与防晒衣部分抵消"
+            "monthly": 30.0,
+            "note": "按年摊销，含冬装更新。东北冬装单价高但更新慢"
           },
           {
             "key": "misc",
             "group": "日常开销",
             "label": "杂项（快递与小额）",
             "monthly": 5.0,
-            "note": "无域名、无代理订阅、无会员、无云存储、娱乐与外食为 ¥0。仅快递与零星小额。⚠️ 若实际有代理订阅需加回 ¥10-30"
+            "note": "拆细后确认：无域名、无代理订阅、无视频音乐会员、无云存储、付费 AI 为 ¥0、娱乐与外食为 ¥0。仅保留快递与零星小额支出。⚠️ 若实际有代理订阅需加回 ¥10-30"
           }
         ],
-        "subtotal": 675.0
+        "subtotal": 532.0
       },
       {
         "group": "医疗与应急",
@@ -195,14 +195,14 @@
             "group": "医疗与应急",
             "label": "医疗自付预留",
             "monthly": 80.0,
-            "note": "门诊与小病自付。⚠️ 已无任何医保：住院 100% 自付，本项只够小病，唯一防线是规划书 §5.4 的专项应急金（¥50k-100k）。玉溪市人民医院（昆医大第六附属医院）三甲，2025 年通过复审。不建议压缩"
+            "note": "门诊与小病自付。⚠️ 已无任何医保：住院费用 100% 自付，本项 ¥80/月只够小病，唯一防线是规划书 §5.4 的专项应急金（¥50k–100k）。不建议压缩"
           },
           {
             "key": "buffer",
             "group": "医疗与应急",
             "label": "应急与物价缓冲",
             "monthly": 137.0,
-            "note": "按月留一笔机动钱，应付物价波动与临时支出；这是安全垫，不建议压缩"
+            "note": "按月留一笔机动钱，应付物价波动与临时支出；经确认不下调，这是安全垫，不建议压缩"
           }
         ],
         "subtotal": 217.0
@@ -217,60 +217,60 @@
       }
     ],
     "one_off_total": 1000.0,
-    "target_with_one_off": 205000.0,
+    "target_with_one_off": 206953.49,
     "override": false
   },
   "two_phase": {
-    "capital_cny": 24841.39,
-    "annual_net_expense_cny": 8772.0,
+    "capital_cny": 25202.88,
+    "annual_net_expense_cny": 8856.0,
     "rate": 0.043,
     "years": 3.1,
     "perpetual": false,
     "exhaust_age": 25.1,
-    "critical_rate": 0.3531,
+    "critical_rate": 0.3514,
     "graduation": "2029-06",
     "start_age": 22,
     "monthly_contribution": 2000,
     "horizon": [
       {
         "years": 5,
-        "capital_cny": 38724.44,
+        "capital_cny": 39095.27,
         "covered": false
       },
       {
         "years": 10,
-        "capital_cny": 70097.99,
+        "capital_cny": 70769.25,
         "covered": false
       },
       {
         "years": 15,
-        "capital_cny": 95516.04,
+        "capital_cny": 96430.69,
         "covered": false
       },
       {
         "years": 20,
-        "capital_cny": 116109.08,
+        "capital_cny": 117220.93,
         "covered": false
       },
       {
         "years": 30,
-        "capital_cny": 146309.95,
+        "capital_cny": 147711.0,
         "covered": false
       },
       {
         "years": 40,
-        "capital_cny": 166133.27,
+        "capital_cny": 167724.15,
         "covered": false
       }
     ]
   },
   "allocation": {
     "btc_pct": 0.0,
-    "sp500_pct": 0.04,
-    "ndx100_pct": 0.1641,
-    "stablecoin_pct": 0.556,
-    "cash_pct": 0.2399,
-    "equity_pct": 0.2041,
+    "sp500_pct": 0.044,
+    "ndx100_pct": 0.1716,
+    "stablecoin_pct": 0.548,
+    "cash_pct": 0.2365,
+    "equity_pct": 0.2155,
     "non_btc_pct": 1.0,
     "sp500_target_range": [
       0.25,
@@ -280,10 +280,10 @@
     "note": "再平衡走场内标普500 ETF，不受场外每日 20 元限购约束"
   },
   "assets": {
-    "total_cny": 24841.39,
-    "progress": 0.12177151960784312,
-    "progress_pct": 12.1772,
-    "remaining_cny": 179158.61,
+    "total_cny": 25202.88,
+    "progress": 0.12237170731707316,
+    "progress_pct": 12.2372,
+    "remaining_cny": 180750.61,
     "btc": {
       "qty": 0.0,
       "price_cny": 0.0,
@@ -312,69 +312,69 @@
       ]
     },
     "sp500": {
-      "value_cny": 993.54,
-      "invested_cny": 1039.48,
-      "profit_cny": -45.94,
-      "return_rate": -0.044195,
-      "latest_nav_date": "2026-11-05",
+      "value_cny": 1107.91,
+      "invested_cny": 1119.44,
+      "profit_cny": -11.53,
+      "return_rate": -0.0103,
+      "latest_nav_date": "2026-11-11",
       "funds": [
         {
           "code": "017641",
           "short_name": "摩根标普500 A",
-          "market_value": 496.59,
-          "invested": 519.48,
-          "shares": 305.67,
-          "latest_nav": 1.6246
+          "market_value": 553.75,
+          "invested": 559.44,
+          "shares": 329.77,
+          "latest_nav": 1.6792
         },
         {
           "code": "019305",
           "short_name": "摩根标普500 C",
-          "market_value": 496.95,
-          "invested": 520.0,
-          "shares": 308.97,
-          "latest_nav": 1.6084
+          "market_value": 554.16,
+          "invested": 560.0,
+          "shares": 333.35,
+          "latest_nav": 1.6624
         }
       ]
     },
     "ndx100": {
-      "value_cny": 4076.75,
+      "value_cny": 4323.87,
       "invested_cny": 4177.22,
-      "profit_cny": -100.47,
-      "return_rate": -0.0240518813948033,
-      "latest_nav_date": "2026-11-04",
+      "profit_cny": 146.65,
+      "return_rate": 0.035107080785785616,
+      "latest_nav_date": "2026-11-12",
       "funds": [
         {
           "code": "018043",
           "short_name": "天弘纳斯达克100指数发起(QDII)A",
           "shares": 1330.28,
-          "latest_nav": 1.8294,
-          "nav_date": "2026-11-04",
-          "market_value": 2433.61,
+          "latest_nav": 1.9377,
+          "nav_date": "2026-11-12",
+          "market_value": 2577.68,
           "invested": 2317.08,
-          "profit": 116.53,
-          "return_rate": 0.050292800551153816
+          "profit": 260.6,
+          "return_rate": 0.11246985876679294
         },
         {
           "code": "160213",
           "short_name": "国泰纳斯达克100指数",
           "shares": 287.06,
-          "latest_nav": 3.991,
-          "nav_date": "2026-11-04",
-          "market_value": 1145.66,
+          "latest_nav": 4.242,
+          "nav_date": "2026-11-12",
+          "market_value": 1217.71,
           "invested": 1300.01,
-          "profit": -154.35,
-          "return_rate": -0.11873164484289067
+          "profit": -82.3,
+          "return_rate": -0.0633073508954004
         },
         {
           "code": "040046",
           "short_name": "华安纳斯达克100ETF联接(QDII)A",
           "shares": 68.0,
-          "latest_nav": 7.3159,
-          "nav_date": "2026-11-04",
-          "market_value": 497.48,
+          "latest_nav": 7.7718,
+          "nav_date": "2026-11-12",
+          "market_value": 528.48,
           "invested": 560.13,
-          "profit": -62.65,
-          "return_rate": -0.11184625843733309
+          "profit": -31.65,
+          "return_rate": -0.05649978147914336
         }
       ]
     },
@@ -408,38 +408,38 @@
   "cost_basis": {
     "btc_cny": null,
     "btc_estimated": false,
-    "sp500_cny": 1039.48,
+    "sp500_cny": 1119.44,
     "ndx100_cny": 4177.22,
     "stablecoin_cny": 13811.36,
     "cash_cny": 5959.74,
-    "total_cny": 24987.8,
-    "profit_cny": -146.41
+    "total_cny": 25067.76,
+    "profit_cny": 135.12
   },
   "price": {
     "btc_usdt": 0.0,
     "usd_cny": 6.685071,
     "btc_cny": 0.0,
     "btc_source": "未配置（无比特币持仓）",
-    "fx_source": "open.er-api.com (2026-11-13)",
-    "fetched_at": "2026-11-13T12:00:00+08:00"
+    "fx_source": "open.er-api.com",
+    "fetched_at": "2026-11-13T21:53:22+08:00"
   },
   "passive_income": {
     "hours_per_year": 8760,
-    "total_value_cny": 24841.39,
-    "weighted_rate": 0.07024368604172312,
-    "annual_cny": 1744.95,
-    "monthly_cny": 145.41,
-    "daily_cny": 4.780684931506849,
-    "hourly_cny": 0.19919520547945205,
-    "rate_low": 0.008522312962358386,
-    "rate_high": 0.07756644052526852,
-    "hourly_low_cny": 0.02416736301369863,
-    "hourly_high_cny": 0.21996098173515982,
-    "monthly_expense": 1454.0,
-    "coverage": 0.1000085969738652,
+    "total_value_cny": 25202.88,
+    "weighted_rate": 0.07009675878312321,
+    "annual_cny": 1766.64,
+    "monthly_cny": 147.22,
+    "daily_cny": 4.840109589041096,
+    "hourly_cny": 0.20167123287671235,
+    "rate_low": 0.008830371767036148,
+    "rate_high": 0.07774477758097488,
+    "hourly_low_cny": 0.025405342465753423,
+    "hourly_high_cny": 0.2236749200913242,
+    "monthly_expense": 1461.0,
+    "coverage": 0.10076659822039699,
     "withdrawal_rate": 0.043,
-    "monthly_at_withdrawal_cny": 89.01,
-    "hourly_at_withdrawal_cny": 0.1219383299086758,
+    "monthly_at_withdrawal_cny": 90.31,
+    "hourly_at_withdrawal_cny": 0.12371276712328766,
     "assets": [
       {
         "key": "btc",
@@ -455,22 +455,22 @@
       {
         "key": "sp500",
         "label": "标普500基金",
-        "value_cny": 993.54,
-        "weight": 0.039995346476183496,
+        "value_cny": 1107.91,
+        "weight": 0.04395965857870213,
         "rate": 0.06,
-        "annual_cny": 59.61,
-        "hourly_cny": 0.006805068493150684,
+        "annual_cny": 66.47,
+        "hourly_cny": 0.007588424657534247,
         "rate_low": 0.03,
         "rate_high": 0.09
       },
       {
         "key": "ndx100",
         "label": "纳指100基金",
-        "value_cny": 4076.75,
-        "weight": 0.16411118701489733,
+        "value_cny": 4323.87,
+        "weight": 0.17156253571020455,
         "rate": 0.06,
-        "annual_cny": 244.6,
-        "hourly_cny": 0.02792294520547945,
+        "annual_cny": 259.43,
+        "hourly_cny": 0.029615547945205475,
         "rate_low": 0.03,
         "rate_high": 0.09
       },
@@ -478,7 +478,7 @@
         "key": "stablecoin",
         "label": "稳定币",
         "value_cny": 13811.36,
-        "weight": 0.555981770746323,
+        "weight": 0.5480072118741985,
         "rate": 0.1,
         "annual_cny": 1381.14,
         "hourly_cny": 0.1576639269406393,
@@ -489,7 +489,7 @@
         "key": "cash_cny",
         "label": "人民币活钱",
         "value_cny": 5959.74,
-        "weight": 0.23991169576259622,
+        "weight": 0.23647059383689484,
         "rate": 0.01,
         "annual_cny": 59.6,
         "hourly_cny": 0.0068033561643835614,
@@ -506,34 +506,34 @@
     "btc_cny_per_day": 0.0,
     "daily_cny": 20.0,
     "monthly_cny": 600.0,
-    "assets_cny": 24841.39,
+    "assets_cny": 25202.88,
     "weights": {
       "btc": 0.0,
-      "sp500": 0.04,
-      "ndx100": 0.1641,
-      "stablecoin": 0.556,
-      "cash_cny": 0.2399
+      "sp500": 0.044,
+      "ndx100": 0.1716,
+      "stablecoin": 0.548,
+      "cash_cny": 0.2365
     },
-    "weighted_rate": 0.0702,
+    "weighted_rate": 0.0701,
     "scenarios": {
       "low": {
-        "rate": 0.0085,
-        "days": 7928,
-        "eta": "2048-07-28"
+        "rate": 0.0088,
+        "days": 7957,
+        "eta": "2048-08-26"
       },
       "base": {
-        "rate": 0.0702,
-        "days": 4601,
-        "eta": "2039-06-19"
+        "rate": 0.0701,
+        "days": 4625,
+        "eta": "2039-07-13"
       },
       "high": {
-        "rate": 0.0776,
-        "days": 4401,
-        "eta": "2038-12-01"
+        "rate": 0.0777,
+        "days": 4414,
+        "eta": "2038-12-14"
       }
     },
-    "days_to_target": 4601,
-    "eta": "2039-06-19",
+    "days_to_target": 4625,
+    "eta": "2039-07-13",
     "reason": null
   },
   "departure": {
@@ -543,16 +543,16 @@
     "moving_cny": 0.0,
     "gap_months_low": 3.0,
     "gap_months_high": 6.0,
-    "gap_low_cny": 4362.0,
-    "gap_high_cny": 8724.0,
-    "low_cny": 54362.0,
-    "high_cny": 108724.0,
-    "note": "双线进度条的第一条。它回答「能不能走」，¥204,000.00 回答「能不能不工作」。",
-    "assets_cny": 24841.39,
-    "progress_low": 0.45696240020602624,
-    "progress_high": 0.22848120010301312,
-    "remaining_low_cny": 29520.61,
-    "remaining_high_cny": 83882.61,
+    "gap_low_cny": 4383.0,
+    "gap_high_cny": 8766.0,
+    "low_cny": 54383.0,
+    "high_cny": 108766.0,
+    "note": "双线进度条的第一条。它回答「能不能走」，¥205,953.49 回答「能不能不工作」。",
+    "assets_cny": 25202.88,
+    "progress_low": 0.4634330581247816,
+    "progress_high": 0.2317165290623908,
+    "remaining_low_cny": 29180.12,
+    "remaining_high_cny": 83563.12,
     "reached_low": false,
     "reached_high": false
   },
@@ -563,34 +563,34 @@
         "key": "departure",
         "label": "出发门槛",
         "subtitle": "能不能动身",
-        "target_cny": 54362.0,
-        "progress": 0.45696240020602624,
-        "progress_pct": 45.6962,
-        "remaining_cny": 29520.61,
+        "target_cny": 54383.0,
+        "progress": 0.4634330581247816,
+        "progress_pct": 46.3433,
+        "remaining_cny": 29180.12,
         "reached": false,
-        "note": "医疗应急 + 空窗期月开销（不含一次性支出）；区间上沿 108,724.00（更保守的医疗额度与更长空窗）",
+        "note": "医疗应急 + 空窗期月开销（不含一次性支出）；区间上沿 108,766.00（更保守的医疗额度与更长空窗）",
         "is_primary": true
       },
       {
         "key": "coffee_fire",
         "label": "咖啡师 FIRE 门槛",
         "subtitle": "有兼职（每周 3 天 × 4h）",
-        "target_cny": 204000.0,
-        "progress": 0.12177151960784312,
-        "progress_pct": 12.1772,
-        "remaining_cny": 179158.61,
+        "target_cny": 205953.49,
+        "progress": 0.12237170731707316,
+        "progress_pct": 12.2372,
+        "remaining_cny": 180750.61,
         "reached": false,
-        "note": "资产覆盖 (月开销 − 兼职净收入) = 731.00/月",
+        "note": "资产覆盖 (月开销 − 兼职净收入) = 738.00/月",
         "is_primary": false
       },
       {
         "key": "full_fire",
         "label": "完全 FIRE 门槛",
         "subtitle": "完全不工作",
-        "target_cny": 405767.44,
-        "progress": 0.061220757387532125,
-        "progress_pct": 6.1221,
-        "remaining_cny": 380926.05,
+        "target_cny": 407720.93,
+        "progress": 0.061814045209795825,
+        "progress_pct": 6.1814,
+        "remaining_cny": 382518.05,
         "reached": false,
         "note": "资产覆盖全额月开销，不依赖任何劳动收入",
         "is_primary": false
@@ -598,15 +598,15 @@
     ]
   },
   "full_fire": {
-    "target_cny": 405767.44,
-    "monthly_expense": 1454.0,
-    "progress_pct": 6.1221,
-    "remaining_cny": 380926.05,
+    "target_cny": 407720.93,
+    "monthly_expense": 1461.0,
+    "progress_pct": 6.1814,
+    "remaining_cny": 382518.05,
     "reached": false
   },
   "fulltime": {
     "enabled": true,
-    "label": "全职 · 轻松工作（云南省内，独自租房）",
+    "label": "全职 · 轻松工作（牡丹江，独自租房）",
     "hourly_wage": 17.0,
     "hours_per_week": 40.0,
     "hours_per_day": 8.0,
@@ -623,47 +623,47 @@
     "occupied_hours_per_month": 195.0,
     "effective_hourly_cny": 14.05,
     "note": "阶段 A 的工作判据：任何一个适合自己的轻松工作（低内耗、坐岗、不轮岗、低人际、责任边界清楚、可随时停），不局限于图书馆保安。独自租房、安静生活、不包吃住。⚠️ 工资 ¥17/h 是保守占位假设，换岗位按实际改。找不到符合条件的全职才退回兼职兜底；找不到图书馆岗不等于计划失败。",
-    "monthly_expense": 1454.0,
-    "stage_a_monthly_expense": 1454.0,
+    "monthly_expense": 1461.0,
+    "stage_a_monthly_expense": 1461.0,
     "room_and_board_covered": false,
-    "surplus_monthly_cny": 1285.33,
+    "surplus_monthly_cny": 1278.33,
     "covered": true,
     "projection": {
       "btc_usdt_per_day": 0.0,
-      "sp500_cny_per_day": 62.26,
+      "sp500_cny_per_day": 62.03,
       "ndx100_cny_per_day": 0.0,
       "usd_cny": 6.6851,
       "btc_cny_per_day": 0.0,
-      "daily_cny": 62.26,
-      "monthly_cny": 1867.72,
-      "assets_cny": 24841.39,
+      "daily_cny": 62.03,
+      "monthly_cny": 1860.82,
+      "assets_cny": 25202.88,
       "weights": {
         "btc": 0.0,
-        "sp500": 0.04,
-        "ndx100": 0.1641,
-        "stablecoin": 0.556,
-        "cash_cny": 0.2399
+        "sp500": 0.044,
+        "ndx100": 0.1716,
+        "stablecoin": 0.548,
+        "cash_cny": 0.2365
       },
-      "weighted_rate": 0.0702,
+      "weighted_rate": 0.0701,
       "scenarios": {
         "low": {
-          "rate": 0.0085,
-          "days": 2760,
-          "eta": "2034-06-04"
+          "rate": 0.0088,
+          "days": 2789,
+          "eta": "2034-07-03"
         },
         "base": {
-          "rate": 0.0702,
-          "days": 2173,
-          "eta": "2032-10-25"
+          "rate": 0.0701,
+          "days": 2195,
+          "eta": "2032-11-16"
         },
         "high": {
-          "rate": 0.0776,
-          "days": 2124,
-          "eta": "2032-09-06"
+          "rate": 0.0777,
+          "days": 2142,
+          "eta": "2032-09-24"
         }
       },
-      "days_to_target": 2173,
-      "eta": "2032-10-25",
+      "days_to_target": 2195,
+      "eta": "2032-11-16",
       "reason": null
     }
   },
