@@ -20,15 +20,21 @@ def _warnings_block(warnings: list[str]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _freshness(btc: dict, sp500: dict) -> str:
-    """数据新鲜度：明确告诉读者「比特币不是实时数据」。"""
+def _freshness(btc: dict, sp500: dict, stablecoin: dict | None = None) -> str:
+    """数据新鲜度：明确告诉读者「持仓和稳定币都不是实时数据」。
+
+    清仓后不再显示比特币快照——主界面不列已离场的资产；
+    稳定币改由下面的「稳定币明细」自己标快照日期。
+    """
     parts = []
-    if btc.get("snapshot_date"):
+    if btc.get("qty") and btc.get("snapshot_date"):
         stale = btc.get("stale_days")
         age = f"{stale} 天前" if isinstance(stale, int) and stale >= 0 else "—"
         parts.append(f"**比特币快照**：{btc['snapshot_date']}（{age}）")
     if sp500.get("latest_nav_date"):
         parts.append(f"**基金净值日**：{sp500['latest_nav_date']}")
+    if stablecoin and stablecoin.get("snapshot_date"):
+        parts.append(f"**稳定币快照**：{stablecoin['snapshot_date']}（手动报数）")
     return "　|　".join(parts)
 
 
@@ -176,6 +182,76 @@ def _life_plan_block(data: dict, cfg) -> str:
     return "\n".join(out)
 
 
+def _stablecoin_block(data: dict, cfg) -> str:
+    """手动维护资产明细：稳定币（USD 计价）+ 人民币活钱，都计入分子。
+
+    边界必须跟着数字一起出现：
+      1. 稳定币以美元计价，按实时汇率折人民币——汇率波动会真实改变完成度；
+      2. 活动年化不是长期保证收益，区间下沿按 0% 记；
+      3. 两项都由本人手动报数，不是实时余额。
+    """
+    assets = data.get("assets") or {}
+    sc = assets.get("stablecoin")
+    cash = assets.get("cash_cny")
+    if not sc and not cash:
+        return ""
+
+    out: list[str] = []
+    out.append("<details>")
+    out.append("<summary>手动维护资产明细 · 稳定币与人民币活钱（均计入分子）</summary>")
+    out.append("")
+    if sc:
+        out.append("| 币种 | 数量 | 折人民币 |")
+        out.append("| --- | ---: | ---: |")
+        for row in sc["holdings"]:
+            out.append(
+                f"| {row['asset']} | {row['amount']:,.0f} | {money(row['value_cny'], cfg)} |"
+            )
+        out.append(
+            f"| **稳定币合计** | **{sc['total_units']:,.0f}** | "
+            f"**{money(sc['value_cny'], cfg)}** |"
+        )
+        out.append("")
+        out.append(
+            f"按 USD/CNY = {sc['usd_cny']:.4f} 折算（USDT / USDC 按 1:1 锚定美元，"
+            f"未计脱锚与买卖价差；快照 {sc.get('snapshot_date') or '—'}，手动报数）。"
+            "**汇率变动会真实改变完成度**，这是它和其他资产最大的不同。"
+        )
+        out.append("")
+    if cash:
+        out.append(
+            f"人民币活钱（余额宝）：**{money(cash['value_cny'], cfg)}**"
+            f"（快照 {cash.get('snapshot_date') or '—'}，手动报数）。"
+        )
+        out.append("")
+    out.append(
+        "> 稳定币放在交易所活期理财，限额活动年化按 **10%** 记，"
+        "区间 0–10%：只覆盖限额内部分，限额会变、活动会结束，下沿 0% 就是活动结束。"
+        "人民币活钱按 **1%** 保守取值（区间 1–1.5%）。"
+    )
+    out.append(">")
+    out.append(
+        "> 两笔钱都**计入分子**：已进上面的资产构成表、三个门槛、完成度、"
+        "被动收入加权与达成年限外推。它们可随时变现，用于在标普500 显著回撤时"
+        "场内加仓或场外申购额度放开时大额申购；真买入标普500 时只是分子内部换形式，"
+        "进度不会因此跳升。"
+    )
+    out.append(">")
+    out.append(
+        "> 标普500 每日 ¥20 定投从人民币活钱里扣，属分子内部划转；"
+        "活钱余额由本人不定期更新，所以短期看板读数会略滞后于实际扣款。"
+    )
+    notes = [sc.get("note") if sc else None, cash.get("note") if cash else None]
+    for n in notes:
+        if n:
+            out.append(">")
+            out.append(f"> {n}")
+    out.append("")
+    out.append("</details>")
+    out.append("")
+    return "\n".join(out)
+
+
 def _passive_income_block(data: dict, cfg) -> str:
     """每小时被动收入 = 当前持仓 × 预期年化回报 ÷ 8760。
 
@@ -190,6 +266,8 @@ def _passive_income_block(data: dict, cfg) -> str:
         return ""
 
     rows = pi["assets"]
+    # 清仓后主界面不列出零市值资产：口径不变（JSON 里仍保留该块），只是不展示。
+    shown = [r for r in rows if r["value_cny"] > 0]
     hourly = pi["hourly_cny"]
     rate = pi["weighted_rate"] or 0.0
 
@@ -198,7 +276,7 @@ def _passive_income_block(data: dict, cfg) -> str:
     out.append("")
     out.append("| 资产 | 市值 | 权重 | 预期年化 | 每小时 |")
     out.append("| --- | ---: | ---: | ---: | ---: |")
-    for row in rows:
+    for row in shown:
         out.append(
             f"| {row['label']} | {money(row['value_cny'], cfg)} | "
             f"{row['weight'] * 100:.1f}% | {row['rate'] * 100:.1f}% | "
@@ -231,23 +309,29 @@ def _passive_income_block(data: dict, cfg) -> str:
     out.append(">")
 
     low_desc = "、".join(
-        f"{r['label']} {r['rate_low'] * 100:.0f}%" for r in rows if r.get("rate_low") is not None
+        f"{r['label']} {r['rate_low'] * 100:.0f}%" for r in shown if r.get("rate_low") is not None
     )
     high_desc = "、".join(
-        f"{r['label']} {r['rate_high'] * 100:.0f}%" for r in rows if r.get("rate_high") is not None
+        f"{r['label']} {r['rate_high'] * 100:.0f}%" for r in shown if r.get("rate_high") is not None
     )
     if pi.get("hourly_low_cny") is not None and pi.get("hourly_high_cny") is not None:
         # 权重要现算，不能写死——仓位结构一变，这句解释就跟着错。
-        top = max(rows, key=lambda r: r["weight"])
-        if top["weight"] >= 0.8:
+        top = max(shown, key=lambda r: r["weight"]) if shown else None
+        if top and top["weight"] >= 0.8:
             why = (
                 f"因为 **{top['weight'] * 100:.0f}% 的仓位压在{top['label']}上**，"
                 "这个数字的软肋是权重，不是回报率。"
             )
+        elif top and top["key"] == "stablecoin":
+            why = (
+                "因为 **10% 是交易所限额活动的活期理财利率**，只覆盖限额内部分："
+                "活动一结束就落到 0%，悲观档几乎只剩权益和活钱在贡献，"
+                "而乐观档也仍按 10% 封顶。这个区间的宽度来自活动本身，不是市场波动。"
+            )
         else:
             why = (
-                "因为各资产的回报率假设本身就宽：比特币没有可锚定的现金流，"
-                "长期回报率只能猜。"
+                "因为各资产的回报率假设本身就宽：权益类没有可锚定的现金流，"
+                "长期回报率只能给一个区间，不是能算出来的数。"
             )
         out.append(
             f"> 区间跨度大：悲观（{low_desc}）每小时 "
@@ -265,7 +349,7 @@ def _passive_income_block(data: dict, cfg) -> str:
     out.append(">")
     out.append(
         "> 差额是给波动留的：平均回报为正，但路径上先腰斩一次，"
-        "按平均回报安排支出就会在中途卖掉筹码。比特币单年 ±50% 是常态，两个数要一起看。"
+        "按平均回报安排支出就会在中途卖掉筹码。权益类单年大幅回撤并不罕见，两个数要一起看。"
     )
     out.append("")
     return "\n".join(out)

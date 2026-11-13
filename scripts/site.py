@@ -23,6 +23,8 @@ ASSET_LABELS = {
     "btc": "比特币",
     "sp500": "标普500基金",
     "ndx100": "纳指100基金",
+    "stablecoin": "稳定币",
+    "cash_cny": "人民币活钱",
 }
 
 CSS = """
@@ -182,6 +184,9 @@ def asset_rows(assets: dict, cfg) -> list[tuple[str, float, float]]:
         if not isinstance(item, dict) or item.get("value_cny") is None:
             continue
         value = float(item["value_cny"])
+        # 清仓后主界面不列零市值资产；底层 assets 仍保留该块，口径不变。
+        if value <= 0:
+            continue
         share = value / total * 100 if total else 0.0
         rows.append((label, value, share))
     return rows
@@ -198,8 +203,6 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
     remaining = assets.get("remaining_cny")
 
     as_of = data["as_of"].replace("T", " ")[:16]
-    btc_snap = (assets.get("btc") or {}).get("snapshot_date") or "—"
-    stale = (assets.get("btc") or {}).get("stale_days")
     nav_date = (assets.get("sp500") or {}).get("latest_nav_date") or "—"
 
     goals = (data.get("goals") or {}).get("items") or []
@@ -248,6 +251,38 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
         f"<tr class='total'><td>合计</td><td class='num'>{money(total, cfg)}</td>"
         f"<td class='num'>100.0%</td></tr>"
     )
+
+    # ---- 手动维护资产明细（稳定币 / 活钱）
+    sc = assets.get("stablecoin") or {}
+    cash = assets.get("cash_cny") or {}
+    cash_html = ""
+    if sc or cash:
+        detail = []
+        if sc:
+            for h in sc.get("holdings", []):
+                detail.append(
+                    f"<tr><td>{h['asset']}</td><td class='num'>{h['amount']:,.0f}</td>"
+                    f"<td class='num'>{money(h['value_cny'], cfg)}</td></tr>"
+                )
+        if cash.get("value_cny") is not None:
+            detail.append(
+                f"<tr><td>人民币活钱（余额宝）</td><td class='num'>—</td>"
+                f"<td class='num'>{money(cash['value_cny'], cfg)}</td></tr>"
+            )
+        rate_note = ""
+        if sc:
+            rate_note = (
+                f"稳定币按 USD/CNY {sc['usd_cny']:.4f} 折算，汇率变动会改变完成度；"
+                "交易所限额活动年化按 10% 记（区间 0–10%），活动结束即为下沿。"
+            )
+        cash_html = f"""
+      <h2>手动维护资产明细</h2>
+      <table>
+        <tr><th>项目</th><th class="num">数量</th><th class="num">折人民币</th></tr>
+        {''.join(detail)}
+      </table>
+      <p class="note">{rate_note}人民币活钱按 1% 保守取值。两项都计入分子，由本人手动报数。</p>
+    """
 
     # ---- 投入与盈亏
     basis = data.get("cost_basis") or {}
@@ -361,8 +396,8 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
     <h1 class="pct">{pct(progress, 2)}</h1>
     <div class="bar"><span style="width:{min(progress, 100):.2f}%"></span></div>
     <p class="sub">{money(total, cfg)} / {money(target, cfg)}</p>
-    <p class="muted">更新于 {as_of}　·　比特币快照 {btc_snap}
-      （{stale if stale is not None else '—'} 天前）　·　基金净值日 {nav_date}</p>
+    <p class="muted">更新于 {as_of}　·　基金净值日 {nav_date}　·　
+      稳定币/活钱为手动报数快照</p>
   </header>
 
   <dl class="grid">{card_html}</dl>
@@ -375,7 +410,9 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
     <tr><th>资产</th><th class="num">市值</th><th class="num">占比</th></tr>
     {asset_table}
   </table>
-  <p class="note">只算长期不动用的钱，日常现金和活期不算。所以进度下跌未必是亏了，可能只是钱变成了现金。</p>
+  <p class="note">权益基金、稳定币与人民币活钱都计入分子。稳定币按实时汇率折算，
+    汇率变动会直接改变完成度；池内互换（如稳定币买标普500）不改变进度。</p>
+{cash_html}
 {basis_html}
   <h2>收益曲线</h2>
   {fig("profit.svg", "FIRE 收益曲线", "上面板是投入和市值，下面板是收益率。加仓会让收益率下降，因为本金变大、盈亏不变。")}
@@ -384,9 +421,10 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
 {proj_html}
 
   <footer>
-    <p>数据源：<a href="https://github.com/{cfg.sources.btc.repo}">比特币持仓</a>（每周手动快照）、
-      <a href="https://github.com/{cfg.sources.sp500.repo}">基金持仓</a>。
-      行情来自 Binance，汇率来自 open.er-api.com。</p>
+    <p>数据源：<a href="https://github.com/{cfg.sources.sp500.repo}">基金持仓</a>、
+      东方财富（纳指100 净值）、
+      <a href="https://github.com/{cfg.sources.btc.repo}">比特币持仓</a>（已清仓）。
+      稳定币与人民币活钱由本人手动报数，汇率来自 open.er-api.com。</p>
     <p>个人资产记录，不构成任何投资建议。完整说明见
       <a href="https://github.com/{cfg.sources.btc.repo.rsplit('/', 1)[0]}/FIRE-Progress">GitHub 仓库</a>。</p>
   </footer>

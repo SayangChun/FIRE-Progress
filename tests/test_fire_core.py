@@ -156,15 +156,19 @@ FX = 6.680538
 CONTRIB = cfg.get("contribution")
 ER = cfg.get("expected_return")
 ASSETS = {"btc": 14_562.22, "sp500": 900.0, "ndx100": 4_500.0}
+# 定投额从配置读，不写死：清仓后比特币日投归零，写死 6.0 会假失败。
+BTC_DAY = float(CONTRIB["btc_usdt_per_day"])
+SP_DAY = float(CONTRIB["sp500_cny_per_day"])
+NDX_DAY = float(CONTRIB["ndx100_cny_per_day"])
 proj = firemod.projection(185_828.10, FX, CONTRIB, ASSETS, ER)
 ok(
     "比特币定投折人民币 = USDT × 汇率",
-    abs(proj["btc_cny_per_day"] - 6.0 * FX) < 0.01,
+    abs(proj["btc_cny_per_day"] - BTC_DAY * FX) < 0.01,
     str(proj["btc_cny_per_day"]),
 )
 ok(
     "日定投合计 = 比特币 + 标普500 + 纳指100",
-    abs(proj["daily_cny"] - (6.0 * FX + 20.0)) < 0.01,
+    abs(proj["daily_cny"] - (BTC_DAY * FX + SP_DAY + NDX_DAY)) < 0.01,
     str(proj["daily_cny"]),
 )
 ok(
@@ -190,7 +194,7 @@ only_dca = firemod.projection(185_828.10, FX, CONTRIB)
 # projection() 内部用未四舍五入的日定投额求解，daily_cny 展示值则保留到分，
 # 两者在整数天上可能差 1（定投额改小后更容易撞上）。用未取整的日额做基准，
 # 钉住「退化成纯定投」这个性质，而不是分币级取整。
-_daily_raw = 6.0 * FX + 20.0
+_daily_raw = BTC_DAY * FX + SP_DAY + NDX_DAY
 ok(
     "不给资产时退化为纯定投（天数 = 剩余 ÷ 日定投）",
     only_dca["days_to_target"] == int(185_828.10 / _daily_raw),
@@ -206,7 +210,10 @@ ok(
     "window_days" not in proj and "daily_gain_cny" not in proj,
     str(sorted(proj)),
 )
-no_fx = firemod.projection(100_000.0, 0.0, CONTRIB, ASSETS, ER)
+# 用一份「仍在投 BTC」的构造配置验证该性质：真实配置已清仓、BTC 日投为 0，
+# 那条分支不会被触发，写在这里的断言会假通过。
+btc_contrib = {**dict(CONTRIB), "btc_usdt_per_day": 6.0}
+no_fx = firemod.projection(100_000.0, 0.0, btc_contrib, ASSETS, ER)
 ok(
     "缺汇率时不拿 0 冒充比特币定投",
     no_fx["days_to_target"] is None
@@ -223,7 +230,7 @@ ok(
 ok("已达标（剩余 ≤ 0）返回 None", firemod.projection(0, FX, CONTRIB) is None)
 ok(
     "compute() 里的外推用的是配置中的定投额与预期回报",
-    abs(data["projection"]["daily_cny"] - (6.0 * 6.7 + 20.0)) < 0.01
+    abs(data["projection"]["daily_cny"] - (BTC_DAY * 6.7 + SP_DAY + NDX_DAY)) < 0.01
     and data["projection"]["weighted_rate"] > 0,
     str(data["projection"].get("weighted_rate")),
 )
@@ -235,6 +242,83 @@ ok(
     monthly_saving >= data["projection"]["monthly_cny"],
     f'储蓄 ¥{monthly_saving:,.0f} vs 定投 ¥{data["projection"]["monthly_cny"]:,.2f}',
 )
+
+print()
+print("清仓与手动资产：BTC 归零，稳定币与活钱计入分子")
+PRICE_SOLD = {"btc_cny": 0.0, "usd_cny": 6.685071, "btc_usdt": 0.0}
+BTC_SOLD = {"available": True, "total_btc": 0.0, "cost_basis_usd": None,
+            "positions": [{"venue": "币安", "amount": 0.0, "note": "清仓卖出（全部持仓）"},
+                          {"venue": "欧易", "amount": 0.0, "note": "清仓卖出（全部持仓）"}],
+            "warnings": []}
+sold = firemod.compute(cfg, price=PRICE_SOLD, btc=BTC_SOLD, sp500=SP500,
+                       ndx100=NDX, history=[])
+ok(
+    "不传手动资产时分子只剩标普500 + 纳指100（向后兼容）",
+    abs(sold["assets"]["total_cny"] - (600.0 + 4425.42)) < 0.01,
+    str(sold["assets"]["total_cny"]),
+)
+
+sc, cash = firemod.manual_assets(cfg, PRICE_SOLD)
+ok("稳定币明细由配置生成", isinstance(sc, dict) and bool(sc.get("holdings")), str(sc))
+ok("活钱明细由配置生成", isinstance(cash, dict) and cash.get("value_cny") == 5959.74, str(cash))
+if sc:
+    ok("稳定币按实时汇率折人民币",
+       abs(sc["value_cny"] - sc["total_units"] * 6.685071) < 0.01,
+       f'{sc["value_cny"]} vs {sc["total_units"] * 6.685071:.2f}')
+    ok("稳定币明确标记为计入分子", sc.get("included_in_assets") is True)
+
+with_manual = firemod.compute(cfg, price=PRICE_SOLD, btc=BTC_SOLD, sp500=SP500,
+                              ndx100=NDX, stablecoin=sc, cash_cny=cash, history=[])
+expect_total = 600.0 + 4425.42 + sc["value_cny"] + cash["value_cny"]
+ok("两项手动资产都计入分子",
+   abs(with_manual["assets"]["total_cny"] - expect_total) < 0.01,
+   f'{with_manual["assets"]["total_cny"]} vs {expect_total:.2f}')
+ok("加入资产不改变 FIRE 目标（钉死的不变量）",
+   abs(with_manual["fire"]["target_cny"] - TARGET) < 0.01,
+   f'{with_manual["fire"]["target_cny"]} vs {TARGET}')
+ok("完成度随分子上升",
+   with_manual["assets"]["progress_pct"] > sold["assets"]["progress_pct"])
+pi = with_manual["passive_income"]
+ok("被动收入把五项资产都纳入加权，权重和为 1",
+   len(pi["assets"]) == 5 and abs(sum(r["weight"] for r in pi["assets"]) - 1.0) < 1e-9,
+   str([(r["key"], round(r["weight"], 4)) for r in pi["assets"]]))
+ok("被动收入市值之和 == 总资产",
+   abs(sum(r["value_cny"] for r in pi["assets"]) - with_manual["assets"]["total_cny"]) < 0.02,
+   str(pi["weighted_rate"]))
+ok("稳定币年化 10%、下沿 0% 进入加权区间",
+   any(r["key"] == "stablecoin" and r["rate"] == 0.10 and r["rate_low"] == 0.0
+       for r in pi["assets"]),
+   str(pi["rate_low"]))
+ok("活钱年化 1% 进入加权",
+   any(r["key"] == "cash_cny" and r["rate"] == 0.01 for r in pi["assets"]))
+ok("外推权重覆盖五项资产",
+   set(with_manual["projection"]["weights"]) == {"btc", "sp500", "ndx100", "stablecoin", "cash_cny"},
+   str(with_manual["projection"]["weights"]))
+ok("清仓后累计本金是当前持有类别之和",
+   abs(with_manual["cost_basis"]["total_cny"]
+       - (600.0 + 4177.22 + sc["value_cny"] + cash["value_cny"])) < 0.01,
+   str(with_manual["cost_basis"]["total_cny"]))
+
+print()
+print("清仓后不再触发 BTC 快照过期告警")
+from scripts.sources import btc_repo  # noqa: E402
+
+sold_csv = ("date,location,btc,note\n"
+            "2026-10-01,binance,0,\"清仓卖出（全部持仓）\"\n"
+            "2026-10-01,okx,0,\"清仓卖出（全部持仓）\"\n")
+sold_fetched = btc_repo.fetch(cfg.sources.btc, csv_text=sold_csv)
+ok("清仓快照解析为合法 0 持仓",
+   sold_fetched["available"] is True and sold_fetched["total_btc"] == 0.0,
+   str(sold_fetched)[:160])
+ok("清仓后不产生快照过期告警", sold_fetched["warnings"] == [],
+   str(sold_fetched["warnings"]))
+held_csv = ("date,location,btc,note\n"
+            "2026-09-01,binance,0.01,\"Binance账户；均价 $70,000/BTC\"\n"
+            "2026-09-01,okx,0.01,\"OKX账户；均价 $70,000/BTC\"\n")
+held_fetched = btc_repo.fetch(cfg.sources.btc, csv_text=held_csv)
+ok("仍持有 BTC 且快照过旧时照常告警",
+   any("超过" in w and "天未更新" in w for w in held_fetched["warnings"]),
+   str(held_fetched["warnings"]))
 
 print()
 if failures:

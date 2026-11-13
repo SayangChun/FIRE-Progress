@@ -154,7 +154,9 @@ def fetch(cfg, csv_text: str | None = None) -> dict:
         return {"available": False, "positions": [], "warnings": [f"比特币：解析 holdings.csv 失败：{exc}"]}
 
     max_stale = int(cfg.get("max_stale_days", 14))
-    if result["stale_days"] > max_stale:
+    # 清仓后持仓恒为 0，快照日期不再有意义（本人也不会再更新一个空仓仓库）。
+    # 只有还持有 BTC 时才检查新鲜度，否则 14 天后看板会永久挂着一条假告警。
+    if result["total_btc"] > 0 and result["stale_days"] > max_stale:
         result["warnings"].append(
             f"比特币持仓快照为 {result['snapshot_date']}，距今 {result['stale_days']} 天"
             f"（超过 {max_stale} 天未更新）"

@@ -11,6 +11,7 @@ from .blocks import (
     _life_plan_block,
     _passive_income_block,
     _positions_table,
+    _stablecoin_block,
     _warnings_block,
 )
 from .charts import curve_svg, dual_progress_svg, progress_svg, profit_svg
@@ -46,7 +47,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
 
     out.append(f"**更新时间**：{data['as_of'].replace('T', ' ')}")
     out.append("")
-    freshness = _freshness(btc, sp500)
+    freshness = _freshness(btc, sp500, assets.get("stablecoin"))
     if freshness:
         out.append(freshness)
         out.append("")
@@ -179,15 +180,27 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     btc_share = btc["value_cny"] / total * 100 if assets["total_cny"] else 0.0
     sp_share = sp500["value_cny"] / total * 100 if assets["total_cny"] else 0.0
     ndx_share = ndx100.get("value_cny", 0.0) / total * 100 if assets["total_cny"] else 0.0
-    out.append(f"| 比特币 | {money(btc['value_cny'], cfg)} | {btc_share:.1f}% |")
+    stable = assets.get("stablecoin") or {}
+    cash = assets.get("cash_cny") or {}
+    stable_share = (stable.get("value_cny") or 0.0) / total * 100 if assets["total_cny"] else 0.0
+    cash_share = (cash.get("value_cny") or 0.0) / total * 100 if assets["total_cny"] else 0.0
+    # 清仓后主界面不再列出比特币这一行（零值行没有信息量，还容易让人以为忘了清）。
+    # ⚠️ 只是展示层隐藏：assets.btc 仍是分子里的一块，口径和历史曲线都不变。
+    if btc["qty"]:
+        out.append(f"| 比特币 | {money(btc['value_cny'], cfg)} | {btc_share:.1f}% |")
     out.append(f"| 标普500基金 | {money(sp500['value_cny'], cfg)} | {sp_share:.1f}% |")
     if ndx100.get("value_cny"):
         out.append(f"| 纳指100基金 | {money(ndx100['value_cny'], cfg)} | {ndx_share:.1f}% |")
+    if stable.get("value_cny"):
+        out.append(f"| 稳定币（USDT + USDC） | {money(stable['value_cny'], cfg)} | {stable_share:.1f}% |")
+    if cash.get("value_cny"):
+        out.append(f"| 人民币活钱（余额宝） | {money(cash['value_cny'], cfg)} | {cash_share:.1f}% |")
     out.append(f"| **合计** | **{money(assets['total_cny'], cfg)}** | 100.0% |")
     out.append("")
     out.append(
-        "> 只算长期不动用的钱：比特币、标普500基金、纳指100基金。日常现金和活期不算。"
-        "所以卖出后进度下跌未必是亏了，可能只是钱变成了现金，详见下方「计入范围」。"
+        "> 计入分子的是上面这几项：权益基金、稳定币与人民币活钱。"
+        "比特币已清仓（持仓 0），不再列出。稳定币按实时 USD/CNY 折算，"
+        "所以汇率波动会真实改变完成度；两项现金的明细见下方折叠块。"
     )
     out.append("")
 
@@ -197,7 +210,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             f"{money(btc['value_cny'], cfg)}"
         )
         out.append("")
-    if btc["positions"]:
+    if btc["qty"] and btc["positions"]:
         out.append("<details>")
         out.append(f"<summary>比特币持仓明细（快照 {btc.get('snapshot_date') or '—'}，手动更新）</summary>")
         out.append("")
@@ -240,6 +253,11 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         out.append("</details>")
         out.append("")
 
+    sc_block = _stablecoin_block(data, cfg)
+    if sc_block:
+        out.append(sc_block.strip())
+        out.append("")
+
     basis = data.get("cost_basis") or {}
     if basis.get("total_cny") is not None:
         out.append("### 投入与盈亏")
@@ -279,13 +297,19 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             )
             out.append(">")
             out.append(
+                "> ⚠️ 资产离开计入范围时（如清仓），市值和本金会**同时**退出统计，"
+                "上面板出现台阶不代表亏损，只是口径边界。稳定币与活钱按面值计入本金，"
+                "不产生浮盈浮亏；稳定币折算值还会随汇率小幅起伏。"
+            )
+            out.append(">")
+            out.append(
                 "> 上面板纵轴不从 0 起，否则缺口会被压成一条线，斜率也不代表涨跌幅。"
                 "下面板含 0，正负可以直接读。"
             )
             out.append(">")
             out.append(
                 f"> 起点 {first_day}。早期数据由两个持仓仓库的历史文件重建，"
-                "比特币统一按当前汇率折算，绝对值和真实本金有误差，趋势可信；"
+                "当时的比特币本金按当时汇率折算，绝对值和真实本金有误差，趋势可信；"
                 "之后每天由 Actions 记录。"
             )
             out.append("")
@@ -310,8 +334,8 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             high = scen.get("high") or {}
             out.append(
                 f"按「定投 + 资产增值」外推：日投 **{money(proj['daily_cny'], cfg)}**"
-                f"（月 {money(proj['monthly_cny'], cfg)}，比特币 {proj['btc_usdt_per_day']:g} USDT"
-                f" + 标普500 {money(proj['sp500_cny_per_day'], cfg)}），"
+                f"（月 {money(proj['monthly_cny'], cfg)}，标普500 "
+                f"{money(proj['sp500_cny_per_day'], cfg)}/天），"
                 f"叠加当前持仓按加权预期年化 **{proj['weighted_rate'] * 100:.2f}%** 增长，"
                 f"**{_horizon(days)}**后达到**咖啡师 FIRE 门槛**（{proj['eta']}）。"
             )
@@ -326,7 +350,9 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             out.append(">")
             out.append(
                 "> 这不再是线性外推：定投按天累加，已有持仓按年化复利。差距全部来自收益率假设——"
-                "比特币占七成时，「平均收益率」对这个组合没有实际意义，路径才重要，上沿只能当参考。"
+                "权益类资产的「平均收益率」只是假设，真实路径先涨还是先跌会改变结果，上沿只能当参考。"
+                "稳定币的 10% 与活钱的 1% 也都进了加权年化：前者是限额活动利率，"
+                "悲观档按 0% 记，所以区间下沿明显更慢。"
             )
             out.append(">")
             out.append(
@@ -369,10 +395,12 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
 
     out.append(
         f"<sub>数据源："
-        f"[{cfg.sources.btc.repo}](https://github.com/{cfg.sources.btc.repo})（比特币持仓，每周手动更新）、"
         f"[{cfg.sources.sp500.repo}](https://github.com/{cfg.sources.sp500.repo})（标普500 持仓）、"
-        f"东方财富（纳指100 净值，份额固定）· "
-        f"行情：{data['price']['btc_source']} · 汇率：{data['price']['fx_source']}</sub>"
+        f"东方财富（纳指100 净值，份额固定）、"
+        f"[{cfg.sources.btc.repo}](https://github.com/{cfg.sources.btc.repo})（比特币持仓，已清仓）· "
+        f"稳定币与人民币活钱由本人手动报数 · "
+        f"汇率：{data['price']['fx_source']}"
+        f"{' · 行情：' + data['price']['btc_source'] if data['price'].get('btc_usdt') else ''}</sub>"
     )
     out.append("")
     out.append(END_MARK)
@@ -411,8 +439,10 @@ def default_readme(
         )
     return f"""# FIRE-Progress
 
-> 我的 FIRE 进度看板。只统计三项长期不动用的资产：比特币、标普500基金、纳指100基金。
-> 持仓来自两个公开仓库 + 东方财富的公开净值接口，由 GitHub Actions 每小时更新，不需要任何密钥。
+> 我的 FIRE 进度看板。计入分子的资产：标普500基金、纳指100基金、稳定币、人民币活钱
+> （比特币已清仓）。基金持仓来自两个公开仓库 + 东方财富的公开净值接口，
+> 稳定币与活钱由本人手动报数，稳定币按实时汇率折算。
+> 由 GitHub Actions 每小时更新，不需要任何密钥。
 
 {block}
 ## 计算口径
@@ -435,29 +465,32 @@ def default_readme(
 
 ## 计入范围
 
-- ✅ [0.1BTC](https://github.com/{cfg.sources.btc.repo}) 仓库中的比特币持仓
 - ✅ [sp500-dca](https://github.com/{cfg.sources.sp500.repo}) 仓库中的标普500基金市值
-- ❌ 日常现金、活期存款、其他币种、其他一切资产
+- ✅ 纳指100 场外基金（份额写在 `config.yaml`）
+- ✅ 稳定币（USDT / USDC，按实时 USD/CNY 折算）
+- ✅ 人民币活钱（余额宝，手动报数）
+- ✅ [0.1BTC](https://github.com/{cfg.sources.btc.repo}) 仓库中的比特币持仓（已清仓，当前为 0）
+- ❌ 其他一切未列出的资产
 
-划线的标准是「长期不动用」，不是「能不能变现」。日常现金要随时周转，所以不算。
-
-由此有个推论：卖出资产不会让进度失真，卖出后钱离开这个范围才会。
+纳入标准是「属于这个资产池」，不是「能不能变现」。上面几项都计入分子，
+所以它们之间的划转不产生进度变化；只有外部资金进出、行情和汇率才会改变完成度。
 
 | 情形 | 进度 | 是否真实 |
 | --- | --- | --- |
-| 工资入金 / 买入 | ↑ | 真实增长 |
-| 池内互换（卖 BTC 买标普500） | → 不变 | 正常 |
-| 卖出后把钱花掉 | ↓ | 真实减少 |
-| 卖出后变成现金放着 | ↓ | 假信号：资产没少，只是换了形式 |
+| 工资入金 / 外部买入 | ↑ | 真实增长 |
+| 池内互换（稳定币买标普500） | → 不变 | 正常 |
+| 把钱花掉 / 转出池外 | ↓ | 真实减少 |
+| 人民币升值（稳定币折人民币变少） | ↓ | 真实：以人民币计的购买力变了 |
 
-> 看到进度下跌，先看钱去哪了。变成现金的话，那是口径边界，不是资产减少。
+> 稳定币按实时汇率折算，所以汇率波动会直接反映在进度上；
+> 这不是数据错误，是本看板以人民币计价的结果。
 
 ## 数据节奏
 
-- **比特币持仓**：在 [0.1BTC](https://github.com/{cfg.sources.btc.repo}) 仓库里**每周手动更新一次**，
-  数量有延迟，不是实时数据；市值仍按最新行情折算。
 - **标普500基金**：QDII 净值通常 T+1 晚间披露，周末和节假日没有净值，
   看板可能连续 2~3 天没有新提交，属正常。
+- **稳定币 / 人民币活钱**：由本人手动报数，不是实时余额；活钱会因日常花销与
+  ¥20/天 定投小幅变化，不定期更新。
 
 ---
 

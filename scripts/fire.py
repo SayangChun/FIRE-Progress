@@ -59,6 +59,8 @@ def passive_income(
     sp500_value: float,
     monthly_expense: float,
     ndx_value: float = 0.0,
+    stablecoin_value: float = 0.0,
+    cash_value: float = 0.0,
 ) -> dict | None:
     """按预期年化回报估算「每小时被动收入」。
 
@@ -81,8 +83,17 @@ def passive_income(
     # 缺假设就跳过这一项，而不是拿 0 或别的资产的值凑——
     # 拿错值会让「每小时被动收入」凭空变化，而看板上看不出来。
     include_ndx = float(ndx_value) > 0 and spec.get("ndx100") is not None
+    # 手动维护的两项：只有实际持有、且配了回报假设时才纳入加权。
+    include_stable = float(stablecoin_value) > 0 and spec.get("stablecoin") is not None
+    include_cash = float(cash_value) > 0 and spec.get("cash_cny") is not None
 
-    total = float(btc_value) + float(sp500_value) + (float(ndx_value) if include_ndx else 0.0)
+    total = (
+        float(btc_value)
+        + float(sp500_value)
+        + (float(ndx_value) if include_ndx else 0.0)
+        + (float(stablecoin_value) if include_stable else 0.0)
+        + (float(cash_value) if include_cash else 0.0)
+    )
 
     specs = [
         ("btc", "比特币", btc_value, spec.get("btc"), spec.get("btc_low"), spec.get("btc_high")),
@@ -97,6 +108,28 @@ def passive_income(
                 spec.get("ndx100"),
                 spec.get("ndx100_low"),
                 spec.get("ndx100_high"),
+            )
+        )
+    if include_stable:
+        specs.append(
+            (
+                "stablecoin",
+                "稳定币",
+                stablecoin_value,
+                spec.get("stablecoin"),
+                spec.get("stablecoin_low"),
+                spec.get("stablecoin_high"),
+            )
+        )
+    if include_cash:
+        specs.append(
+            (
+                "cash_cny",
+                "人民币活钱",
+                cash_value,
+                spec.get("cash_cny"),
+                spec.get("cash_cny_low"),
+                spec.get("cash_cny_high"),
             )
         )
 
@@ -167,6 +200,56 @@ def collect_warnings(*results: dict) -> list[str]:
     return warnings
 
 
+def manual_assets(cfg, price: dict) -> tuple[dict | None, dict | None]:
+    """手动报数的两项资产，都**计入分子**：稳定币（USD 计价）与人民币活钱。
+
+    - 稳定币：USDT / USDC 按 1:1 锚定 USD，用与 BTC 同一份实时汇率折成人民币。
+      因此汇率波动会真实改变完成度——现金类资产也有了汇率敞口。
+    - 人民币活钱：余额宝一类，本币计价，不涉汇率。
+
+    两项都没有公开数据源，数量由本人手动更新。返回 (stablecoin, cash_cny)，
+    任一未启用就返回 None，调用方按 0 处理。
+    """
+    fx = float(price.get("usd_cny") or 0.0)
+
+    stable = None
+    spec = cfg.get("stablecoin") or {}
+    holdings = spec.get("holdings") or []
+    if spec.get("enabled", False) and holdings:
+        rows = []
+        for item in holdings:
+            amount = float(item.get("amount") or 0.0)
+            rows.append(
+                {
+                    "asset": str(item.get("asset") or "").upper(),
+                    "amount": amount,
+                    "value_cny": round(amount * fx, 2),
+                }
+            )
+        units = sum(r["amount"] for r in rows)
+        stable = {
+            "holdings": rows,
+            "total_units": round(units, 2),
+            "usd_cny": fx,
+            "value_cny": round(units * fx, 2),
+            "snapshot_date": spec.get("snapshot_date"),
+            "note": spec.get("note"),
+            "included_in_assets": True,
+        }
+
+    cash = None
+    cspec = cfg.get("cash_cny") or {}
+    if cspec.get("enabled", False):
+        balance = float(cspec.get("balance_cny") or 0.0)
+        cash = {
+            "value_cny": round(balance, 2),
+            "snapshot_date": cspec.get("snapshot_date"),
+            "note": cspec.get("note"),
+            "included_in_assets": True,
+        }
+    return stable, cash
+
+
 def _days_to_target(
     remaining: float, start: float, daily: float, annual: float
 ) -> float | None:
@@ -213,7 +296,7 @@ def projection(
         按当前市值权重。
 
     这是「外推」，不是预测：它假设定投不中断、收益率恒定。
-    比特币占七成时，「平均收益率」本身就很不可靠，所以同时给出悲观/基准/乐观三档。
+    稳定币的限额活动利率会结束，单点假设不可靠，所以同时给出悲观/基准/乐观三档。
     """
     if remaining <= 0:
         return None
@@ -257,7 +340,9 @@ def projection(
         return {**base, "days_to_target": None, "eta": None, "reason": "定投额为 0，无法外推"}
 
     # 按当前市值权重加权预期年化，与「每小时被动收入」同口径。
-    values = {"btc": 0.0, "sp500": 0.0, "ndx100": 0.0}
+    # 五项资产都要列进权重字典：漏掉稳定币/活钱会让它们的市值参与增长、
+    # 却不参与收益率加权，算出来的加权年化会凭空偏高。
+    values = {"btc": 0.0, "sp500": 0.0, "ndx100": 0.0, "stablecoin": 0.0, "cash_cny": 0.0}
     for key in values:
         values[key] = float((assets or {}).get(key) or 0.0)
     start = sum(values.values())
@@ -395,22 +480,29 @@ def two_phase(cfg, *, capital: float, annual_net_expense: float) -> dict | None:
 
 
 def allocation_split(
-    cfg, btc_value: float, sp500_value: float, ndx_value: float = 0.0
+    cfg,
+    btc_value: float,
+    sp500_value: float,
+    ndx_value: float = 0.0,
+    stablecoin_value: float = 0.0,
+    cash_value: float = 0.0,
 ) -> dict | None:
-    """比特币 / 标普500 / 纳指100 的市值占比，用于展示配置失衡程度。
+    """五项资产的市值占比，用于展示配置失衡程度。
 
-    ⚠️ 只读展示，**不改变分子构成**。分子仍然是这三项之和，
-    加资产不能让目标变化（tests/test_fire_core.py 钉死）。
+    ⚠️ 只读展示，**不改变分子构成**。加资产不能让目标变化（测试钉死）。
 
-    ⚠️ `in_range` 只按**标普500**判断，纳指100 不计入「稳」的部分——
-    纳指与标普500 相关性 0.9 以上，都是美股成长敞口，只是纳指更偏科技。
-    所以 `non_btc_pct` 是「非比特币敞口」，不等于「稳健资产」。
+    ⚠️ `in_range` 只按**标普500**判断：纳指100 与标普相关性 0.9 以上，
+    都是美股成长敞口；稳定币和人民币活钱是现金等价物，不算权益敞口。
+    所以 `equity_pct` 才是「权益类占比」，不要把现金也算进去。
     """
     spec = cfg.get("asset_allocation") or {}
     if not spec.get("enabled", False):
         return None
 
-    total = float(btc_value) + float(sp500_value) + float(ndx_value)
+    total = (
+        float(btc_value) + float(sp500_value) + float(ndx_value)
+        + float(stablecoin_value) + float(cash_value)
+    )
     if total <= 0:
         return None
 
@@ -421,12 +513,19 @@ def allocation_split(
     btc_pct = float(btc_value) / total
     sp_pct = float(sp500_value) / total
     ndx_pct = float(ndx_value) / total
+    stable_pct = float(stablecoin_value) / total
+    cash_pct = float(cash_value) / total
 
     return {
         "btc_pct": round(btc_pct, 4),
         "sp500_pct": round(sp_pct, 4),
         "ndx100_pct": round(ndx_pct, 4),
-        "non_btc_pct": round(sp_pct + ndx_pct, 4),
+        "stablecoin_pct": round(stable_pct, 4),
+        "cash_pct": round(cash_pct, 4),
+        "equity_pct": round(sp_pct + ndx_pct, 4),
+        # 保留旧字段以免下游读不到；清仓后它恒为 100%，意义有限，
+        # 真正该看的是 equity_pct（权益）与两项现金占比。
+        "non_btc_pct": round(1 - btc_pct, 4),
         "sp500_target_range": [low, high],
         "in_range": bool(low is not None and high is not None and low <= sp_pct <= high),
         "note": spec.get("note"),
@@ -441,6 +540,8 @@ def compute(
     sp500: dict,
     history: list[dict],
     ndx100: dict | None = None,
+    stablecoin: dict | None = None,
+    cash_cny: dict | None = None,
     as_of: str | None = None,
 ) -> dict:
     monthly, plan_summary = lifeplan_mod.resolve_monthly(cfg)
@@ -473,7 +574,14 @@ def compute(
     ndx_value = float(ndx100.get("market_value") or 0.0)
     ndx_invested = float(ndx100.get("invested") or 0.0)
 
-    total = btc_value + sp500_value + ndx_value
+    # 手动维护的两项（2026-11-13 加入）：由 update.py 用 manual_assets() 折算后传入。
+    # 不传时按 0 处理，行为与加入前完全一致——旧调用点与历史快照不受影响。
+    # ⚠️ 刻意不在 compute() 里读 config：那会让每次调用都悄悄多出两项资产，
+    #    口径测试会失去意义，也没法复现「只有三项资产」的历史快照。
+    stable_value = float((stablecoin or {}).get("value_cny") or 0.0)
+    cash_value = float((cash_cny or {}).get("value_cny") or 0.0)
+
+    total = btc_value + sp500_value + ndx_value + stable_value + cash_value
     progress = total / target if target else 0.0
     remaining = max(target - total, 0.0)
 
@@ -554,7 +662,13 @@ def compute(
     # 纳指100：成本由 config 的 shares × cost_nav 直接算出，无需外部来源
     ndx_basis = ndx_invested if ndx_invested > 0 else None
 
-    parts = [p for p in (btc_basis, sp500_basis, ndx_basis) if p is not None]
+    # 稳定币与活钱：现金等价物，按面值计入累计投入本金（不产生浮盈浮亏）。
+    # ⚠️ 只统计当前仍持有的类别；清仓的比特币没有成本价了，btc_basis 为 None，
+    #    所以累计投入本金会出现台阶——这是口径边界，不是亏损，见 CHANGELOG。
+    stable_basis = stable_value if stable_value > 0 else None
+    cash_basis = cash_value if cash_value > 0 else None
+
+    parts = [p for p in (btc_basis, sp500_basis, ndx_basis, stable_basis, cash_basis) if p is not None]
     total_basis = sum(parts) if parts else None
 
     now = _now(cfg.automation.get("timezone", "Asia/Shanghai"))
@@ -567,7 +681,13 @@ def compute(
             remaining,
             price.get("usd_cny"),
             cfg.get("contribution"),
-            {"btc": btc_value, "sp500": sp500_value, "ndx100": ndx_value},
+            {
+                "btc": btc_value,
+                "sp500": sp500_value,
+                "ndx100": ndx_value,
+                "stablecoin": stable_value,
+                "cash_cny": cash_value,
+            },
             cfg.get("expected_return"),
         )
 
@@ -585,7 +705,13 @@ def compute(
                     remaining,
                     price.get("usd_cny"),
                     ft_contrib,
-                    {"btc": btc_value, "sp500": sp500_value, "ndx100": ndx_value},
+                    {
+                        "btc": btc_value,
+                        "sp500": sp500_value,
+                        "ndx100": ndx_value,
+                        "stablecoin": stable_value,
+                        "cash_cny": cash_value,
+                    },
                     cfg.get("expected_return"),
                 )
 
@@ -669,7 +795,9 @@ def compute(
         # 只回答「够不够撑到回北京那天」，见 docs/FIRE-ROADMAP.md。
         "two_phase": two_phase(cfg, capital=total, annual_net_expense=net_monthly * 12),
         # 资产占比：只用于展示失衡程度，不改变分子构成
-        "allocation": allocation_split(cfg, btc_value, sp500_value, ndx_value),
+        "allocation": allocation_split(
+            cfg, btc_value, sp500_value, ndx_value, stable_value, cash_value
+        ),
         "assets": {
             "total_cny": round(total, 2),
             "progress": progress,
@@ -699,12 +827,17 @@ def compute(
                 "latest_nav_date": ndx100.get("latest_nav_date"),
                 "funds": ndx100.get("funds", []),
             },
+            # 稳定币 / 人民币活钱：计入分子的两项手动维护资产。
+            "stablecoin": stablecoin,
+            "cash_cny": cash_cny,
         },
         "cost_basis": {
             "btc_cny": round(btc_basis, 2) if btc_basis is not None else None,
             "btc_estimated": btc_basis is not None,
             "sp500_cny": round(sp500_basis, 2),
             "ndx100_cny": round(ndx_basis, 2) if ndx_basis is not None else None,
+            "stablecoin_cny": round(stable_basis, 2) if stable_basis is not None else None,
+            "cash_cny": round(cash_basis, 2) if cash_basis is not None else None,
             "total_cny": round(total_basis, 2) if total_basis is not None else None,
             "profit_cny": round(total - total_basis, 2) if total_basis is not None else None,
         },
@@ -715,6 +848,8 @@ def compute(
                 btc_value=btc_value,
                 sp500_value=sp500_value,
                 ndx_value=ndx_value,
+                stablecoin_value=stable_value,
+                cash_value=cash_value,
                 monthly_expense=monthly,
             )
             if cfg.display.get("show_passive_income", True)

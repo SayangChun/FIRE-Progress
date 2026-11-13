@@ -109,8 +109,18 @@ def usd_cny(order: list[str], fallback: float | None = None) -> tuple[float, str
 
 
 def resolve(cfg) -> dict:
-    """汇总一次价格快照。"""
-    btc_price, btc_src = btc_usdt(list(cfg.price.btc_sources))
+    """汇总一次价格快照。
+
+    `btc_sources` 为空表示「当前没有比特币持仓，不需要抓 BTC 行情」——
+    这是合法配置，不是数据源故障。此时 btc_usdt 记 0 并标注来源，
+    汇率照抓（稳定币折人民币还要用）。上层若发现持仓 > 0 却没配行情源，
+    必须告警，不能让市值被静默算成 0，见 update.py 的检查。
+    """
+    order = list(cfg.price.get("btc_sources") or [])
+    if order:
+        btc_price, btc_src = btc_usdt(order)
+    else:
+        btc_price, btc_src = 0.0, "未配置（无比特币持仓）"
     fx, fx_src = usd_cny(list(cfg.price.fx_sources), cfg.price.get("fallback_fx_usdcny"))
     return {
         "btc_usdt": btc_price,

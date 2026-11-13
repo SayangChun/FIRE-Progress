@@ -100,7 +100,12 @@ def apply_last_good(
     notes: list[str] = []
     prev_assets = (previous or {}).get("assets") or {}
 
-    if not btc.get("available") or not btc.get("total_btc"):
+    # ⚠️ 清仓后的 0 是**合法持仓**，不是数据故障：
+    #    `available=True` 且 total_btc==0 表示「读到了持仓文件，余额为零」。
+    #    只有读不到文件 / 解析失败（available=False）或数量缺失（None）才沿用旧值。
+    #    否则清仓会被当成故障、把上次的 0.028 BTC 又写回看板。
+    _btc_unavailable = not btc.get("available") or btc.get("total_btc") is None
+    if _btc_unavailable:
         cached = prev_assets.get("btc") or {}
         original_warnings = list(btc.get("warnings", []))
         if cached.get("qty"):
@@ -168,6 +173,11 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
         "progress_pct": data["assets"]["progress_pct"],
         "btc_cny": data["assets"]["btc"]["value_cny"],
         "btc_qty": data["assets"]["btc"]["qty"],
+        # 稳定币 / 人民币活钱（2026-11-13 新增）：都计入分子，逐日留档。
+        # 稳定币按当日汇率折算，所以留档里能看出汇率带来的变动；
+        # 旧记录没有这两个字段，读的时候要容忍缺失。
+        "stablecoin_cny": (data["assets"].get("stablecoin") or {}).get("value_cny"),
+        "cash_cny": (data["assets"].get("cash_cny") or {}).get("value_cny"),
         "sp500_cny": data["assets"]["sp500"]["value_cny"],
         # 纳指100（2026-10-27 加入）：逐日留档，否则事后无法拆出它的贡献。
         # 旧记录没有这个字段，读的时候要容忍缺失（用 .get）。
@@ -297,6 +307,18 @@ def is_material(
         if abs(float(old) - float(new)) > tol:
             return True, f"{label}变化（{old} → {new}）"
 
+    # 手动维护的资产虽计入分子，但「只改数量、同一天行情没动」时总资产会变，
+    # 一般能过阈值；不过数量很小或汇率反向抵消时可能漏，所以显式比一次数量。
+    prev_sc = ((previous.get("assets") or {}).get("stablecoin") or {}).get("total_units")
+    cur_sc = ((data["assets"].get("stablecoin") or {}).get("total_units"))
+    prev_cash = ((previous.get("assets") or {}).get("cash_cny") or {}).get("value_cny")
+    cur_cash = ((data["assets"].get("cash_cny") or {}).get("value_cny"))
+    for old, new, label in ((prev_sc, cur_sc, "稳定币数量"), (prev_cash, cur_cash, "活钱余额")):
+        if (old is None) != (new is None) or (
+            old is not None and new is not None and abs(float(old) - float(new)) > 0.01
+        ):
+            return True, f"{label}变化（{old} → {new}）"
+
     prev_total = ((previous.get("assets") or {}).get("total_cny")) or 0.0
     cur_total = data["assets"]["total_cny"]
     delta = abs(cur_total - prev_total)
@@ -334,23 +356,47 @@ def main() -> int:
 
     print("→ 抓取数据源…")
     price, btc, sp500, ndx100 = fetch_all(cfg, args.mock)
-    print(f"  BTC/USDT = {price['btc_usdt']:,.2f} ({price['btc_source']})")
+    if price.get("btc_usdt"):
+        print(f"  BTC/USDT = {price['btc_usdt']:,.2f} ({price['btc_source']})")
+        print(f"  → BTC/CNY = {price['btc_cny']:,.2f}")
+    else:
+        print(f"  BTC 行情未抓取（{price.get('btc_source') or '无比特币持仓'}）")
     print(f"  USD/CNY  = {price['usd_cny']:.4f} ({price['fx_source']})")
-    print(f"  → BTC/CNY = {price['btc_cny']:,.2f}")
     if btc.get("available"):
         print(f"  比特币持仓快照 = {btc.get('snapshot_date')}（{btc.get('stale_days')} 天前）")
+        if not float(btc.get("total_btc") or 0):
+            print("  → 持仓为 0（已清仓），按合法零值处理，不沿用上次快照")
 
     btc, sp500, ndx100, fallback_notes = apply_last_good(btc, sp500, ndx100, previous)
 
+    # 手动报数的两项资产：零网络请求，按当日汇率折算后计入分子。
+    stablecoin, cash_cny = firemod.manual_assets(cfg, price)
+
     print("→ 计算 FIRE 进度…")
     data = firemod.compute(
-        cfg, price=price, btc=btc, sp500=sp500, ndx100=ndx100, history=history
+        cfg,
+        price=price,
+        btc=btc,
+        sp500=sp500,
+        ndx100=ndx100,
+        stablecoin=stablecoin,
+        cash_cny=cash_cny,
+        history=history,
     )
+
+    # ⚠️ 持仓 > 0 却没配 BTC 行情源时，btc_cny 会是 0、市值被静默算成 0。
+    #    这种情况必须显式告警，不能让看板假装「没有资产」。
+    extra_warnings: list[str] = []
+    if float(btc.get("total_btc") or 0) > 0 and not float(price.get("btc_usdt") or 0):
+        extra_warnings.append(
+            "⚠️ 比特币持仓非零但 btc_sources 为空，市值被算成 0；"
+            "请在 config.yaml 的 price.btc_sources 补回行情源"
+        )
 
     # 兜底说明排在前面，并去重（同一告警可能从来源和兜底两处各来一次）
     seen: set[str] = set()
     merged: list[str] = []
-    for warn in [*fallback_notes, *data.get("warnings", [])]:
+    for warn in [*fallback_notes, *extra_warnings, *data.get("warnings", [])]:
         if warn not in seen:
             seen.add(warn)
             merged.append(warn)
@@ -386,6 +432,15 @@ def main() -> int:
     print(f"  标普500 = ¥{assets['sp500']['value_cny']:,.2f}")
     if assets.get("ndx100"):
         print(f"  纳指100 = ¥{assets['ndx100']['value_cny']:,.2f}")
+    sc = assets.get("stablecoin")
+    if sc:
+        print(
+            f"  稳定币 = {sc['total_units']:,.0f} × {sc['usd_cny']:.4f} "
+            f"= ¥{sc['value_cny']:,.2f}"
+        )
+    cash = assets.get("cash_cny")
+    if cash:
+        print(f"  人民币活钱 = ¥{cash['value_cny']:,.2f}")
     print(f"  合计 = ¥{assets['total_cny']:,.2f}　完成度 = {assets['progress_pct']:.4f}%")
 
     material, reason = is_material(previous, data, cfg, history)
