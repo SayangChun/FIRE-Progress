@@ -21,7 +21,6 @@ from scripts import config as cfgmod  # noqa: E402
 from scripts import fire as firemod  # noqa: E402
 from scripts import render as rendermod  # noqa: E402
 from scripts.sources import (  # noqa: E402
-    btc_repo,
     ndx100 as ndx100_src,
     price as price_src,
     sp500 as sp500_src,
@@ -60,22 +59,16 @@ def load_fixture_json(name: str) -> dict:
 # ------------------------------------------------------------------ 数据抓取
 
 
-def fetch_all(cfg, mock: bool) -> tuple[dict, dict, dict, dict]:
-    """返回 (price, btc, sp500, ndx100)。单个来源失败不阻断整体。"""
+def fetch_all(cfg, mock: bool) -> tuple[dict, dict, dict]:
+    """返回 (price, sp500, ndx100)。单个来源失败不阻断整体。"""
     if mock:
         print("[mock] 使用 tests/fixtures 下的样例数据")
         price = load_fixture_json("price.json")
-        btc = btc_repo.fetch(cfg.sources.btc, csv_text=read_fixture("holdings.csv"))
         sp500 = load_fixture_json("sp500.json")
         ndx100 = load_fixture_json("ndx100.json")
-        return price, btc, sp500, ndx100
+        return price, sp500, ndx100
 
     price = price_src.resolve(cfg)
-
-    if cfg.sources.btc.get("enabled", True):
-        btc = btc_repo.fetch(cfg.sources.btc)
-    else:
-        btc = {"available": False, "positions": [], "warnings": ["比特币：已在配置中禁用"]}
 
     if cfg.sources.sp500.get("enabled", True):
         sp500 = sp500_src.fetch(cfg.sources.sp500)
@@ -87,44 +80,18 @@ def fetch_all(cfg, mock: bool) -> tuple[dict, dict, dict, dict]:
     else:
         ndx100 = {"available": False, "warnings": ["纳指100：已在配置中禁用"]}
 
-    return price, btc, sp500, ndx100
+    return price, sp500, ndx100
 
 
 def apply_last_good(
-    btc, sp500, ndx100, previous: dict
-) -> tuple[dict, dict, dict, list[str]]:
+    sp500, ndx100, previous: dict
+) -> tuple[dict, dict, list[str]]:
     """某个来源挂掉时沿用上次的可用值，并明确告警——绝不用 0 冒充持仓。
 
     注意：必须把「替换后的对象」显式返回，否则调用方拿到的仍是原来的变量。
     """
     notes: list[str] = []
     prev_assets = (previous or {}).get("assets") or {}
-
-    # ⚠️ 清仓后的 0 是**合法持仓**，不是数据故障：
-    #    `available=True` 且 total_btc==0 表示「读到了持仓文件，余额为零」。
-    #    只有读不到文件 / 解析失败（available=False）或数量缺失（None）才沿用旧值。
-    #    否则清仓会被当成故障、把上次的 0.028 BTC 又写回看板。
-    _btc_unavailable = not btc.get("available") or btc.get("total_btc") is None
-    if _btc_unavailable:
-        cached = prev_assets.get("btc") or {}
-        original_warnings = list(btc.get("warnings", []))
-        if cached.get("qty"):
-            print(f"[fallback] 比特币持仓不可用，沿用上次值 {cached['qty']}")
-            btc = {
-                "available": True,
-                "total_btc": cached["qty"],
-                "snapshot_date": cached.get("snapshot_date"),
-                "stale_days": None,
-                "cost_basis_usd": None,
-                "positions": [],
-                "warnings": [],
-            }
-            notes.append("比特币持仓取自上次成功值（本次未读到 holdings.csv）")
-        else:
-            # 没有缓存可退：绝不能把「拿不到数据」当成「持有 0 枚」写进去，
-            # 那会让进度看起来凭空倒退，且没有任何痕迹。
-            notes.append("⚠️ 比特币持仓不可用，本次进度**未计入比特币**，实际进度被低估")
-        notes.extend(original_warnings)
 
     if not sp500.get("available") and prev_assets.get("sp500", {}).get("value_cny") is not None:
         sp = prev_assets["sp500"]
@@ -155,7 +122,7 @@ def apply_last_good(
         }
         notes.append("纳指100 市值取自上次成功值")
 
-    return btc, sp500, ndx100, notes
+    return sp500, ndx100, notes
 
 
 # ------------------------------------------------------------------ 快照
@@ -171,8 +138,6 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
         "as_of": data["as_of"],
         "total_cny": data["assets"]["total_cny"],
         "progress_pct": data["assets"]["progress_pct"],
-        "btc_cny": data["assets"]["btc"]["value_cny"],
-        "btc_qty": data["assets"]["btc"]["qty"],
         # 稳定币 / 人民币活钱（2026-11-13 新增）：都计入分子，逐日留档。
         # 稳定币按当日汇率折算，所以留档里能看出汇率带来的变动；
         # 旧记录没有这两个字段，读的时候要容忍缺失。
@@ -194,7 +159,7 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
         "departure_cny": (data.get("departure") or {}).get("low_cny"),
         "basis_cny": basis.get("total_cny"),
         "profit_cny": basis.get("profit_cny"),
-        # 比特币本金是「美元成本 × 当日汇率」，汇率不记下来事后无法审计
+        # 当日汇率：稳定币折人民币靠它，不记下来事后无法审计
         "fx_usd_cny": (data.get("price") or {}).get("usd_cny"),
     }
     kept = [r for r in history if r.get("date") != row["date"]]
@@ -218,7 +183,7 @@ def is_material(
     其余情况按阈值判断：阈值 = max(绝对下限, 上次总资产 × 比例)。
 
     为什么用比例而不是固定金额：固定金额不随资产规模变化。
-    资产 ¥13k 时「变动 1 元」只占 0.007%，比特币几秒就能波动这么多，
+    资产 ¥13k 时「变动 1 元」只占 0.007%，行情几秒就能波动这么多，
     结果就是每小时都提交（实测约 720 次/月）；等资产涨到几十万，
     同一个金额又小到失去意义。按比例设阈值才能真正「只在有意义时提交」。
     """
@@ -355,19 +320,10 @@ def main() -> int:
         history = []
 
     print("→ 抓取数据源…")
-    price, btc, sp500, ndx100 = fetch_all(cfg, args.mock)
-    if price.get("btc_usdt"):
-        print(f"  BTC/USDT = {price['btc_usdt']:,.2f} ({price['btc_source']})")
-        print(f"  → BTC/CNY = {price['btc_cny']:,.2f}")
-    else:
-        print(f"  BTC 行情未抓取（{price.get('btc_source') or '无比特币持仓'}）")
+    price, sp500, ndx100 = fetch_all(cfg, args.mock)
     print(f"  USD/CNY  = {price['usd_cny']:.4f} ({price['fx_source']})")
-    if btc.get("available"):
-        print(f"  比特币持仓快照 = {btc.get('snapshot_date')}（{btc.get('stale_days')} 天前）")
-        if not float(btc.get("total_btc") or 0):
-            print("  → 持仓为 0（已清仓），按合法零值处理，不沿用上次快照")
 
-    btc, sp500, ndx100, fallback_notes = apply_last_good(btc, sp500, ndx100, previous)
+    sp500, ndx100, fallback_notes = apply_last_good(sp500, ndx100, previous)
 
     # 手动报数的两项资产：零网络请求，按当日汇率折算后计入分子。
     stablecoin, cash_cny = firemod.manual_assets(cfg, price)
@@ -376,7 +332,6 @@ def main() -> int:
     data = firemod.compute(
         cfg,
         price=price,
-        btc=btc,
         sp500=sp500,
         ndx100=ndx100,
         stablecoin=stablecoin,
@@ -384,14 +339,7 @@ def main() -> int:
         history=history,
     )
 
-    # ⚠️ 持仓 > 0 却没配 BTC 行情源时，btc_cny 会是 0、市值被静默算成 0。
-    #    这种情况必须显式告警，不能让看板假装「没有资产」。
     extra_warnings: list[str] = []
-    if float(btc.get("total_btc") or 0) > 0 and not float(price.get("btc_usdt") or 0):
-        extra_warnings.append(
-            "⚠️ 比特币持仓非零但 btc_sources 为空，市值被算成 0；"
-            "请在 config.yaml 的 price.btc_sources 补回行情源"
-        )
 
     # 兜底说明排在前面，并去重（同一告警可能从来源和兜底两处各来一次）
     seen: set[str] = set()
@@ -428,7 +376,6 @@ def main() -> int:
         fire.get("net_monthly_expense", fire["monthly_expense"]),
     )
     print(f"  目标 = ¥{fire['target_cny']:,.2f}（{base:.0f} × 12 ÷ {fire['withdrawal_rate']}）")
-    print(f"  比特币 = {assets['btc']['qty']:.8f} → ¥{assets['btc']['value_cny']:,.2f}")
     print(f"  标普500 = ¥{assets['sp500']['value_cny']:,.2f}")
     if assets.get("ndx100"):
         print(f"  纳指100 = ¥{assets['ndx100']['value_cny']:,.2f}")

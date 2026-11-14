@@ -20,7 +20,6 @@ from .fmt import money
 
 # 资产顺序固定，避免 dict 顺序变化导致页面上下跳
 ASSET_LABELS = {
-    "btc": "比特币",
     "sp500": "标普500基金",
     "ndx100": "纳指100基金",
     "stablecoin": "稳定币",
@@ -184,7 +183,7 @@ def asset_rows(assets: dict, cfg) -> list[tuple[str, float, float]]:
         if not isinstance(item, dict) or item.get("value_cny") is None:
             continue
         value = float(item["value_cny"])
-        # 清仓后主界面不列零市值资产；底层 assets 仍保留该块，口径不变。
+        # 零市值资产不列入主界面表格。
         if value <= 0:
             continue
         share = value / total * 100 if total else 0.0
@@ -300,7 +299,6 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
         <tr><th>累计盈亏</th><td class="num {tone}">{money(profit, cfg)}</td></tr>
         <tr><th>累计收益率</th><td class="num {tone}">{rate:+.2f}%</td></tr>
       </table>
-      <p class="note">比特币本金按持仓备注的均价推算，用当前汇率折算，和真实买入成本有偏差。</p>
     """
 
     # ---- 月开销
@@ -422,11 +420,10 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
 
   <footer>
     <p>数据源：<a href="https://github.com/{cfg.sources.sp500.repo}">基金持仓</a>、
-      东方财富（纳指100 净值）、
-      <a href="https://github.com/{cfg.sources.btc.repo}">比特币持仓</a>（已清仓）。
+      东方财富（纳指100 净值）。
       稳定币与人民币活钱由本人手动报数，汇率来自 open.er-api.com。</p>
     <p>个人资产记录，不构成任何投资建议。完整说明见
-      <a href="https://github.com/{cfg.sources.btc.repo.rsplit('/', 1)[0]}/FIRE-Progress">GitHub 仓库</a>。</p>
+      <a href="https://github.com/{cfg.sources.sp500.repo.rsplit('/', 1)[0]}/FIRE-Progress">GitHub 仓库</a>。</p>
   </footer>
 </main>
 </body>

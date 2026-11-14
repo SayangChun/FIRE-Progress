@@ -3,7 +3,7 @@
 页面是给别人看的，错了不会有人报错——所以钉住这几条：
 
   1. 资产是**遍历出来的**，不是硬编码两项。2026-10-27 加了纳指100，
-     如果页面只画比特币和标普500，数字加起来会不等于合计，看着像 bug。
+     如果页面只画基金，数字加起来会不等于合计，看着像 bug。
   2. `privacy.mode: masked` 时页面上不能出现任何金额。
   3. 不能漏出 Python 的 None / nan ——那说明某个字段缺了，取数没兜底。
   4. 进度条宽度必须和 progress_pct 一致，否则页面自相矛盾。
@@ -35,7 +35,7 @@ def fake_data() -> dict:
             "total_cny": 20125.39,
             "progress_pct": 11.1274,
             "remaining_cny": -160711.82,
-            "btc": {"value_cny": 14780.99, "snapshot_date": "2026-10-25", "stale_days": 3},
+            "stablecoin": {"value_cny": 14780.99, "usd_cny": 6.6849},
             "sp500": {"value_cny": 873.12, "latest_nav_date": "2026-10-26"},
             "ndx100": {"value_cny": 4471.28},
         },
@@ -52,7 +52,6 @@ def fake_data() -> dict:
         "projection": {
             "days_to_target": 1476,
             "eta": "2030-11-13",
-            "btc_cny_per_day": 66.14,
             "sp500_cny_per_day": 20.0,
             "daily_cny": 86.14,
             "monthly_cny": 2584.2,
@@ -72,7 +71,7 @@ def fake_data() -> dict:
                  "items": [{"label": "房租", "monthly": 500.0}]},
             ],
         },
-        "price": {"btc_source": "binance", "fx_source": "open.er-api.com"},
+        "price": {"fx_source": "open.er-api.com"},
     }
 
 
@@ -86,8 +85,7 @@ def make_cfg(masked: bool = False) -> FakeCfg:
     return FakeCfg({
         "fire": {"currency_symbol": "¥"},
         "privacy": {"mode": "masked" if masked else "full"},
-        "sources": {"btc": {"repo": "SayangChun/0.1BTC"},
-                    "sp500": {"repo": "SayangChun/sp500-dca"}},
+        "sources": {"sp500": {"repo": "SayangChun/sp500-dca"}},
     })
 
 
@@ -99,7 +97,7 @@ def render(masked: bool = False) -> str:
 html = render()
 
 # 1. 三种资产都在，且合计与分项对得上
-for label in ("比特币", "标普500基金", "纳指100基金"):
+for label in ("稳定币", "标普500基金", "纳指100基金"):
     assert label in html, f"页面缺资产：{label}"
 assert "¥20,125.39" in html, "合计没出现"
 assert html.count("¥14,780.99") >= 1 and html.count("¥4,471.28") >= 1

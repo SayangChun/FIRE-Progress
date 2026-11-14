@@ -42,8 +42,7 @@ def ok(label: str, cond: bool, extra: str = "") -> None:
         failures.append(label)
 
 
-PRICE = {"btc_cny": 550_000.0, "usd_cny": 6.7, "btc_usdt": 82_000.0}
-BTC = {"available": True, "total_btc": 0.02, "cost_basis_usd": 1300.0, "positions": [], "warnings": []}
+PRICE = {"usd_cny": 6.7}
 SP500 = {
     "available": True,
     "market_value": 600.0,
@@ -52,15 +51,18 @@ SP500 = {
     "funds": [],
     "warnings": [],
 }
+STABLE = {"value_cny": 2000.0}
 
 print("1. 两段式不改变 FIRE 目标")
-data = firemod.compute(cfg, price=PRICE, btc=BTC, sp500=SP500, history=[])
+data = firemod.compute(cfg, price=PRICE, sp500=SP500, stablecoin=STABLE, history=[])
 ok("目标仍等于（月开销 − 兼职净收入）× 12 ÷ 提取率", abs(data["fire"]["target_cny"] - TARGET) < 0.01)
 ok("two_phase 已生成", data.get("two_phase") is not None)
 
 # 换一个完全不同的资产规模，目标必须一动不动
 big = firemod.compute(
-    cfg, price=PRICE, btc={**BTC, "total_btc": 2.0}, sp500=SP500, history=[]
+    cfg, price=PRICE,
+    sp500={**SP500, "market_value": 60_000.0, "invested": 60_000.0},
+    stablecoin=STABLE, history=[]
 )
 ok(
     "资产扩大 100 倍，目标不变",
@@ -96,10 +98,10 @@ ok("本金越大临界值越低", firemod.critical_rate(8856.0, 200_000.0) < cr)
 
 print("\n5. 资产占比只做展示")
 alloc = data["allocation"]
-ok("占比之和为 1", abs(alloc["btc_pct"] + alloc["sp500_pct"] - 1.0) < 1e-6)
+ok("占比之和为 1", abs(sum(alloc[k] for k in ("sp500_pct", "ndx100_pct", "stablecoin_pct", "cash_pct")) - 1.0) < 1e-6)
 ok(
     "标普500 占比 = 市值 ÷ 总市值",
-    abs(alloc["sp500_pct"] - 600.0 / (0.02 * 550_000.0 + 600.0)) < 1e-4,
+    abs(alloc["sp500_pct"] - 600.0 / 2600.0) < 1e-4,
     f'{alloc["sp500_pct"]}',
 )
 ok("当前远超目标区间，标记为不在区间", alloc["in_range"] is False)
@@ -109,7 +111,7 @@ import copy  # noqa: E402
 
 off = cfgmod.Config(copy.deepcopy(dict(cfg)))
 off["asset_allocation"]["enabled"] = False
-off_data = firemod.compute(off, price=PRICE, btc=BTC, sp500=SP500, history=[])
+off_data = firemod.compute(off, price=PRICE, sp500=SP500, stablecoin=STABLE, history=[])
 ok("关闭 asset_allocation -> None", off_data["allocation"] is None)
 ok("关闭它不影响目标", abs(off_data["fire"]["target_cny"] - TARGET) < 0.01)
 

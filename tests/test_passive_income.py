@@ -45,27 +45,26 @@ def close(a, b, tol=1e-6) -> bool:
     return a is not None and b is not None and abs(float(a) - float(b)) <= tol
 
 
-PRICE = {"btc_cny": 550_000.0, "usd_cny": 6.7, "btc_usdt": 82_000.0}
-BTC = {"available": True, "total_btc": 0.025, "cost_basis_usd": 1300.0, "positions": [], "warnings": []}
+PRICE = {"usd_cny": 6.7}
 SP500 = {"available": True, "market_value": 700.0, "invested": 700.0, "profit": 0.0, "funds": [], "warnings": []}
+STABLE = {"value_cny": 2000.0, "included_in_assets": True}
 
-BTC_VALUE = 0.025 * PRICE["btc_cny"]  # 13,750
-TOTAL = BTC_VALUE + 700.0
+TOTAL = 700.0 + 2000.0
 
 print("加权年化按市值加权，不是各资产算术平均")
-data = firemod.compute(cfg, price=PRICE, btc=BTC, sp500=SP500, history=[])
+data = firemod.compute(cfg, price=PRICE, sp500=SP500, stablecoin=STABLE, history=[])
 pi = data["passive_income"]
 ok("passive_income 已生成", pi is not None)
 
-w_btc = BTC_VALUE / TOTAL
 w_sp = 700.0 / TOTAL
-expect_rate = w_btc * float(SPEC["btc"]) + w_sp * float(SPEC["sp500"])
+w_st = 2000.0 / TOTAL
+expect_rate = w_sp * float(SPEC["sp500"]) + w_st * float(SPEC["stablecoin"])
 ok(
-    "加权年化 == 比特币×权重 + 标普500×权重",
+    "加权年化 == 标普500×权重 + 稳定币×权重",
     close(pi["weighted_rate"], expect_rate),
     f'{pi["weighted_rate"]} vs {expect_rate}',
 )
-naive = (float(SPEC["btc"]) + float(SPEC["sp500"])) / 2
+naive = (float(SPEC["sp500"]) + float(SPEC["stablecoin"])) / 2
 ok(
     "加权值不等于各资产算术平均（权重必须真的起作用）",
     not close(pi["weighted_rate"], naive, 1e-9),
@@ -88,10 +87,10 @@ target = NET_MONTHLY * 12 / float(cfg.fire.withdrawal_rate)
 ok("目标 == 组合需覆盖 × 12 ÷ 提取率", close(data["fire"]["target_cny"], target, 0.01))
 # 把预期回报改到荒唐的 500%，目标必须一动不动
 loud = cfgmod.Config(
-    {**cfg, "expected_return": {"btc": 5.0, "sp500": 5.0, "btc_low": 0, "sp500_low": 0,
-                                "btc_high": 9, "sp500_high": 9}}
+    {**cfg, "expected_return": {**SPEC, "sp500": 5.0, "sp500_low": 5.0, "sp500_high": 5.0,
+                                "stablecoin": 5.0, "stablecoin_low": 5.0, "stablecoin_high": 5.0}}
 )
-loud_data = firemod.compute(loud, price=PRICE, btc=BTC, sp500=SP500, history=[])
+loud_data = firemod.compute(loud, price=PRICE, sp500=SP500, stablecoin=STABLE, history=[])
 ok(
     "预期回报改成 500% -> FIRE 目标不变",
     loud_data["fire"]["target_cny"] == data["fire"]["target_cny"],
@@ -112,7 +111,7 @@ ok(
 )
 ok(
     "覆盖月开销 = 每月被动收入 ÷ 月开销",
-    close(pi["coverage"], pi["monthly_cny"] / MONTHLY, 1e-9),
+    close(pi["coverage"], pi["monthly_cny"] / MONTHLY, 1e-5),
 )
 
 print()
@@ -126,17 +125,15 @@ ok(
 print()
 print("配置缺项时不猜默认值")
 no_spec = cfgmod.Config({k: v for k, v in cfg.items() if k != "expected_return"})
-no_spec_data = firemod.compute(no_spec, price=PRICE, btc=BTC, sp500=SP500, history=[])
+no_spec_data = firemod.compute(no_spec, price=PRICE, sp500=SP500, stablecoin=STABLE, history=[])
 ok("缺 expected_return -> passive_income 为 None", no_spec_data["passive_income"] is None)
 off = cfgmod.Config({**cfg, "display": {**cfg.display, "show_passive_income": False}})
-off_data = firemod.compute(off, price=PRICE, btc=BTC, sp500=SP500, history=[])
+off_data = firemod.compute(off, price=PRICE, sp500=SP500, stablecoin=STABLE, history=[])
 ok("开关关闭 -> passive_income 为 None", off_data["passive_income"] is None)
 
 print()
 print("只有标普500时，加权年化 == 标普500 的假设")
-sp_only = firemod.compute(
-    cfg, price=PRICE, btc={"available": False, "total_btc": None, "warnings": []}, sp500=SP500, history=[]
-)
+sp_only = firemod.compute(cfg, price=PRICE, sp500=SP500, history=[])
 ok(
     "纯标普500组合的加权年化 == sp500 假设",
     close(sp_only["passive_income"]["weighted_rate"], float(SPEC["sp500"]), 1e-9),

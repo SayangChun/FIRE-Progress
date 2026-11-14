@@ -1527,4 +1527,33 @@ CI 的 `verify` 仍是 8 支回归脚本，本次未新增测试文件（新断�
 
 ---
 
+## 2026-11-14：移除项目中全部比特币相关内容
+
+本人决定：项目里不再保留任何与比特币相关的内容。该资产此前已清仓（持仓 0、停止定投、行情源已停用），
+所以这次是把残留的展示文案、数据源、计算槽位与历史字段一并清掉，**不改变任何当前数值、口径与门槛**。
+
+### 清除范围
+
+- 删除文件：`scripts/sources/btc_repo.py`、`tests/fixtures/holdings.csv`。
+- 代码：`scripts/fire.py`（`compute()` / `passive_income()` / `allocation_split()` / `projection()` 的 BTC 参数与分支）、
+  `scripts/update.py`（抓取、沿用上次值、快照留档、告警、打印）、`scripts/render.py`、`scripts/blocks.py`、
+  `scripts/site.py`、`scripts/sources/price.py`（改为纯汇率模块）、`scripts/sources/ndx100.py`（注释）。
+- 配置：`config.yaml` 的 `sources.btc`、`price.btc_sources`、`expected_return.btc*`、`contribution.btc_usdt_per_day`、
+  `display.capital_change_note` 及相关注释。
+- 数据：`data/latest.json`（含嵌套的 `fulltime.projection`）、`data/history.json` 51 条逐日记录、
+  `tests/fixtures/price.json` 中的 BTC 字段；**只删字段，不动数值**。
+- 文档与页面：`README.md`（手写段 + 自动区块模板）、`docs/DESIGN.md`、`docs/FIRE-LIFE-PLAN.md`、
+  `docs/FIRE-ROADMAP.md`、`docs/FIRE-SPENDING-CHECKLIST.md`、`site/index.html`、`reports/curve.svg`、`site/curve.svg`。
+- 测试：`tests/` 下含 BTC 的回归用例同步重写。
+
+### 边界
+
+- 历史完成度曲线仍按 `data/history.json` 里的**原值**连线，不回填、不重算；删除的只是已不再使用的 BTC 字段。
+- 分子口径变为标普500基金 + 纳指100基金 + 稳定币 + 人民币活钱四项。由于该资产早已清仓、市值恒为 0，
+  `total_cny`、三个门槛、完成度、被动收入与外推结果**全部不变**。
+- 本文件是唯一保留相关历史叙述的位置；上述各文件不再出现该字样，也不在原处留删除说明。
+- 离线校验：用现有 `data/latest.json` + `data/history.json` 重渲染 README 与进度曲线，结果均与当前文件逐字一致；静态页重新生成；8 支回归测试全部通过。
+
+---
+
 *整理于 2026-11-06：把散落在 6 份文档 + config.yaml 注释 + 渲染层文案中的更新记录集中到本文件。*

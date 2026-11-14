@@ -20,34 +20,17 @@ def _warnings_block(warnings: list[str]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _freshness(btc: dict, sp500: dict, stablecoin: dict | None = None) -> str:
+def _freshness(sp500: dict, stablecoin: dict | None = None) -> str:
     """数据新鲜度：明确告诉读者「持仓和稳定币都不是实时数据」。
 
-    清仓后不再显示比特币快照——主界面不列已离场的资产；
     稳定币改由下面的「稳定币明细」自己标快照日期。
     """
     parts = []
-    if btc.get("qty") and btc.get("snapshot_date"):
-        stale = btc.get("stale_days")
-        age = f"{stale} 天前" if isinstance(stale, int) and stale >= 0 else "—"
-        parts.append(f"**比特币快照**：{btc['snapshot_date']}（{age}）")
     if sp500.get("latest_nav_date"):
         parts.append(f"**基金净值日**：{sp500['latest_nav_date']}")
     if stablecoin and stablecoin.get("snapshot_date"):
         parts.append(f"**稳定币快照**：{stablecoin['snapshot_date']}（手动报数）")
     return "　|　".join(parts)
-
-
-def _positions_table(positions: list[dict], cfg) -> str:
-    if not positions:
-        return "_（未读到比特币持仓）_\n"
-    masked = cfg.privacy.get("mode") == "masked"
-    rows = ["| 账户 | 数量 (BTC) | 均价 (USD) |", "| --- | ---: | ---: |"]
-    for pos in positions:
-        qty = "已隐藏" if masked else f"{pos['amount']:.8f}".rstrip("0").rstrip(".")
-        avg = f"${pos['avg_usd']:,.2f}" if pos.get("avg_usd") else "—"
-        rows.append(f"| {pos['venue']} | {qty} | {avg} |")
-    return "\n".join(rows) + "\n"
 
 
 def _fulltime_block(data: dict, cfg, key: str = "fulltime", primary: bool = True) -> str:

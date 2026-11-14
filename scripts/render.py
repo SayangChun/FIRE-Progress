@@ -10,7 +10,6 @@ from .blocks import (
     _fulltime_block,
     _life_plan_block,
     _passive_income_block,
-    _positions_table,
     _stablecoin_block,
     _warnings_block,
 )
@@ -35,7 +34,6 @@ def _horizon(days) -> str:
 def render_block(data: dict, cfg, history: list[dict]) -> str:
     fire = data["fire"]
     assets = data["assets"]
-    btc = assets["btc"]
     sp500 = assets["sp500"]
     ndx100 = assets.get("ndx100") or {}
     pct = assets["progress_pct"]
@@ -47,7 +45,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
 
     out.append(f"**更新时间**：{data['as_of'].replace('T', ' ')}")
     out.append("")
-    freshness = _freshness(btc, sp500, assets.get("stablecoin"))
+    freshness = _freshness(sp500, assets.get("stablecoin"))
     if freshness:
         out.append(freshness)
         out.append("")
@@ -177,17 +175,12 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append("| 资产 | 市值 | 占比 |")
     out.append("| --- | ---: | ---: |")
     total = assets["total_cny"] or 1
-    btc_share = btc["value_cny"] / total * 100 if assets["total_cny"] else 0.0
     sp_share = sp500["value_cny"] / total * 100 if assets["total_cny"] else 0.0
     ndx_share = ndx100.get("value_cny", 0.0) / total * 100 if assets["total_cny"] else 0.0
     stable = assets.get("stablecoin") or {}
     cash = assets.get("cash_cny") or {}
     stable_share = (stable.get("value_cny") or 0.0) / total * 100 if assets["total_cny"] else 0.0
     cash_share = (cash.get("value_cny") or 0.0) / total * 100 if assets["total_cny"] else 0.0
-    # 清仓后主界面不再列出比特币这一行（零值行没有信息量，还容易让人以为忘了清）。
-    # ⚠️ 只是展示层隐藏：assets.btc 仍是分子里的一块，口径和历史曲线都不变。
-    if btc["qty"]:
-        out.append(f"| 比特币 | {money(btc['value_cny'], cfg)} | {btc_share:.1f}% |")
     out.append(f"| 标普500基金 | {money(sp500['value_cny'], cfg)} | {sp_share:.1f}% |")
     if ndx100.get("value_cny"):
         out.append(f"| 纳指100基金 | {money(ndx100['value_cny'], cfg)} | {ndx_share:.1f}% |")
@@ -203,20 +196,6 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         "所以汇率波动会真实改变完成度；两项现金的明细见下方折叠块。"
     )
     out.append("")
-
-    if not masked and btc["qty"]:
-        out.append(
-            f"比特币计价：**{btc['qty']:.8f} BTC** × {money(btc['price_cny'], cfg)} = "
-            f"{money(btc['value_cny'], cfg)}"
-        )
-        out.append("")
-    if btc["qty"] and btc["positions"]:
-        out.append("<details>")
-        out.append(f"<summary>比特币持仓明细（快照 {btc.get('snapshot_date') or '—'}，手动更新）</summary>")
-        out.append("")
-        out.append(_positions_table(btc["positions"], cfg))
-        out.append("</details>")
-        out.append("")
 
     if sp500.get("funds"):
         out.append("<details>")
@@ -272,13 +251,6 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         rate_txt = f"{profit_total / basis_total * 100:+.2f}%" if basis_total else "—"
         out.append(f"| **累计收益率** | **{rate_txt}** |")
         out.append("")
-        if basis.get("btc_estimated"):
-            out.append(
-                "> 比特币本金按持仓备注的「均价 $xx/BTC」推算，用当前汇率折成人民币，"
-                "和真实买入成本有偏差；标普500本金取 sp500-dca 的累计投入。"
-            )
-            out.append("")
-
         curve_pts = sum(1 for r in history if r.get("basis_cny") is not None)
         if cfg.display.get("show_profit_curve", True) and curve_pts >= 2:
             first_day = next(r["date"] for r in history if r.get("basis_cny") is not None)
@@ -398,8 +370,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         f"[{cfg.sources.sp500.repo}](https://github.com/{cfg.sources.sp500.repo})（标普500 持仓）、"
         f"东方财富（纳指100 净值，份额固定）· "
         f"稳定币与人民币活钱由本人手动报数 · "
-        f"汇率：{data['price']['fx_source']}"
-        f"{' · 行情：' + data['price']['btc_source'] if data['price'].get('btc_usdt') else ''}</sub>"
+        f"汇率：{data['price']['fx_source']}</sub>"
     )
     out.append("")
     out.append(END_MARK)

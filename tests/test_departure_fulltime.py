@@ -187,10 +187,9 @@ with contextlib.redirect_stdout(io.StringIO()):
     import test_fire_core as T  # noqa: E402
 
 PRICE = dict(T.PRICE)
-PRICE.setdefault("btc_source", "binance")
 PRICE.setdefault("fx_source", "er-api")
 data = fire_mod.compute(
-    cfg, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[]
+    cfg, price=PRICE, sp500=T.SP500, ndx100=T.NDX, history=[]
 )
 ok("compute 带 departure", isinstance(data.get("departure"), dict))
 ok("compute 带 fulltime", isinstance(data.get("fulltime"), dict))
@@ -199,7 +198,7 @@ print("\n主进度开关（display.primary_progress）")
 # 主进度只改展示位排序与标记，三个门槛的金额和完成度一律不变。
 for key in ("departure", "coffee_fire", "full_fire"):
     alt_cfg = variant(**{"display.primary_progress": key})
-    alt = fire_mod.compute(alt_cfg, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
+    alt = fire_mod.compute(alt_cfg, price=PRICE, sp500=T.SP500, ndx100=T.NDX, history=[])
     items = (alt.get("goals") or {}).get("items") or []
     ok(
         f"主进度设为 {key} 时排在第一位",
@@ -216,7 +215,7 @@ for key in ("departure", "coffee_fire", "full_fire"):
     )
 bad_cfg = variant(**{"display.primary_progress": "not_a_goal"})
 try:
-    fire_mod.compute(bad_cfg, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
+    fire_mod.compute(bad_cfg, price=PRICE, sp500=T.SP500, ndx100=T.NDX, history=[])
     ok("主进度写错名字必须报错，不静默回落", False, "没有报错")
 except ValueError:
     ok("主进度写错名字必须报错，不静默回落", True)
@@ -240,7 +239,7 @@ rb = variant(**{
     "fire.fulltime.room_and_board_covered": True,
     "fire.fulltime.covered_keys": covered,
 })
-data_rb = fire_mod.compute(rb, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[])
+data_rb = fire_mod.compute(rb, price=PRICE, sp500=T.SP500, ndx100=T.NDX, history=[])
 ok(
     "打开包吃住后盈余回到 ¥2,183.33（仅作反向验证，非当前方案）",
     abs(data_rb["fulltime"]["surplus_monthly_cny"] - 2183.33) < 1.0,
@@ -337,7 +336,7 @@ print("\n档位切换：月开销随 profile，目标随 target_profile")
 cfg_normal = cfgmod.load()
 cfg_normal["life_plan"]["profile"] = "mudanjiang-rent-normal"
 data_normal = fire_mod.compute(
-    cfg_normal, price=PRICE, btc=T.BTC, sp500=T.SP500, ndx100=T.NDX, history=[]
+    cfg_normal, price=PRICE, sp500=T.SP500, ndx100=T.NDX, history=[]
 )
 tgt_normal = data_normal["fire"]["target_cny"]
 ok(
