@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-11-14T09:37:39+08:00",
-  "as_of_date": "2026-11-14",
+  "as_of": "2026-11-15T03:45:47+08:00",
+  "as_of_date": "2026-11-15",
   "fire": {
     "monthly_expense": 1371.0,
     "net_monthly_expense": 648.0,
@@ -298,14 +298,14 @@
       "invested_cny": 4177.22,
       "profit_cny": 146.65,
       "return_rate": 0.035107080785785616,
-      "latest_nav_date": "2026-11-12",
+      "latest_nav_date": "2026-11-11",
       "funds": [
         {
           "code": "018043",
           "short_name": "天弘纳斯达克100指数发起(QDII)A",
           "shares": 1330.28,
           "latest_nav": 1.9377,
-          "nav_date": "2026-11-12",
+          "nav_date": "2026-11-11",
           "market_value": 2577.68,
           "invested": 2317.08,
           "profit": 260.6,
@@ -316,7 +316,7 @@
           "short_name": "国泰纳斯达克100指数",
           "shares": 287.06,
           "latest_nav": 4.242,
-          "nav_date": "2026-11-12",
+          "nav_date": "2026-11-11",
           "market_value": 1217.71,
           "invested": 1300.01,
           "profit": -82.3,
@@ -327,7 +327,7 @@
           "short_name": "华安纳斯达克100ETF联接(QDII)A",
           "shares": 68.0,
           "latest_nav": 7.7718,
-          "nav_date": "2026-11-12",
+          "nav_date": "2026-11-11",
           "market_value": 528.48,
           "invested": 560.13,
           "profit": -31.65,
@@ -373,7 +373,7 @@
   "price": {
     "usd_cny": 6.684938,
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-11-14T09:37:36+08:00"
+    "fetched_at": "2026-11-14T19:45:46+00:00"
   },
   "passive_income": {
     "hours_per_year": 8760,
@@ -457,21 +457,21 @@
       "low": {
         "rate": 0.0088,
         "days": 6937,
-        "eta": "2045-11-11"
+        "eta": "2045-11-12"
       },
       "base": {
         "rate": 0.0701,
         "days": 4175,
-        "eta": "2038-04-20"
+        "eta": "2038-04-21"
       },
       "high": {
         "rate": 0.0778,
         "days": 3992,
-        "eta": "2037-10-19"
+        "eta": "2037-10-20"
       }
     },
     "days_to_target": 4175,
-    "eta": "2038-04-20",
+    "eta": "2038-04-21",
     "reason": null
   },
   "departure": {
@@ -584,21 +584,21 @@
         "low": {
           "rate": 0.0088,
           "days": 2307,
-          "eta": "2033-03-09"
+          "eta": "2033-03-10"
         },
         "base": {
           "rate": 0.0701,
           "days": 1868,
-          "eta": "2031-12-26"
+          "eta": "2031-12-27"
         },
         "high": {
           "rate": 0.0778,
           "days": 1828,
-          "eta": "2031-11-16"
+          "eta": "2031-11-17"
         }
       },
       "days_to_target": 1868,
-      "eta": "2031-12-26",
+      "eta": "2031-12-27",
       "reason": null
     }
   },
@@ -607,5 +607,5 @@
     "sp500": true
   },
   "warnings": [],
-  "history_days": 51
+  "history_days": 52
 }
