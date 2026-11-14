@@ -552,7 +552,7 @@ def compute(
     # ⚠️ 不工作门槛按 target_profile 算（默认 = 当前 profile，见 lifeplan.target_profile_name）。
     # 与 net_monthly 分开，避免「临时试算别的档位」把进度条分母一起拖走：
     # 切到常规档（mudanjiang-rent-normal）时，月开销变 ¥2,754 用于门槛，
-    # 但 target 仍按极简档 ¥1,461 算 ¥205,953.49。
+    # 但 target 仍按极简档 ¥1,371 算 ¥180,837.21。
     target_net = (plan_summary or {}).get("target_net_monthly_expense", net_monthly)
     target = target_cny(target_net, rate)
     # 完全 FIRE 门槛（2026-11-05）：完全不工作，不扣兼职收入。
@@ -586,7 +586,7 @@ def compute(
     remaining = max(target - total, 0.0)
 
     # --- 出发门槛（2026-10-31 新增）---
-    # 全职方案下，「能不能走」由这笔钱决定，而不是 ¥205,953.49。
+    # 全职方案下，「能不能走」由这笔钱决定，而不是 ¥180,837.21。
     # ⚠️ 它不改 target_cny，只是并行的一条线：两条线回答两个不同问题。
     gate = lifeplan_mod.departure_gate(cfg)
     departure = None
@@ -620,7 +620,7 @@ def compute(
         _spec = ((cfg.get("fire") or {}).get(_key)) or {}
         # 阶段 A 个人开销按「这个岗位所在城市」的 profile 算，不是按当前激活 profile。
         # 否则同一个岗位的盈余会随「你把 profile 切到哪」而变，看板上会莫名跳动。
-        # 2026-11-05 起不包吃住，走的正是 elif 分支：完整月开销 ¥1,461。
+        # 2026-11-05 起不包吃住，走的正是 elif 分支：完整月开销 ¥1,371。
         _spec_profile = _spec.get("life_plan_profile")
         if _spec.get("room_and_board_covered"):
             stage_a = lifeplan_mod.monthly_excluding(
