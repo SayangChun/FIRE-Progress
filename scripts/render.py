@@ -199,7 +199,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append("")
     out.append(
         "> 计入分子的是上面这几项：权益基金、稳定币与人民币活钱。"
-        "比特币已清仓（持仓 0），不再列出。稳定币按实时 USD/CNY 折算，"
+        "稳定币按实时 USD/CNY 折算，"
         "所以汇率波动会真实改变完成度；两项现金的明细见下方折叠块。"
     )
     out.append("")
@@ -297,7 +297,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             )
             out.append(">")
             out.append(
-                "> ⚠️ 资产离开计入范围时（如清仓），市值和本金会**同时**退出统计，"
+                "> ⚠️ 资产离开计入范围时，市值和本金会**同时**退出统计，"
                 "上面板出现台阶不代表亏损，只是口径边界。稳定币与活钱按面值计入本金，"
                 "不产生浮盈浮亏；稳定币折算值还会随汇率小幅起伏。"
             )
@@ -308,8 +308,8 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
             )
             out.append(">")
             out.append(
-                f"> 起点 {first_day}。早期数据由两个持仓仓库的历史文件重建，"
-                "当时的比特币本金按当时汇率折算，绝对值和真实本金有误差，趋势可信；"
+                f"> 起点 {first_day}。早期数据由持仓仓库的历史文件重建，"
+                "绝对值和真实本金可能有误差，趋势可信；"
                 "之后每天由 Actions 记录。"
             )
             out.append("")
@@ -396,8 +396,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     out.append(
         f"<sub>数据源："
         f"[{cfg.sources.sp500.repo}](https://github.com/{cfg.sources.sp500.repo})（标普500 持仓）、"
-        f"东方财富（纳指100 净值，份额固定）、"
-        f"[{cfg.sources.btc.repo}](https://github.com/{cfg.sources.btc.repo})（比特币持仓，已清仓）· "
+        f"东方财富（纳指100 净值，份额固定）· "
         f"稳定币与人民币活钱由本人手动报数 · "
         f"汇率：{data['price']['fx_source']}"
         f"{' · 行情：' + data['price']['btc_source'] if data['price'].get('btc_usdt') else ''}</sub>"
@@ -439,8 +438,8 @@ def default_readme(
         )
     return f"""# FIRE-Progress
 
-> 我的 FIRE 进度看板。计入分子的资产：标普500基金、纳指100基金、稳定币、人民币活钱
-> （比特币已清仓）。基金持仓来自两个公开仓库 + 东方财富的公开净值接口，
+> 我的 FIRE 进度看板。计入分子的资产：标普500基金、纳指100基金、稳定币、人民币活钱。
+> 标普500 持仓来自公开仓库，纳指100 净值来自东方财富的公开接口，
 > 稳定币与活钱由本人手动报数，稳定币按实时汇率折算。
 > 由 GitHub Actions 每小时更新，不需要任何密钥。
 
@@ -469,7 +468,6 @@ def default_readme(
 - ✅ 纳指100 场外基金（份额写在 `config.yaml`）
 - ✅ 稳定币（USDT / USDC，按实时 USD/CNY 折算）
 - ✅ 人民币活钱（余额宝，手动报数）
-- ✅ [0.1BTC](https://github.com/{cfg.sources.btc.repo}) 仓库中的比特币持仓（已清仓，当前为 0）
 - ❌ 其他一切未列出的资产
 
 纳入标准是「属于这个资产池」，不是「能不能变现」。上面几项都计入分子，
