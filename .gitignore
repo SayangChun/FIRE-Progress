@@ -18,7 +18,9 @@ venv/
 Thumbs.db
 
 # AI 助手的工作区数据（本地记忆等），不属于项目内容
+# 含内部工作日志、未公开判断，绝不推到公开仓库
 .workbuddy-ai/
+.workbuddy/
 
 # 本地临时产物
 /tmp/
