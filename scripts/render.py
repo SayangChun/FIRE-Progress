@@ -13,7 +13,7 @@ from .blocks import (
     _stablecoin_block,
     _warnings_block,
 )
-from .charts import curve_svg, dual_progress_svg, progress_svg, profit_svg
+from .charts import curve_svg, dual_progress_svg, progress_svg
 from .fmt import money
 
 START_MARK = "<!-- FIRE:START -->"
@@ -54,7 +54,6 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     # 它同时回答「现在到哪了」和「是怎么走到这里的」，右端还标着当前百分比，
     # 是这一页信息量最大的一张图，值得第一眼就看到。
     # 完成度条只回答「现在到哪了」，退到它后面当补充。
-    # 收益曲线由 display.show_profit_curve 控制，当前关闭。
     if cfg.display.get("show_curve") and history:
         out.append("### 进度曲线")
         out.append("")
@@ -254,40 +253,6 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
         rate_txt = f"{profit_total / basis_total * 100:+.2f}%" if basis_total else "—"
         out.append(f"| **累计收益率** | **{rate_txt}** |")
         out.append("")
-        curve_pts = sum(1 for r in history if r.get("basis_cny") is not None)
-        if cfg.display.get("show_profit_curve", True) and curve_pts >= 2:
-            first_day = next(r["date"] for r in history if r.get("basis_cny") is not None)
-            out.append("### 收益曲线")
-            out.append("")
-            out.append("![FIRE 收益曲线](reports/profit.svg)")
-            out.append("")
-            out.append(
-                "> 上面板：累计投入（虚线）和市值（实线），缺口就是盈亏。"
-                "下面板：累计收益率，纵轴含 0。"
-            )
-            out.append(">")
-            out.append(
-                "> 加仓会让收益率下降，因为本金变大、盈亏不变。所以收益率掉了不一定是亏，"
-                "可能只是又投了一笔。上面板能看出本金哪天跳升。"
-            )
-            out.append(">")
-            out.append(
-                "> ⚠️ 资产离开计入范围时，市值和本金会**同时**退出统计，"
-                "上面板出现台阶不代表亏损，只是口径边界。稳定币与活钱按面值计入本金，"
-                "不产生浮盈浮亏；稳定币折算值还会随汇率小幅起伏。"
-            )
-            out.append(">")
-            out.append(
-                "> 上面板纵轴不从 0 起，否则缺口会被压成一条线，斜率也不代表涨跌幅。"
-                "下面板含 0，正负可以直接读。"
-            )
-            out.append(">")
-            out.append(
-                f"> 起点 {first_day}。早期数据由持仓仓库的历史文件重建，"
-                "绝对值和真实本金可能有误差，趋势可信；"
-                "之后每天由 Actions 记录。"
-            )
-            out.append("")
 
     # 被动收入与外推都是「往前看」的内容，放在一起。
     # 被动收入在**前**：它是当前持仓的直接推论，比外推更硬；

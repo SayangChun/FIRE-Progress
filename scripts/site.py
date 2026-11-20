@@ -377,15 +377,6 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
         else ""
     )
 
-    # 收益曲线跟随 display.show_profit_curve（与 README 同一开关）
-    show_profit = (cfg.get("display") or {}).get("show_profit_curve", True)
-    profit_html = ""
-    if show_profit:
-        profit_html = (
-            '<h2>收益曲线</h2>\n  '
-            + fig("profit.svg", "FIRE 收益曲线", "上面板是投入和市值，下面板是收益率。加仓会让收益率下降，因为本金变大、盈亏不变。")
-        )
-
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -422,7 +413,6 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
 {cash_html}
 {basis_html}
 {plan_html}
-{profit_html}
 {passive_html}
 {proj_html}
 
@@ -451,11 +441,8 @@ def main() -> None:
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # 图表直接复用 update.py 生成的 SVG（收益曲线随开关停用）
-    svgs = ["curve.svg", "progress.svg"]
-    if (cfg.get("display") or {}).get("show_profit_curve", True):
-        svgs.append("profit.svg")
-    for svg in svgs:
+    # 图表直接复用 update.py 生成的 SVG
+    for svg in ("curve.svg", "progress.svg"):
         src = cfgmod.REPORTS_DIR / svg
         if src.exists():
             shutil.copy2(src, out_dir / svg)

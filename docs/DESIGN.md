@@ -274,7 +274,7 @@ config.yaml/life_plan ──► Σ items ──► 月开销 1750 ──► × 1
 1. **一律折算成人民币**。稳定币按「数量 × USD/CNY」换算（USDT / USDC 按 1:1 锚定美元），
    未计脱锚与买卖价差；人民币活钱按面值。
 2. **进度历史自己存**。`data/history.json` 按天去重保存
-   `{date, total_cny, progress_pct, stablecoin_cny, cash_cny, sp500_cny, ndx100_cny, target_cny, basis_cny, profit_cny, fx_usd_cny}`，
+   `{date, total_cny, progress_pct, stablecoin_cny, cash_cny, sp500_cny, ndx100_cny, target_cny, full_fire_cny, departure_cny, fx_usd_cny}`，
    曲线与外推都基于它。**每天的分项必须当天记**——稳定币要当天汇率、纳指要当天净值，
    事后无法精确重建。
    不能直接复用 `sp500-dca` 的 timeline，那是纯基金口径，缺了现金与其它资产。
@@ -408,7 +408,7 @@ README 中 `<!-- FIRE:START -->` 与 `<!-- FIRE:END -->` 之间由脚本重写�
    读者不必相信一个数字，可以直接看它是怎么加出来的
 7. **资产构成表**：各项资产的市值与占比
 8. **持仓明细**（折叠）：基金列出市值、投入、份额、净值；稳定币与活钱列出数量与金额
-9. **投入与盈亏**：累计投入、当前市值、累计盈亏与累计收益率（收益曲线 SVG 当前不展示）
+9. **投入与盈亏**：累计投入、当前市值、累计盈亏与累计收益率（单期快照，不画时序曲线）
 10. **每小时 / 每月被动收入**：当前市值 × 预期年化回报 ÷ 8760，指标表同时列出每小时与每月值；
     另有加权年化、四条时间尺度换算、月开销覆盖率、悲观/乐观区间，
     以及**按 4.3% 提取率口径的对照数**。
@@ -439,7 +439,7 @@ FIRE-Progress/
 │   ├── lifeplan.py              # 生活规划：月开销逐项汇总、校验、一次性支出
 │   ├── fire.py                  # 计算核心：目标、进度、成本、外推、两段式
 │   ├── fmt.py                   # 金额格式化（三个渲染器共用一份）
-│   ├── charts.py                # 两张在用 SVG：进度条、进度曲线（收益曲线函数保留、当前关闭）
+│   ├── charts.py                # 两张 SVG：进度条、进度曲线
 │   ├── blocks.py                # README 各小节文案，各返回一段 markdown
 │   ├── render.py                # 组装：按顺序拼接小节 → 替换进手写 README
 │   ├── site.py                  # GitHub Pages 静态页（手机端）
@@ -451,7 +451,7 @@ FIRE-Progress/
 ├── data/
 │   ├── history.json             # 按天的进度快照（曲线数据源）
 │   └── latest.json              # 最近一次结果（兜底缓存，必须入库）
-├── reports/                     # 在用 SVG（由 Actions 生成，入库供 README 引用；profit.svg 当前不展示）
+├── reports/                     # 两张 SVG（由 Actions 生成，入库供 README 引用）
 ├── site/                        # 静态页生成结果（gitignore，只存在于 CI 与本地）
 ├── tests/
 │   ├── fixtures/                # 样例数据，供 --mock 使用

@@ -6,9 +6,7 @@
     "progress_pct": 2.425,
     "sp500_cny": 524.01,
     "target_cny": 558139.53,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11136.74,
-    "profit_cny": 2398.28
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-09-25",
@@ -17,9 +15,7 @@
     "progress_pct": 2.4626,
     "sp500_cny": 540.33,
     "target_cny": 558139.53,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11136.74,
-    "profit_cny": 2608.26
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-09-26",
@@ -28,9 +24,7 @@
     "progress_pct": 2.4326,
     "sp500_cny": 540.33,
     "target_cny": 558139.53,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11136.74,
-    "profit_cny": 2440.5
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-09-27",
@@ -39,9 +33,7 @@
     "progress_pct": 2.8627,
     "sp500_cny": 540.33,
     "target_cny": 496744.19,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11534.1,
-    "profit_cny": 2686.25
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-09-28",
@@ -50,9 +42,7 @@
     "progress_pct": 2.7954,
     "sp500_cny": 540.33,
     "target_cny": 496744.19,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11554.09,
-    "profit_cny": 2332.11
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-09-29",
@@ -61,9 +51,7 @@
     "progress_pct": 3.1611,
     "sp500_cny": 560.38,
     "target_cny": 444279.07,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11574.08,
-    "profit_cny": 2469.84
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-09-30",
@@ -72,9 +60,7 @@
     "progress_pct": 3.1648,
     "sp500_cny": 578.29,
     "target_cny": 444279.07,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11594.07,
-    "profit_cny": 2466.5
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-10-01",
@@ -83,9 +69,7 @@
     "progress_pct": 3.153,
     "sp500_cny": 597.51,
     "target_cny": 444279.07,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11594.07,
-    "profit_cny": 2414.26
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-10-02",
@@ -94,9 +78,7 @@
     "progress_pct": 3.2271,
     "sp500_cny": 597.51,
     "target_cny": 444279.07,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11594.07,
-    "profit_cny": 2743.06
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-10-03",
@@ -105,9 +87,7 @@
     "progress_pct": 3.1891,
     "sp500_cny": 597.51,
     "target_cny": 444279.07,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11594.07,
-    "profit_cny": 2574.3
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-10-04",
@@ -116,9 +96,7 @@
     "progress_pct": 3.2222,
     "sp500_cny": 597.51,
     "target_cny": 444279.07,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 11594.07,
-    "profit_cny": 2721.39
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-10-05",
@@ -127,9 +105,7 @@
     "progress_pct": 3.3795,
     "sp500_cny": 597.51,
     "target_cny": 444279.07,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 12051.21,
-    "profit_cny": 2963.05
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-10-06",
@@ -138,9 +114,7 @@
     "progress_pct": 3.3738,
     "sp500_cny": 597.51,
     "target_cny": 444279.07,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 12051.21,
-    "profit_cny": 2938.09
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-10-07",
@@ -149,9 +123,7 @@
     "progress_pct": 3.2751,
     "sp500_cny": 597.51,
     "target_cny": 444279.07,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 12051.21,
-    "profit_cny": 2499.39
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-10-08",
@@ -160,9 +132,7 @@
     "progress_pct": 3.3623,
     "sp500_cny": 597.51,
     "target_cny": 427534.88,
-    "fx_usd_cny": 6.712457,
-    "basis_cny": 12051.21,
-    "profit_cny": 2324.0
+    "fx_usd_cny": 6.712457
   },
   {
     "date": "2026-10-09",
@@ -171,8 +141,6 @@
     "progress_pct": 3.4015,
     "sp500_cny": 615.69,
     "target_cny": 427534.88,
-    "basis_cny": 12055.97,
-    "profit_cny": 2486.77,
     "fx_usd_cny": 6.715255
   },
   {
@@ -182,8 +150,6 @@
     "progress_pct": 3.3775,
     "sp500_cny": 644.47,
     "target_cny": 427534.88,
-    "basis_cny": 12075.96,
-    "profit_cny": 2363.91,
     "fx_usd_cny": 6.715255
   },
   {
@@ -193,8 +159,6 @@
     "progress_pct": 3.4771,
     "sp500_cny": 644.47,
     "target_cny": 427534.88,
-    "basis_cny": 12415.07,
-    "profit_cny": 2450.73,
     "fx_usd_cny": 6.706851
   },
   {
@@ -204,8 +168,6 @@
     "progress_pct": 3.4926,
     "sp500_cny": 644.47,
     "target_cny": 427534.88,
-    "basis_cny": 12403.57,
-    "profit_cny": 2528.31,
     "fx_usd_cny": 6.700304
   },
   {
@@ -215,8 +177,6 @@
     "progress_pct": 3.5629,
     "sp500_cny": 667.68,
     "target_cny": 420558.14,
-    "basis_cny": 12433.25,
-    "profit_cny": 2550.89,
     "fx_usd_cny": 6.70582
   },
   {
@@ -226,8 +186,6 @@
     "progress_pct": 3.5222,
     "sp500_cny": 687.11,
     "target_cny": 420558.14,
-    "basis_cny": 12451.84,
-    "profit_cny": 2361.07,
     "fx_usd_cny": 6.705025
   },
   {
@@ -237,8 +195,6 @@
     "progress_pct": 3.4493,
     "sp500_cny": 706.97,
     "target_cny": 420558.14,
-    "basis_cny": 12474.41,
-    "profit_cny": 2031.74,
     "fx_usd_cny": 6.706494
   },
   {
@@ -248,8 +204,6 @@
     "progress_pct": 3.5017,
     "sp500_cny": 741.03,
     "target_cny": 420558.14,
-    "basis_cny": 12508.23,
-    "profit_cny": 2218.45,
     "fx_usd_cny": 6.702985
   },
   {
@@ -259,8 +213,6 @@
     "progress_pct": 3.4941,
     "sp500_cny": 741.03,
     "target_cny": 420558.14,
-    "basis_cny": 12500.29,
-    "profit_cny": 2194.49,
     "fx_usd_cny": 6.698464
   },
   {
@@ -270,8 +222,6 @@
     "progress_pct": 3.6173,
     "sp500_cny": 741.03,
     "target_cny": 420558.14,
-    "basis_cny": 12976.17,
-    "profit_cny": 2236.66,
     "fx_usd_cny": 6.702912
   },
   {
@@ -281,8 +231,6 @@
     "progress_pct": 3.638,
     "sp500_cny": 741.03,
     "target_cny": 420558.14,
-    "basis_cny": 12957.6,
-    "profit_cny": 2342.37,
     "fx_usd_cny": 6.69274
   },
   {
@@ -292,8 +240,6 @@
     "progress_pct": 6.1253,
     "sp500_cny": 764.2,
     "target_cny": 252167.44,
-    "basis_cny": 12989.27,
-    "profit_cny": 2456.69,
     "fx_usd_cny": 6.693661
   },
   {
@@ -303,8 +249,6 @@
     "progress_pct": 6.5223,
     "sp500_cny": 797.5,
     "target_cny": 239330.23,
-    "basis_cny": 13014.97,
-    "profit_cny": 2594.93,
     "fx_usd_cny": 6.691314
   },
   {
@@ -314,8 +258,6 @@
     "progress_pct": 6.3796,
     "sp500_cny": 821.75,
     "target_cny": 239330.23,
-    "basis_cny": 13031.33,
-    "profit_cny": 2236.88,
     "fx_usd_cny": 6.689327
   },
   {
@@ -325,8 +267,6 @@
     "progress_pct": 6.3732,
     "sp500_cny": 821.75,
     "target_cny": 239330.23,
-    "basis_cny": 13029.32,
-    "profit_cny": 2223.66,
     "fx_usd_cny": 6.688225
   },
   {
@@ -336,8 +276,6 @@
     "progress_pct": 6.257,
     "sp500_cny": 832.12,
     "target_cny": 239330.23,
-    "basis_cny": 13043.18,
-    "profit_cny": 1931.76,
     "fx_usd_cny": 6.684864
   },
   {
@@ -347,8 +285,6 @@
     "progress_pct": 7.5316,
     "sp500_cny": 832.12,
     "target_cny": 205953.49,
-    "basis_cny": 13518.31,
-    "profit_cny": 1993.33,
     "fx_usd_cny": 6.689203
   },
   {
@@ -358,8 +294,6 @@
     "progress_pct": 7.4982,
     "sp500_cny": 832.12,
     "target_cny": 205953.49,
-    "basis_cny": 13496.03,
-    "profit_cny": 1946.81,
     "fx_usd_cny": 6.677446
   },
   {
@@ -370,8 +304,6 @@
     "sp500_cny": 873.12,
     "ndx100_cny": 4471.28,
     "target_cny": 205953.49,
-    "basis_cny": 17725.18,
-    "profit_cny": 2189.18,
     "fx_usd_cny": 6.683751
   },
   {
@@ -382,8 +314,6 @@
     "sp500_cny": 873.12,
     "ndx100_cny": 4471.28,
     "target_cny": 205953.49,
-    "basis_cny": 17720.05,
-    "profit_cny": 2405.34,
     "fx_usd_cny": 6.681042
   },
   {
@@ -394,8 +324,6 @@
     "sp500_cny": 898.3,
     "ndx100_cny": 4551.27,
     "target_cny": 205953.49,
-    "basis_cny": 17739.08,
-    "profit_cny": 2499.19,
     "fx_usd_cny": 6.680538
   },
   {
@@ -406,8 +334,6 @@
     "sp500_cny": 937.36,
     "ndx100_cny": 4488.87,
     "target_cny": 205953.49,
-    "basis_cny": 17772.09,
-    "profit_cny": 1741.8,
     "fx_usd_cny": 6.676858
   },
   {
@@ -419,8 +345,6 @@
     "ndx100_cny": 4488.87,
     "target_cny": 205953.49,
     "departure_cny": 69383.0,
-    "basis_cny": 17758.26,
-    "profit_cny": 1752.38,
     "fx_usd_cny": 6.669566
   },
   {
@@ -432,8 +356,6 @@
     "ndx100_cny": 4488.87,
     "target_cny": 205953.49,
     "departure_cny": 69383.0,
-    "basis_cny": 18226.88,
-    "profit_cny": 1785.82,
     "fx_usd_cny": 6.670992
   },
   {
@@ -445,8 +367,6 @@
     "ndx100_cny": 4337.26,
     "target_cny": 205953.49,
     "departure_cny": 69383.0,
-    "basis_cny": 18235.87,
-    "profit_cny": 1396.65,
     "fx_usd_cny": 6.665393
   },
   {
@@ -458,8 +378,6 @@
     "ndx100_cny": 4278.7,
     "target_cny": 205953.49,
     "departure_cny": 69383.0,
-    "basis_cny": 18292.5,
-    "profit_cny": 1701.03,
     "fx_usd_cny": 6.684036
   },
   {
@@ -472,8 +390,6 @@
     "target_cny": 205953.49,
     "full_fire_cny": 407720.93,
     "departure_cny": 56183.0,
-    "basis_cny": 18315.21,
-    "profit_cny": 1962.24,
     "fx_usd_cny": 6.685421
   },
   {
@@ -486,8 +402,6 @@
     "target_cny": 205953.49,
     "full_fire_cny": 407720.93,
     "departure_cny": 56183.0,
-    "basis_cny": 18349.5,
-    "profit_cny": 935.39,
     "fx_usd_cny": 6.682525
   },
   {
@@ -500,8 +414,6 @@
     "target_cny": 204000.0,
     "full_fire_cny": 405767.44,
     "departure_cny": 54362.0,
-    "basis_cny": 18356.54,
-    "profit_cny": 975.44,
     "fx_usd_cny": 6.686107
   },
   {
@@ -514,8 +426,6 @@
     "target_cny": 204000.0,
     "full_fire_cny": 405767.44,
     "departure_cny": 54362.0,
-    "basis_cny": 18806.37,
-    "profit_cny": 993.21,
     "fx_usd_cny": 6.690826
   },
   {
@@ -528,8 +438,6 @@
     "target_cny": 204000.0,
     "full_fire_cny": 405767.44,
     "departure_cny": 54362.0,
-    "basis_cny": 18784.0,
-    "profit_cny": 714.05,
     "fx_usd_cny": 6.679814
   },
   {
@@ -542,8 +450,6 @@
     "target_cny": 204000.0,
     "full_fire_cny": 405767.44,
     "departure_cny": 54362.0,
-    "basis_cny": 18817.74,
-    "profit_cny": 750.01,
     "fx_usd_cny": 6.686583
   },
   {
@@ -556,8 +462,6 @@
     "target_cny": 204000.0,
     "full_fire_cny": 405767.44,
     "departure_cny": 54362.0,
-    "basis_cny": 18840.11,
-    "profit_cny": 718.76,
     "fx_usd_cny": 6.687755
   },
   {
@@ -570,8 +474,6 @@
     "target_cny": 204000.0,
     "full_fire_cny": 405767.44,
     "departure_cny": 54362.0,
-    "basis_cny": 18856.12,
-    "profit_cny": 386.2,
     "fx_usd_cny": 6.685797
   },
   {
@@ -586,8 +488,6 @@
     "target_cny": 205953.49,
     "full_fire_cny": 407720.93,
     "departure_cny": 54383.0,
-    "basis_cny": 25067.76,
-    "profit_cny": 135.12,
     "fx_usd_cny": 6.685071
   },
   {
@@ -602,8 +502,6 @@
     "target_cny": 180837.21,
     "full_fire_cny": 382604.65,
     "departure_cny": 54113.0,
-    "basis_cny": 25087.47,
-    "profit_cny": 131.42,
     "fx_usd_cny": 6.684938
   },
   {
@@ -618,8 +516,6 @@
     "target_cny": 180837.21,
     "full_fire_cny": 382604.65,
     "departure_cny": 54113.0,
-    "basis_cny": 25087.47,
-    "profit_cny": 131.42,
     "fx_usd_cny": 6.684938
   },
   {
@@ -634,8 +530,6 @@
     "target_cny": 180837.21,
     "full_fire_cny": 382604.65,
     "departure_cny": 54113.0,
-    "basis_cny": 25073.96,
-    "profit_cny": 78.74,
     "fx_usd_cny": 6.678399
   },
   {
@@ -650,8 +544,6 @@
     "target_cny": 180837.21,
     "full_fire_cny": 382604.65,
     "departure_cny": 54113.0,
-    "basis_cny": 25093.95,
-    "profit_cny": 74.21,
     "fx_usd_cny": 6.678399
   },
   {
@@ -666,8 +558,6 @@
     "target_cny": 180837.21,
     "full_fire_cny": 382604.65,
     "departure_cny": 54113.0,
-    "basis_cny": 25095.72,
-    "profit_cny": -37.44,
     "fx_usd_cny": 6.679257
   },
   {
@@ -682,8 +572,6 @@
     "target_cny": 180837.21,
     "full_fire_cny": 382604.65,
     "departure_cny": 54113.0,
-    "basis_cny": 25116.97,
-    "profit_cny": -87.42,
     "fx_usd_cny": 6.679863
   },
   {
@@ -698,8 +586,6 @@
     "target_cny": 180837.21,
     "full_fire_cny": 382604.65,
     "departure_cny": 54113.0,
-    "basis_cny": 25181.98,
-    "profit_cny": -84.34,
     "fx_usd_cny": 6.69198
   }
 ]

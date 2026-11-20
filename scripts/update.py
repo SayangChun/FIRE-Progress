@@ -129,10 +129,6 @@ def apply_last_good(
 
 
 def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
-    # 本金与盈亏必须逐日留档：它们是「收益曲线」的数据源，
-    # 事后再想重建只能靠外部仓库的历史文件反推（汇率还取不到历史值），
-    # 所以当天不记，当天就永久丢失。缺失时写 None，绝不拿 0 冒充。
-    basis = data.get("cost_basis") or {}
     row = {
         "date": data["as_of_date"],
         "as_of": data["as_of"],
@@ -157,8 +153,6 @@ def upsert_snapshot(history: list[dict], data: dict) -> list[dict]:
         # 所以今天不记，事后同样无法精确重建。
         # 旧记录没有这个字段，读的时候要容忍缺失（用 .get）。
         "departure_cny": (data.get("departure") or {}).get("low_cny"),
-        "basis_cny": basis.get("total_cny"),
-        "profit_cny": basis.get("profit_cny"),
         # 当日汇率：稳定币折人民币靠它，不记下来事后无法审计
         "fx_usd_cny": (data.get("price") or {}).get("usd_cny"),
     }
@@ -420,12 +414,6 @@ def main() -> int:
         )
         (cfgmod.REPORTS_DIR / "curve.svg").write_text(svg, encoding="utf-8")
         print(f"→ 已写出 reports/curve.svg（{len(history)} 个数据点）")
-
-    if cfg.display.get("show_profit_curve", True):
-        svg = rendermod.profit_svg(history, cfg)
-        (cfgmod.REPORTS_DIR / "profit.svg").write_text(svg, encoding="utf-8")
-        n_pts = sum(1 for r in history if r.get("basis_cny") is not None)
-        print(f"→ 已写出 reports/profit.svg（{n_pts} 个数据点）")
 
     block = rendermod.render_block(data, cfg, history)
     readme_path = ROOT / "README.md"

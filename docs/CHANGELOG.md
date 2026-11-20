@@ -1578,6 +1578,31 @@ CI 的 `verify` 仍是 8 支回归脚本，本次未新增测试文件（新断�
 - README 自动区块已用现有 `data/latest.json` + `data/history.json` 离线重算；
   8 支回归测试全部通过。
 
+## 2026-11-20（续）：彻底删除收益曲线代码与文件
+
+本人追加要求：连代码和文件一起彻底删掉；长期投资不再看收益率与金额曲线，只关注长期被动投资收入。
+本节取代上一节里「开关关闭、文件与字段保留」的过渡状态。
+
+### 删除范围
+
+- `scripts/charts.py`：删掉 `profit_svg()` 与其专用的 `_nice_axis()`，文件缩到两张 SVG。
+- `scripts/render.py`：删掉 `profit_svg` 导入与「### 收益曲线」整段生成逻辑。
+- `scripts/update.py`：删掉 `profit.svg` 的生成，以及 `upsert_snapshot()` 里
+  `basis_cny` / `profit_cny` 的逐日留档（这两项只服务收益曲线）。
+- `scripts/site.py`：删掉网页版的收益曲线区块与 `profit.svg` 拷贝。
+- `config.yaml`：删掉 `display.show_profit_curve` 开关（无需再说「当前不展示」）。
+- `reports/profit.svg`：文件从仓库删除。
+- `data/history.json`：57 条记录里的 `basis_cny` / `profit_cny` 字段全部删除；
+  其余字段与数值一字未改。
+
+### 边界
+
+- 「投入与盈亏」表（累计投入本金、当前市值、累计盈亏、累计收益率）是**单期快照**，
+  不是时序曲线，按本人「不再看收益率以及金额曲线」的指向保留；
+  `data/latest.json` 的 `cost_basis` 与相关测试断言不动。
+- 三个门槛、完成度、被动收入、外推结果全部不变；每月被动收入行保留。
+- README 用最新数据离线重算；8 支回归测试全部通过。
+
 ---
 
 *整理于 2026-11-06：把散落在 6 份文档 + config.yaml 注释 + 渲染层文案中的更新记录集中到本文件。*
