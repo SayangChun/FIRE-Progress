@@ -415,6 +415,12 @@ def main() -> int:
         (cfgmod.REPORTS_DIR / "curve.svg").write_text(svg, encoding="utf-8")
         print(f"→ 已写出 reports/curve.svg（{len(history)} 个数据点）")
 
+    if cfg.display.get("show_wall_chart", True) and data.get("wall_chart"):
+        svg = rendermod.wall_chart_svg(history, data, cfg)
+        if svg:
+            (cfgmod.REPORTS_DIR / "wall_chart.svg").write_text(svg, encoding="utf-8")
+            print("→ 已写出 reports/wall_chart.svg")
+
     block = rendermod.render_block(data, cfg, history)
     readme_path = ROOT / "README.md"
     existing = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""

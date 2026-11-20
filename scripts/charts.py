@@ -360,3 +360,156 @@ def curve_svg(
   <text class="fg-muted" x="{pad_l + plot_w}" y="{height - 12}" text-anchor="end" font-size="10">{rows[-1]['date']}</text>
 </svg>
 """
+
+
+# ---------------------------------------------------------------- 挂图 SVG
+#
+# 《要钱还是要生活》第 5 步的 Wall Chart：三条线按月描点——
+#   月总收入、月总支出、月投资收益；投资收益追上支出的点即 crossover。
+# 这里两条面板：上面板全尺度（收入远高于支出，是真实比例），
+# 下面板放大支出与投资收入的交叉区间，否则后者被压成一条贴底线。
+
+
+def wall_chart_svg(history: list[dict], data: dict, cfg) -> str:
+    """挂图：当前实际收支 vs 投资收入，标出交叉点所需资产。
+
+    ⚠️ 收入/支出是**当前值**画成水平线（没有逐月历史留档）；
+       投资收入线由历史资产 × 当前预期年化折算，是反事实、不是历史实测收益。
+       这两点必须写进图注，否则读者会当成真实历史投资收益。
+    """
+    wc = data.get("wall_chart") or {}
+    income = wc.get("monthly_income_cny")
+    expense = wc.get("monthly_expense_cny")
+    rate = wc.get("expected_rate")
+    if income is None or expense is None:
+        return ""
+
+    income, expense = float(income), float(expense)
+    rate = float(rate) if rate else 0.0
+
+    width, height = 680, 368
+    pad_l, pad_r = 58, 66
+    plot_w = width - pad_l - pad_r
+
+    # 投资收入序列：历史资产 × 当前预期年化 ÷ 12（反事实，图注说明）
+    series: list[tuple[str, float]] = []
+    if rate > 0:
+        for row in history:
+            if row.get("date") and row.get("total_cny") is not None:
+                series.append((row["date"], float(row["total_cny"]) * rate / 12))
+    series.sort(key=lambda p: p[0])
+    inv_max = max((v for _, v in series), default=0.0)
+
+    # 上面板：全尺度
+    a_top, a_h = 60.0, 132.0
+    a_max = max(income, expense, inv_max) * 1.12
+    # 下面板：放大到支出/投资收入区间
+    b_top, b_h = 258.0, 74.0
+    b_max = max(expense, inv_max) * 1.35
+
+    def ya(v: float) -> float:
+        return a_top + a_h * (1 - v / a_max)
+
+    def yb(v: float) -> float:
+        return b_top + b_h * (1 - v / b_max)
+
+    def path(panel, col: int) -> str:
+        if len(series) < 2:
+            return ""
+        pts = [
+            (pad_l + plot_w * i / (len(series) - 1), panel(series[i][col]))
+            for i in range(len(series))
+        ]
+        return " ".join(
+            f"{'M' if i == 0 else 'L'}{x:.1f},{y:.1f}" for i, (x, y) in enumerate(pts)
+        )
+
+    inv_path_a = path(ya, 1)
+    inv_path_b = path(yb, 1)
+
+    def hline(y: float, cls: str) -> str:
+        return f'<line class="{cls}" x1="{pad_l}" y1="{y:.1f}" x2="{pad_l + plot_w}" y2="{y:.1f}"/>'
+
+    # 网格与刻度（上面板）
+    grid: list[str] = []
+    for step in range(5):
+        r = step / 4
+        y = a_top + a_h * r
+        grid.append(
+            f'<line class="grid" x1="{pad_l}" y1="{y:.1f}" x2="{pad_l + plot_w}" y2="{y:.1f}"/>'
+        )
+        grid.append(
+            f'<text class="fg-muted" x="{pad_l - 8}" y="{y + 4:.1f}" text-anchor="end" '
+            f'font-size="10">{money(a_max * (1 - r), cfg)}</text>'
+        )
+    # 下面板刻度：0 与交叉线
+    for v in (0.0, expense):
+        y = yb(v)
+        grid.append(
+            f'<text class="fg-muted" x="{pad_l - 8}" y="{y + 4:.1f}" text-anchor="end" '
+            f'font-size="10">{money(v, cfg)}</text>'
+        )
+
+    inc_label = money(income, cfg)
+    exp_label = money(expense, cfg)
+    inv_now = wc.get("investment_monthly_cny")
+    inv_label = money(inv_now, cfg) if inv_now is not None else "—"
+    cross = wc.get("crossover_capital_cny")
+    cross_txt = money(cross, cfg) if cross else "—"
+    pct_txt = f"{wc['crossover_pct']:.1f}%" if wc.get("crossover_pct") is not None else "—"
+
+    legend = (
+        f'<rect x="{pad_l}" y="20" width="10" height="10" rx="2" fill="#2563eb"/>'
+        f'<text class="fg-muted" x="{pad_l + 16}" y="29" font-size="11">月收入 {inc_label}</text>'
+        f'<rect x="{pad_l + 170}" y="20" width="10" height="10" rx="2" fill="#dc2626"/>'
+        f'<text class="fg-muted" x="{pad_l + 186}" y="29" font-size="11">月开销 {exp_label}</text>'
+        f'<rect x="{pad_l + 340}" y="20" width="10" height="10" rx="2" fill="#16a34a"/>'
+        f'<text class="fg-muted" x="{pad_l + 356}" y="29" font-size="11">投资收入（当前 {inv_label}）</text>'
+    )
+
+    note = (
+        "收入与开销是当前值（无逐月留档），画成水平线；"
+        "投资收入线由历史资产按当前预期年化折算，是反事实、不是历史实测收益。"
+    )
+
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-label="挂图：月收入、月开销与投资收入">
+  <title>挂图：当前实际收支与投资收入</title>
+  <desc>月收入 {inc_label}，月开销 {exp_label}，投资收入 {inv_label}。交叉点：投资收入覆盖月开销需资产 {cross_txt}，当前 {pct_txt}。{note}</desc>
+  <defs>
+    <style>
+      .fg-muted {{ fill: #57606a; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }}
+      .grid {{ stroke: #d8dee4; stroke-width: 1; stroke-dasharray: 3 4; }}
+      .line-income {{ fill: none; stroke: #2563eb; stroke-width: 1.5; stroke-dasharray: 5 4; }}
+      .line-expense {{ fill: none; stroke: #dc2626; stroke-width: 1.5; stroke-dasharray: 5 4; }}
+      .line-inv {{ fill: none; stroke: #16a34a; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }}
+      .zoom-frame {{ fill: none; stroke: #b9c0c8; stroke-width: 1; }}
+      .cross-mark {{ fill: none; stroke: #16a34a; stroke-width: 1; stroke-dasharray: 3 3; }}
+      @media (prefers-color-scheme: dark) {{
+        .fg-muted {{ fill: #8b949e; }}
+        .grid {{ stroke: #30363d; }}
+        .line-income {{ stroke: #60a5fa; }}
+        .line-expense {{ stroke: #f87171; }}
+        .line-inv {{ stroke: #4ade80; }}
+        .zoom-frame {{ stroke: #4d545c; }}
+        .cross-mark {{ stroke: #4ade80; }}
+      }}
+    </style>
+  </defs>
+  {legend}
+  {''.join(grid)}
+  {hline(ya(income), 'line-income')}
+  {hline(ya(expense), 'line-expense')}
+  {f'<path d="{inv_path_a}" class="line-inv"/>' if inv_path_a else ''}
+  <text class="fg-muted" x="{pad_l + plot_w}" y="{ya(income) - 6:.1f}" text-anchor="end" font-size="11">月收入 {inc_label}</text>
+  <text class="fg-muted" x="{pad_l + plot_w}" y="{ya(expense) - 6:.1f}" text-anchor="end" font-size="11">月开销 {exp_label}</text>
+  <text class="fg-muted" x="6" y="{a_top:.1f}" font-size="10">全尺度</text>
+  <rect class="zoom-frame" x="{pad_l}" y="{b_top:.1f}" width="{plot_w}" height="{b_h:.1f}" rx="4"/>
+  {hline(yb(expense), 'line-expense')}
+  {f'<path d="{inv_path_b}" class="line-inv"/>' if inv_path_b else ''}
+  <text class="fg-muted" x="6" y="{b_top:.1f}" font-size="10">放大</text>
+  <text class="fg-muted" x="{pad_l + plot_w}" y="{yb(expense) - 6:.1f}" text-anchor="end" font-size="11">交叉点：投资收入 = 月开销 {exp_label}</text>
+  <text class="fg-muted" x="{pad_l + 8}" y="{b_top + b_h - 8:.1f}" font-size="11">需资产 {cross_txt} · 当前 {pct_txt}</text>
+  <text class="fg-muted" x="{pad_l}" y="{height - 12}" font-size="10">{series[0][0] if series else ''}</text>
+  <text class="fg-muted" x="{pad_l + plot_w}" y="{height - 12}" text-anchor="end" font-size="10">{series[-1][0] if series else ''}</text>
+</svg>
+"""

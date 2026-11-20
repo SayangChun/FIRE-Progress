@@ -141,6 +141,32 @@ ok(
 )
 
 print()
+print("挂图（《要钱还是要生活》）：当前实际收支，与 FIRE 口径隔离")
+wc = sp_only["wall_chart"]
+ok("挂图有数据", wc is not None)
+if wc:
+    ok("月收入 ¥2,200", close(wc["monthly_income_cny"], 2200.0, 0.01), str(wc["monthly_income_cny"]))
+    ok("月开销 ¥240", close(wc["monthly_expense_cny"], 240.0, 0.01), str(wc["monthly_expense_cny"]))
+    ok("月盈余 = 收入 − 开销", close(wc["monthly_surplus_cny"], 2200.0 - 240.0, 0.01))
+    ok(
+        "投资收入与被动收入同源",
+        close(wc["investment_monthly_cny"], sp_only["passive_income"]["monthly_cny"], 0.01),
+    )
+    need = 240.0 * 12 / sp_only["passive_income"]["weighted_rate"]
+    ok("交叉点资产 = 月开销 × 12 ÷ 年化", close(wc["crossover_capital_cny"], need, 0.01))
+    ok(
+        "FIRE 目标不受挂图影响",
+        close(
+            sp_only["fire"]["target_cny"],
+            firemod.target_cny(data["fire"]["net_monthly_expense"], cfg.fire.withdrawal_rate),
+            0.01,
+        ),
+    )
+off_wall = cfgmod.Config({**cfg, "display": {**cfg.display, "show_wall_chart": False}})
+off_wall_data = firemod.compute(off_wall, price=PRICE, sp500=SP500, history=[])
+ok("挂图开关关闭 -> wall_chart 为 None", off_wall_data["wall_chart"] is None)
+
+print()
 if failures:
     print(f"失败 {len(failures)} 项：")
     for f in failures:

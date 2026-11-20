@@ -189,6 +189,40 @@ def passive_income(
     }
 
 
+def wall_chart(cfg, pi: dict | None, capital: float) -> dict | None:
+    """《要钱还是要生活》挂图数据：当前真实收支 vs 投资收入。
+
+    ⚠️ 与 FIRE 口径完全隔离：读 `current_situation`（现在真实发生），
+    不读 `life_plan`（FIRE 后设想）。不参与任何目标、门槛或外推计算。
+
+    三条线：月收入、月开销、投资收入（当前资产 × 预期年化 ÷ 12）。
+    书里的「交叉点」＝投资收入线追上开销线；对应资产 = 月开销 × 12 ÷ 预期年化。
+    """
+    if not cfg.display.get("show_wall_chart", True):
+        return None
+    spec = cfg.get("current_situation") or {}
+    income = spec.get("monthly_income_cny")
+    expense = spec.get("monthly_expense_cny")
+    if income is None or expense is None:
+        return None
+    income, expense = float(income), float(expense)
+    pi = pi or {}
+    rate = pi.get("weighted_rate")
+    inv_monthly = pi.get("monthly_cny")  # 与被动收入同源，不重算
+    crossover = (expense * 12 / rate) if rate and rate > 0 else None
+    return {
+        "monthly_income_cny": round(income, 2),
+        "monthly_expense_cny": round(expense, 2),
+        "monthly_surplus_cny": round(income - expense, 2),
+        "investment_monthly_cny": inv_monthly,
+        "expected_rate": rate,
+        "crossover_capital_cny": round(crossover, 2) if crossover else None,
+        "current_capital_cny": round(capital, 2),
+        "crossover_pct": (capital / crossover * 100.0) if crossover else None,
+        "note": str(spec.get("note") or "").strip() or None,
+    }
+
+
 def collect_warnings(*results: dict) -> list[str]:
     warnings: list[str] = []
     for result in results:
@@ -725,6 +759,20 @@ def compute(
     goal_items.sort(key=lambda g: (not g["is_primary"], ["departure", "coffee_fire", "full_fire"].index(g["key"])))
     primary = next(g for g in goal_items if g["is_primary"])
 
+    # 被动收入算一次，两处复用：展示小节 + 挂图（同源，不重算）。
+    pi = (
+        passive_income(
+            cfg,
+            sp500_value=sp500_value,
+            ndx_value=ndx_value,
+            stablecoin_value=stable_value,
+            cash_value=cash_value,
+            monthly_expense=monthly,
+        )
+        if cfg.display.get("show_passive_income", True)
+        else None
+    )
+
     return {
         "as_of": stamp,
         "as_of_date": now.strftime("%Y-%m-%d"),
@@ -788,18 +836,8 @@ def compute(
             "profit_cny": round(total - total_basis, 2) if total_basis is not None else None,
         },
         "price": price,
-        "passive_income": (
-            passive_income(
-                cfg,
-                sp500_value=sp500_value,
-                ndx_value=ndx_value,
-                stablecoin_value=stable_value,
-                cash_value=cash_value,
-                monthly_expense=monthly,
-            )
-            if cfg.display.get("show_passive_income", True)
-            else None
-        ),
+        "passive_income": pi,
+        "wall_chart": wall_chart(cfg, pi, total),
         "projection": proj,
         # 出发门槛与全职情景（2026-10-31）。两者都**不改变上面的 target_cny**：
         # 出发门槛回答「能不能走」，全职情景回答「走之后攒得多快」。

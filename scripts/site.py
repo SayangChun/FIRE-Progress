@@ -345,6 +345,41 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
         {money(pi.get('monthly_at_withdrawal_cny'), cfg)}。</p>
     """
 
+    fig = lambda name, alt, cap: (
+        f'<figure><img src="{name}" alt="{alt}" loading="lazy">'
+        f"<figcaption>{cap}</figcaption></figure>"
+        if (out_dir / name).exists()
+        else ""
+    )
+
+    # ---- 挂图（《要钱还是要生活》）：当前实际收支 + 投资收入
+    wc = data.get("wall_chart") or {}
+    wall_html = ""
+    if wc and (cfg.get("display") or {}).get("show_wall_chart", True):
+        inv = wc.get("investment_monthly_cny")
+        cross = wc.get("crossover_capital_cny")
+        cross_pct = wc.get("crossover_pct")
+        rate = wc.get("expected_rate")
+        inv_txt = money(inv, cfg) if inv is not None else "—"
+        cross_txt = money(cross, cfg) if cross else "—"
+        cross_pct_txt = f"{cross_pct:.1f}%" if cross_pct is not None else "—"
+        rate_txt = f"{pct(rate * 100, 2)}" if rate else "—"
+        wd = (data.get("passive_income") or {}).get("monthly_at_withdrawal_cny")
+        wd_txt = (
+            f" 按提取率口径每月只有 {money(wd, cfg)}，预期年化不等于能安全花多少。"
+            if wd is not None else ""
+        )
+        wall_html = f"""
+  <h2>挂图（当前实际收支）</h2>
+  <p class="muted">月收入 {money(wc['monthly_income_cny'], cfg)} ·
+    月开销 {money(wc['monthly_expense_cny'], cfg)} ·
+    月盈余 {money(wc['monthly_surplus_cny'], cfg)} ·
+    投资收入 {inv_txt}（预期年化 {rate_txt}）</p>
+  {fig("wall_chart.svg", "挂图：当前实际收支与投资收入", "交叉点：投资收入覆盖月开销需资产 " + cross_txt + "，当前 " + cross_pct_txt + "。")}
+  <p class="note">用现在真实发生的收支，不是 FIRE 后的设想；不参与任何目标计算。
+    收入/开销是当前值画成水平线，投资收入线按当前预期年化折算历史资产，非实测收益。{wd_txt}</p>
+"""
+
     # ---- 外推
     proj = data.get("projection") or {}
     proj_html = ""
@@ -369,13 +404,6 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
       <p class="note">区间：悲观 {_y(low.get('days'))} · 基准 {horizon} ·
         乐观 {_y(high.get('days'))}。差距全部来自收益率假设。</p>
     """
-
-    fig = lambda name, alt, cap: (
-        f'<figure><img src="{name}" alt="{alt}" loading="lazy">'
-        f"<figcaption>{cap}</figcaption></figure>"
-        if (out_dir / name).exists()
-        else ""
-    )
 
     return f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -414,6 +442,7 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
 {basis_html}
 {plan_html}
 {passive_html}
+{wall_html}
 {proj_html}
 
   <footer>
@@ -442,7 +471,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # 图表直接复用 update.py 生成的 SVG
-    for svg in ("curve.svg", "progress.svg"):
+    for svg in ("curve.svg", "progress.svg", "wall_chart.svg"):
         src = cfgmod.REPORTS_DIR / svg
         if src.exists():
             shutil.copy2(src, out_dir / svg)

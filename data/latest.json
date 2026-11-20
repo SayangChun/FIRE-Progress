@@ -607,5 +607,16 @@
     "sp500": true
   },
   "warnings": [],
-  "history_days": 57
+  "history_days": 57,
+  "wall_chart": {
+    "monthly_income_cny": 2200.0,
+    "monthly_expense_cny": 240.0,
+    "monthly_surplus_cny": 1960.0,
+    "investment_monthly_cny": 146.74,
+    "expected_rate": 0.07016183991801621,
+    "crossover_capital_cny": 41047.95,
+    "current_capital_cny": 25097.64,
+    "crossover_pct": 61.14224305555557,
+    "note": null
+  }
 }

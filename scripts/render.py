@@ -12,6 +12,7 @@ from .blocks import (
     _passive_income_block,
     _stablecoin_block,
     _warnings_block,
+    _wall_chart_block,
 )
 from .charts import curve_svg, dual_progress_svg, progress_svg
 from .fmt import money
@@ -260,6 +261,13 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     pi_block = _passive_income_block(data, cfg)
     if pi_block:
         out.append(pi_block.strip())
+        out.append("")
+
+    # 挂图紧跟被动收入：都是「投资收入」这条线，一个是拆解假设，一个是时间轨迹。
+    # 用的是当前真实收支（current_situation），与上面的 FIRE 设想严格隔离。
+    wall_block = _wall_chart_block(data, cfg)
+    if wall_block:
+        out.append(wall_block.strip())
         out.append("")
 
     proj = data.get("projection")

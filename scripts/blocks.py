@@ -336,3 +336,64 @@ def _passive_income_block(data: dict, cfg) -> str:
     )
     out.append("")
     return "\n".join(out)
+
+
+def _wall_chart_block(data: dict, cfg) -> str:
+    """《要钱还是要生活》挂图：当前真实收支 + 投资收入三条线。
+
+    ⚠️ 与 FIRE 口径隔离：数字来自 current_situation（现在），
+    不是 life_plan（FIRE 后的设想）。不参与任何目标计算。
+    """
+    wc = data.get("wall_chart")
+    if not wc or not cfg.display.get("show_wall_chart", True):
+        return ""
+
+    sur = wc["monthly_surplus_cny"]
+    inv = wc.get("investment_monthly_cny")
+    rate = wc.get("expected_rate")
+    cross = wc.get("crossover_capital_cny")
+    pct = wc.get("crossover_pct")
+    inv_txt = money(inv, cfg) if inv is not None else "—"
+    rate_txt = f"{rate * 100:.2f}%" if rate else "—"
+    cross_txt = money(cross, cfg) if cross else "—"
+    pct_txt = f"{pct:.1f}%" if pct is not None else "—"
+    pi = data.get("passive_income") or {}
+    wd = pi.get("monthly_at_withdrawal_cny")
+    wd_rate = pi.get("withdrawal_rate")
+    wd_line = ""
+    if wd is not None and wd_rate:
+        wd_line = (
+            "　⚠️ 预期年化是「平均能涨多少」，不是「能安全花多少」："
+            f"按 {wd_rate * 100:.1f}% 提取率，同样资产每月只有 {money(wd, cfg)}。"
+        )
+
+    out: list[str] = []
+    out.append("### 挂图（当前实际收支）")
+    out.append("")
+    out.append(
+        "> 《要钱还是要生活》第 5 步：把钱画在墙上——月收入、月开销、投资收入三条线，"
+        "投资收入追上开销的地方就是「交叉点」。这里用**现在真实发生**的收支，"
+        "不是上面 FIRE 后的设想生活；这一节不参与任何目标计算。"
+    )
+    out.append("")
+    out.append("![挂图：当前实际收支](reports/wall_chart.svg)")
+    out.append("")
+    out.append("| 指标 | 数值 |")
+    out.append("| --- | ---: |")
+    out.append(f"| 💵 月收入（生活费 + 外快） | {money(wc['monthly_income_cny'], cfg)} |")
+    out.append(f"| 🧾 月开销 | {money(wc['monthly_expense_cny'], cfg)} |")
+    out.append(f"| 📈 月盈余 | {money(sur, cfg)} |")
+    out.append(f"| 🌱 投资收入（按预期年化 {rate_txt}） | {inv_txt} |")
+    out.append("")
+    if wc.get("note"):
+        out.append(f"> {wc['note']}")
+        out.append(">")
+    out.append(
+        f"> 交叉点：投资收入要覆盖 {money(wc['monthly_expense_cny'], cfg)}/月，"
+        f"按 {rate_txt} 需资产 **{cross_txt}**；当前 {money(wc['current_capital_cny'], cfg)}，"
+        f"约 **{pct_txt}**。图中收入/开销是当前值画成水平线；"
+        "投资收入线由历史资产按当前预期年化折算，是反事实、不是历史实测收益。"
+        f"{wd_line}"
+    )
+    out.append("")
+    return "\n".join(out)
