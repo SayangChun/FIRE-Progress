@@ -54,7 +54,7 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     # 它同时回答「现在到哪了」和「是怎么走到这里的」，右端还标着当前百分比，
     # 是这一页信息量最大的一张图，值得第一眼就看到。
     # 完成度条只回答「现在到哪了」，退到它后面当补充。
-    # 收益曲线（金额 + 收益率）涉及本金，逻辑上属于「投入与盈亏」，仍留在那一节。
+    # 收益曲线由 display.show_profit_curve 控制，当前关闭。
     if cfg.display.get("show_curve") and history:
         out.append("### 进度曲线")
         out.append("")
@@ -142,6 +142,9 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
     if pi:
         out.append(
             f"| ⏱️ 每小时被动收入（按预期年化） | {money(pi['hourly_cny'], cfg, decimals=2)} |"
+        )
+        out.append(
+            f"| 📅 每月被动收入（按预期年化） | {money(pi['monthly_cny'], cfg)} |"
         )
     out.append("")
     if goals:

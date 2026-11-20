@@ -1556,4 +1556,28 @@ CI 的 `verify` 仍是 8 支回归脚本，本次未新增测试文件（新断�
 
 ---
 
+## 2026-11-20：不再展示收益曲线；指标表新增每月被动收入
+
+本人要求：README 不再展示收益曲线，并且在每小时被动收入之外补一行每月被动收入。
+
+### 当前状态
+
+- `display.show_profit_curve` 由 `true` 改为 `false`，作为唯一开关：
+  `scripts/render.py` 不再输出「### 收益曲线」小节，`scripts/update.py` 不再重写 `reports/profit.svg`。
+- `scripts/site.py` 的「收益曲线」区块与 SVG 拷贝同样跟随该开关，网页版一并停用。
+- 指标表在「⏱️ 每小时被动收入（按预期年化）」之后新增
+  「📅 每月被动收入（按预期年化）」，取 `passive_income.monthly_cny`，
+  与每小时值同源、同为按预期年化的假设性测算，不参与 FIRE 目标。
+- `reports/profit.svg` 文件仍在仓库中，但已不再由 Actions 更新、也不被任何展示层引用。
+
+### 边界
+
+- 只是展示层调整：`data/latest.json` 与 `data/history.json` 的 `basis_cny` / `profit_cny`
+  仍逐日留档，累计投入、当前市值、累计盈亏、累计收益率四项照常展示。
+- 三个门槛、完成度、被动收入数值、外推结果全部不变。
+- README 自动区块已用现有 `data/latest.json` + `data/history.json` 离线重算；
+  8 支回归测试全部通过。
+
+---
+
 *整理于 2026-11-06：把散落在 6 份文档 + config.yaml 注释 + 渲染层文案中的更新记录集中到本文件。*
