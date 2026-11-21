@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-11-21T11:41:40+08:00",
-  "as_of_date": "2026-11-21",
+  "as_of": "2026-11-22T04:47:39+08:00",
+  "as_of_date": "2026-11-22",
   "fire": {
     "monthly_expense": 1371.0,
     "net_monthly_expense": 648.0,
@@ -373,7 +373,7 @@
   "price": {
     "usd_cny": 6.69198,
     "fx_source": "open.er-api.com",
-    "fetched_at": "2026-11-21T03:41:38+00:00"
+    "fetched_at": "2026-11-21T20:47:37+00:00"
   },
   "passive_income": {
     "hours_per_year": 8760,
@@ -468,21 +468,21 @@
       "low": {
         "rate": 0.0086,
         "days": 6963,
-        "eta": "2045-12-14"
+        "eta": "2045-12-15"
       },
       "base": {
         "rate": 0.0702,
         "days": 4180,
-        "eta": "2038-05-02"
+        "eta": "2038-05-03"
       },
       "high": {
         "rate": 0.0777,
         "days": 4002,
-        "eta": "2037-11-05"
+        "eta": "2037-11-06"
       }
     },
     "days_to_target": 4180,
-    "eta": "2038-05-02",
+    "eta": "2038-05-03",
     "reason": null
   },
   "departure": {
@@ -595,21 +595,21 @@
         "low": {
           "rate": 0.0086,
           "days": 2312,
-          "eta": "2033-03-21"
+          "eta": "2033-03-22"
         },
         "base": {
           "rate": 0.0702,
           "days": 1871,
-          "eta": "2032-01-05"
+          "eta": "2032-01-06"
         },
         "high": {
           "rate": 0.0777,
           "days": 1831,
-          "eta": "2031-11-26"
+          "eta": "2031-11-27"
         }
       },
       "days_to_target": 1871,
-      "eta": "2032-01-05",
+      "eta": "2032-01-06",
       "reason": null
     }
   },
@@ -618,5 +618,5 @@
     "sp500": true
   },
   "warnings": [],
-  "history_days": 58
+  "history_days": 59
 }
