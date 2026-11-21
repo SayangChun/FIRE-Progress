@@ -14,7 +14,7 @@ from .blocks import (
     _warnings_block,
     _wall_chart_block,
 )
-from .charts import curve_svg, dual_progress_svg, progress_svg
+from .charts import curve_svg, dual_progress_svg, progress_svg, wall_chart_svg
 from .fmt import money
 
 START_MARK = "<!-- FIRE:START -->"

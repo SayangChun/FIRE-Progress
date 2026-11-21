@@ -1637,6 +1637,32 @@ CI 的 `verify` 仍是 8 支回归脚本，本次未新增测试文件（新断�
 - 交叉点信息不丢：改成图上一条说明文字——「投资收入 = 月开销 ¥240 · 需资产 ¥41,047.95 · 当前 61.1%」。
 - 三条线、数字口径、README 与网页版展示位置全部不变；8 支回归测试通过。
 
+## 2026-11-21：修复 GitHub Actions 全线失败（挂图函数未导出）
+
+本人反馈：最近的 Actions 全部失败，要求检查并修复。
+
+### 现象
+
+- 2026-11-20 16:25 起，每次运行都在 `verify` 的第 5 步「语法与冒烟检查（样例数据）」
+  （`python scripts/update.py --mock`）失败，`update` 作业被跳过，数据与 README 自那之后没再更新。
+
+### 根因
+
+- `scripts/render.py` 从 `scripts.charts` 导入图表函数时只导入了
+  `curve_svg, dual_progress_svg, progress_svg`，漏了 `wall_chart_svg`；
+  而 `scripts/update.py` 一律经 `render` 调用图表（`rendermod.wall_chart_svg`），
+  于是 `--mock` 在写挂图时报 `AttributeError: module 'scripts.render' has no attribute 'wall_chart_svg'`。
+- 这是上一节（续二）新增挂图时留下的遗漏：`charts.py` 有实现、`update.py` 有调用，
+  中间的 `render` 转出口没补。
+
+### 修复
+
+- `scripts/render.py` 导入补上 `wall_chart_svg`。
+- `tests/test_passive_income.py` 新增 4 项断言，钉死 `render` 必须暴露
+  `progress_svg` / `dual_progress_svg` / `curve_svg` / `wall_chart_svg`——
+  这类「实现有、转出口漏」的错误以后在测试阶段就会暴露，而不是等 CI 红。
+- 8 支回归测试全部通过；`--mock` 与静态页生成在干净副本上均跑通。
+
 ---
 
 *整理于 2026-11-06：把散落在 6 份文档 + config.yaml 注释 + 渲染层文案中的更新记录集中到本文件。*

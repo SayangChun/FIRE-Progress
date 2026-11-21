@@ -24,6 +24,7 @@ sys.path.insert(0, str(ROOT))
 from scripts import config as cfgmod  # noqa: E402
 from scripts import fire as firemod  # noqa: E402
 from scripts import lifeplan as lifeplan_mod  # noqa: E402
+from scripts import render as rendermod  # noqa: E402
 
 cfg = cfgmod.load()
 MONTHLY, PLAN = lifeplan_mod.resolve_monthly(cfg)
@@ -165,6 +166,11 @@ if wc:
 off_wall = cfgmod.Config({**cfg, "display": {**cfg.display, "show_wall_chart": False}})
 off_wall_data = firemod.compute(off_wall, price=PRICE, sp500=SP500, history=[])
 ok("挂图开关关闭 -> wall_chart 为 None", off_wall_data["wall_chart"] is None)
+
+# update.py 一律经 render 调图表（render 是拼接层，实现都在 charts）。
+# 少 re-export 一个函数，CI 会在 --mock 那步整条挂掉，这里钉死。
+for _fn in ("progress_svg", "dual_progress_svg", "curve_svg", "wall_chart_svg"):
+    ok(f"render 暴露 {_fn}", hasattr(rendermod, _fn))
 
 print()
 if failures:
