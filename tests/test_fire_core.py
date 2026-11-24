@@ -217,7 +217,14 @@ ok(
 
 sc, cash = firemod.manual_assets(cfg, PRICE_MANUAL)
 ok("稳定币明细由配置生成", isinstance(sc, dict) and bool(sc.get("holdings")), str(sc))
-ok("活钱明细由配置生成", isinstance(cash, dict) and cash.get("value_cny") == 5959.74, str(cash))
+# 余额由本人不定期手动报数，别把某个具体金额钉死在测试里（每报一次数就要改测试）。
+# 断言「取的是配置里的数」才是这段的本意。
+_expected_cash = float((cfg.get("cash_cny") or {}).get("balance_cny") or 0.0)
+ok(
+    "活钱明细由配置生成",
+    isinstance(cash, dict) and abs((cash.get("value_cny") or 0.0) - _expected_cash) < 0.01,
+    f'{cash} vs 配置 ¥{_expected_cash:,.2f}',
+)
 if sc:
     ok("稳定币按实时汇率折人民币",
        abs(sc["value_cny"] - sc["total_units"] * 6.685071) < 0.01,
