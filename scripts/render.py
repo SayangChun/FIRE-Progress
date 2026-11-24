@@ -296,11 +296,15 @@ def render_block(data: dict, cfg, history: list[dict]) -> str:
                 f"（加权 {high.get('rate', 0) * 100:.2f}%）。"
             )
             out.append(">")
+            er_cfg = cfg.get("expected_return") or {}
+            sc_base = float(er_cfg.get("stablecoin") or 0.0) * 100
+            sc_low = float(er_cfg.get("stablecoin_low") or 0.0) * 100
+            cash_base = float(er_cfg.get("cash_cny") or 0.0) * 100
             out.append(
                 "> 这不再是线性外推：定投按天累加，已有持仓按年化复利。差距全部来自收益率假设——"
                 "权益类资产的「平均收益率」只是假设，真实路径先涨还是先跌会改变结果，上沿只能当参考。"
-                "稳定币的 10% 与活钱的 1% 也都进了加权年化：前者是限额活动利率，"
-                "悲观档按 0% 记，所以区间下沿明显更慢。"
+                f"稳定币的 {sc_base:g}% 与活钱的 {cash_base:g}% 也都进了加权年化：前者是限额活动利率，"
+                f"悲观档按 {sc_low:g}% 记，所以区间下沿明显更慢。"
             )
             out.append(">")
             out.append(

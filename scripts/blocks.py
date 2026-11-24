@@ -170,7 +170,7 @@ def _stablecoin_block(data: dict, cfg) -> str:
 
     边界必须跟着数字一起出现：
       1. 稳定币以美元计价，按实时汇率折人民币——汇率波动会真实改变完成度；
-      2. 活动年化不是长期保证收益，区间下沿按 0% 记；
+      2. 活动年化不是长期保证收益，基准与区间下沿都写在 config 的 expected_return 段；
       3. 两项都由本人手动报数，不是实时余额。
     """
     assets = data.get("assets") or {}
@@ -207,10 +207,18 @@ def _stablecoin_block(data: dict, cfg) -> str:
             f"（快照 {cash.get('snapshot_date') or '—'}，手动报数）。"
         )
         out.append("")
+    er_cfg = cfg.get("expected_return") or {}
+    sc_base = float(er_cfg.get("stablecoin") or 0.0) * 100
+    sc_low = float(er_cfg.get("stablecoin_low") or 0.0) * 100
+    sc_high = float(er_cfg.get("stablecoin_high") or 0.0) * 100
+    cash_base = float(er_cfg.get("cash_cny") or 0.0) * 100
+    cash_low = float(er_cfg.get("cash_cny_low") or 0.0) * 100
+    cash_high = float(er_cfg.get("cash_cny_high") or 0.0) * 100
     out.append(
-        "> 稳定币放在交易所活期理财，限额活动年化按 **10%** 记，"
-        "区间 0–10%：只覆盖限额内部分，限额会变、活动会结束，下沿 0% 就是活动结束。"
-        "人民币活钱按 **1%** 保守取值（区间 1–1.5%）。"
+        f"> 稳定币放在交易所活期理财，限额活动年化按 **{sc_base:g}%** 记，"
+        f"区间 {sc_low:g}–{sc_high:g}%：只覆盖限额内部分，限额会变、活动会结束，"
+        f"下沿 {sc_low:g}% 是活动结束后的保守假设。"
+        f"人民币活钱按 **{cash_base:g}%** 保守取值（区间 {cash_low:g}–{cash_high:g}%）。"
     )
     out.append(">")
     out.append(
@@ -239,7 +247,7 @@ def _passive_income_block(data: dict, cfg) -> str:
     """每小时被动收入 = 当前持仓 × 预期年化回报 ÷ 8760。
 
     这一节的重点不是那个数字，而是它的边界，两句话必须跟着数字一起出现：
-      1. 它是**假设**推出来的——换一组假设，加权年化能从 0.1% 摆到 24%；
+      1. 它是**假设**推出来的——换一组假设，加权年化会明显变化；
       2. 它和提取率**不是一回事**——预期回报是「平均能涨多少」，
          提取率是「能安全花多少」，把前者当后者用会在第一个熊市击穿本金。
     否则读者只会记住那个偏大的数。
@@ -306,10 +314,14 @@ def _passive_income_block(data: dict, cfg) -> str:
                 "这个数字的软肋是权重，不是回报率。"
             )
         elif top and top["key"] == "stablecoin":
+            er_cfg = cfg.get("expected_return") or {}
+            sc_base = float(er_cfg.get("stablecoin") or 0.0) * 100
+            sc_low = float(er_cfg.get("stablecoin_low") or 0.0) * 100
+            sc_high = float(er_cfg.get("stablecoin_high") or 0.0) * 100
             why = (
-                "因为 **10% 是交易所限额活动的活期理财利率**，只覆盖限额内部分："
-                "活动一结束就落到 0%，悲观档几乎只剩权益和活钱在贡献，"
-                "而乐观档也仍按 10% 封顶。这个区间的宽度来自活动本身，不是市场波动。"
+                f"因为 **{sc_base:g}% 是交易所限额活动的活期理财利率**，只覆盖限额内部分："
+                f"悲观档把它换成活动结束后按 {sc_low:g}% 的保守假设，"
+                f"乐观档仍按 {sc_high:g}% 封顶。区间宽度主要来自活动利率的存废，不是市场波动。"
             )
         else:
             why = (
@@ -317,7 +329,7 @@ def _passive_income_block(data: dict, cfg) -> str:
                 "长期回报率只能给一个区间，不是能算出来的数。"
             )
         out.append(
-            f"> 区间跨度大：悲观（{low_desc}）每小时 "
+            f"> 区间来自各资产自己的假设：悲观（{low_desc}）每小时 "
             f"{money(pi['hourly_low_cny'], cfg, decimals=3)}，乐观（{high_desc}）"
             f"{money(pi['hourly_high_cny'], cfg, decimals=3)}。{why}"
         )

@@ -242,10 +242,12 @@ ok("被动收入把四项资产都纳入加权，权重和为 1",
 ok("被动收入市值之和 == 总资产",
    abs(sum(r["value_cny"] for r in pi["assets"]) - with_manual["assets"]["total_cny"]) < 0.02,
    str(pi["weighted_rate"]))
-ok("稳定币年化 10%、下沿 0% 进入加权区间",
-   any(r["key"] == "stablecoin" and r["rate"] == 0.10 and r["rate_low"] == 0.0
-       for r in pi["assets"]),
-   str(pi["rate_low"]))
+ok("稳定币年化 7%（配置值）、下沿 2% 进入加权区间",
+   abs(cfg.expected_return.stablecoin - 0.07) < 1e-9
+   and abs(cfg.expected_return.stablecoin_low - 0.02) < 1e-9
+   and any(r["key"] == "stablecoin" and r["rate"] == 0.07 and r["rate_low"] == 0.02
+           for r in pi["assets"]),
+   str([(r["key"], r["rate"], r["rate_low"]) for r in pi["assets"] if r["key"] == "stablecoin"]))
 ok("活钱年化 1% 进入加权",
    any(r["key"] == "cash_cny" and r["rate"] == 0.01 for r in pi["assets"]))
 ok("外推权重覆盖四项资产",

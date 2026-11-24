@@ -268,11 +268,16 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
                 f"<tr><td>人民币活钱（余额宝）</td><td class='num'>—</td>"
                 f"<td class='num'>{money(cash['value_cny'], cfg)}</td></tr>"
             )
+        er_cfg = cfg.get("expected_return") or {}
+        sc_base = float(er_cfg.get("stablecoin") or 0.0) * 100
+        sc_low = float(er_cfg.get("stablecoin_low") or 0.0) * 100
+        sc_high = float(er_cfg.get("stablecoin_high") or 0.0) * 100
+        cash_base = float(er_cfg.get("cash_cny") or 0.0) * 100
         rate_note = ""
         if sc:
             rate_note = (
                 f"稳定币按 USD/CNY {sc['usd_cny']:.4f} 折算，汇率变动会改变完成度；"
-                "交易所限额活动年化按 10% 记（区间 0–10%），活动结束即为下沿。"
+                f"交易所限额活动年化按 {sc_base:g}% 记（区间 {sc_low:g}–{sc_high:g}%），活动结束即为下沿。"
             )
         cash_html = f"""
       <h2>手动维护资产明细</h2>
@@ -280,7 +285,7 @@ def build_page(data: dict, cfg, history: list[dict], out_dir: Path) -> str:
         <tr><th>项目</th><th class="num">数量</th><th class="num">折人民币</th></tr>
         {''.join(detail)}
       </table>
-      <p class="note">{rate_note}人民币活钱按 1% 保守取值。两项都计入分子，由本人手动报数。</p>
+      <p class="note">{rate_note}人民币活钱按 {cash_base:g}% 保守取值。两项都计入分子，由本人手动报数。</p>
     """
 
     # ---- 投入与盈亏
