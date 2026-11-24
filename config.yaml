@@ -427,15 +427,15 @@ price:
 stablecoin:
   enabled: true
   holdings:
-    - {asset: USDT, amount: 1500.0}
-    - {asset: USDC, amount: 566.0}
-  snapshot_date: "2026-11-13" # 手动报数日期
+    - {asset: USDT, amount: 1302.0}
+    - {asset: USDC, amount: 769.0}
+  snapshot_date: "2026-11-24" # 手动报数日期
   note: "预留用于在标普500 显著回撤时场内加仓，或场外申购额度放开时大额申购。"
 
 cash_cny:
   enabled: true
-  balance_cny: 5959.74
-  snapshot_date: "2026-11-13" # 手动报数日期
+  balance_cny: 5998.37
+  snapshot_date: "2026-11-24" # 手动报数日期
   note: "余额宝活钱；日常花销与标普500 定投（¥20/天）从这里扣，余额有小幅变化，由本人不定期更新。"
 
 # ------------------------------------------------------------
