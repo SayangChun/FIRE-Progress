@@ -685,5 +685,19 @@
     "full_fire_cny": 382604.65,
     "departure_cny": 54113.0,
     "fx_usd_cny": 6.674963
+  },
+  {
+    "date": "2026-11-28",
+    "as_of": "2026-11-28T06:30:46+08:00",
+    "total_cny": 25054.79,
+    "progress_pct": 13.8549,
+    "stablecoin_cny": 13823.85,
+    "cash_cny": 5998.37,
+    "sp500_cny": 1245.88,
+    "ndx100_cny": 3986.69,
+    "target_cny": 180837.21,
+    "full_fire_cny": 382604.65,
+    "departure_cny": 54113.0,
+    "fx_usd_cny": 6.674963
   }
 ]
