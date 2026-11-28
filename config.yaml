@@ -362,6 +362,33 @@ life_plan:
         - {key: medical_buffer, group: 医疗与应急, label: 医疗自付预留, monthly: 120, note: "门诊与小病自付。⚠️ 对照方案同样不参加任何医保"}
         - {key: buffer, group: 医疗与应急, label: 应急与物价缓冲, monthly: 187, note: "按月留一笔机动钱。⚠️ 移除医保两项后本方案合计为 ¥2,754（原按 ¥2,800 设计）"}
 
+    # 对照方案（未激活）：澳大利亚 WHV 期间的生活成本。
+    #
+    # ⚠️ 这是「积累期在澳开销」对照，**不是 FIRE 后的定居地**：
+    #    设想是大三抽签，中签后赴澳打工三年，靠攒下的钱回国 FIRE。
+    #    所以这一档只用于核算「在澳三年能攒多少」，绝不激活为 profile 或 target_profile。
+    #    激活它会把出发门槛与三个不工作门槛一并换成澳洲口径，进度条分母随之跳变。
+    #
+    # 汇率口径：AUD/CNY = 4.43（数据来源时点 2026-11-28，见顶层 whv.fx_as_of）。
+    #    monthly 是折算后的人民币；每条 note 保留 AUD 原值，汇率变动时按
+    #    「AUD 周值 × 52 ÷ 12 × 新汇率」重算即可，不必改结构。
+    # ⚠️ 全部金额为估算，未实地验证；住宿为合住，与「独自居住生活」的硬条件冲突——
+    #    这一档 modeling 的是 WHV 这段过渡期，不是他最终想要的生活方式。
+    australia-whv-share:
+      city: 澳大利亚（城市未定）
+      province: 海外
+      housing: share
+      household: 1
+      lifestyle: 极简 · WHV 打工
+      headline: 澳大利亚 · WHV 期间 · 单人 · 合住 · 对照（未激活）
+      items:
+        - {key: rent, group: 住房与水电燃气, label: 住宿（share house / 背包客栈周租）, monthly: 4223.27, note: "AUD 220/周 × 52 ÷ 12 × 4.43。⚠️ 合住，与独自居住的硬条件冲突；WHV 过渡期建模，不代表最终生活方式。汇率变动按 AUD 220/周 重算。估算"}
+        - {key: food, group: 日常开销, label: 食品（自炊为主）, monthly: 2495.57, note: "AUD 130/周 × 52 ÷ 12 × 4.43。自炊、极少外食；按澳洲超市价格估算，未验证"}
+        - {key: transport, group: 日常开销, label: 交通, monthly: 479.92, note: "AUD 25/周 × 52 ÷ 12 × 4.43。估算；若购车须另计油费与保险并重核"}
+        - {key: telecom, group: 日常开销, label: 网络与手机, monthly: 287.95, note: "AUD 15/周 × 52 ÷ 12 × 4.43。估算"}
+        - {key: insurance, group: 医疗与应急, label: 保险（OSHC / 访客险）, monthly: 383.93, note: "AUD 20/周 × 52 ÷ 12 × 4.43。⚠️ 中国护照 WHV 不在 Medicare 互免范围；他已决定不参保，但在澳至少需一份访客/工作保险，否则一次急诊即可击穿应急金。估算"}
+        - {key: supplies, group: 日常开销, label: 日用品与杂项, monthly: 383.93, note: "AUD 20/周 × 52 ÷ 12 × 4.43。估算"}
+
   # 一次性支出：不进入「月开销 × 12 ÷ 提取率」，单独加总。
   # 它们只在 FIRE 落地的那一年发生一次。
   one_off:
@@ -398,6 +425,78 @@ sources:
       - {code: "040046", name: "华安纳斯达克100ETF联接(QDII)A", shares: 68.00, cost_nav: 8.2372}
     # 净值日超过这个天数未更新就告警（QDII T+2 + 周末，7 天是合理阈值）
     max_stale_days: 7
+
+# ------------------------------------------------------------
+# 澳大利亚 WHV 情景参数（未激活，不参与任何计算）
+# ------------------------------------------------------------
+# 用途：把 462 签证的硬规则与三年攒钱的假设集中在一处，
+#   以后按真实汇率与中签结果核算时只改这里，不改 life_plan / fire / 任何代码。
+#
+# ⚠️ 这一段**不参与任何计算**：不会被 lifeplan / fire / render 读取，
+#    也不改变三个门槛、月开销、完成度或外推。它只是核算输入的记录。
+# ⚠️ `australia-whv-share` 档同样未激活，只作对照；
+#    它 modeling 的是在澳过渡期开销，不是回国 FIRE 后的生活口径。
+#
+# 规则依据：澳大利亚内政部 462 签证页与驻华使馆公告（2026-11-28 核实）。
+# 中签率依据：2024 年 34,161 人申请 / 5,000 名额 = 14.64%；
+#   2025 注册 13.9 万 / 5,000 名额 = 不足 8%。两者都随年份波动，不是承诺。
+whv:
+  enabled: false
+  fx_aud_cny: 4.43 # 2026-11-28 查询值；核算时按当日真实汇率替换
+  fx_as_of: "2026-11-28"
+  visa:
+    subclass: 462
+    eligible_age: [18, 30] # 含 30；31 岁生日前一天的午夜（澳东部时间）前须递交
+    annual_quota: 5000
+    ballot: true # 中国护照必须先抽签，抽中才有申请资格
+    # 2026-27 年度注册 2026-06-04~06-25（已关闭）；本档记录窗口规律，便于以后蹲点
+    registration_window: "每年 6 月，约三周"
+    first_stay_months: 12
+    second_stay_months: 12
+    third_stay_months: 12
+    specified_work_for_second_days: 88 # ≥3 个最短日历月
+    specified_work_for_third_days: 179 # ≥6 个最短日历月
+    # 指定工作行业：偏远/北澳旅游酒店、动植物种植采摘包装、渔业、林业、建筑、灾害重建
+    # ⚠️ 与「低内耗、坐岗、不轮岗、低人际、可随时停」的硬约束直接冲突
+    specified_work_note: "想续到第三年，必须做满 3+6 个月指定工作，多为体力/轮班/偏远岗位"
+    same_employer_limit_months: 6
+    first_visa_fee_aud: 840
+    second_visa_fee_aud: 1000
+    third_visa_fee_aud: 1000
+    ballot_registration_fee_aud: 25
+    education: "完成 2 年本科即可，不要求学位证"
+    english: "Functional English，约 IELTS 4.5 / PTE 30 / TOEFL iBT 32；成绩须在申请前 12 个月内"
+    funds_aud: 5000 # 初期生活资金，另需离境机票钱
+    medicare: false # 中国护照 WHV 不在 Medicare 互免范围，需自购保险
+  ballot_rate:
+    low: 0.08
+    high: 0.1464
+    # 连抽三年累计（独立近似）：8% -> 22.1%；14.64% -> 37.8%。大概率抽不中
+    three_year_cumulative_note: "按 8% 三年约 22%，按 14.64% 三年约 38%"
+  income_scenarios:
+    # 三年净攒的三档假设，AUD 口径；按 fx_aud_cny 折人民币。全部为估算，非承诺。
+    # gross = 时薪 × 周工时 × 工作周数；税 = 45k 内 15% / 超出 30%+6750（WHM 税率）；
+    # 净攒 = 税后 − 生活成本。签证费、机票、考试见 one_off，需另扣。
+    conservative: {label: "保守·农场计件", hourly_aud: 26, hours_per_week: 35, work_weeks: 40, weekly_living_aud: 400}
+    neutral: {label: "现实中性", hourly_aud: 27, hours_per_week: 38, work_weeks: 42, weekly_living_aud: 400}
+    smooth: {label: "顺利·半技能", hourly_aud: 30, hours_per_week: 40, work_weeks: 46, weekly_living_aud: 423}
+    optimistic: {label: "乐观·高薪岗", hourly_aud: 34, hours_per_week: 45, work_weeks: 48, weekly_living_aud: 462}
+  super:
+    # 雇主按工资约 11.5% 缴 super；WHM 离境经 DASP 取回，应税部分扣 65%，实拿约 35%
+    employer_rate: 0.115
+    dasp_withhold_rate: 0.65
+    recovered_fraction: 0.35
+    note: "三年蒸发约 ¥3.6–7.3 万（视收入档），是很容易漏算的一笔"
+  one_off_cny:
+    # 三次签证费合计 AUD 2,840；往返机票（含可能一次回国）与雅思/体检/材料为估算
+    visas: 12581
+    flights: 10000
+    tests_and_admin: 3000
+  tax:
+    whm_rate_low: 0.15
+    whm_rate_low_threshold_aud: 45000
+    whm_rate_high: 0.30
+  note: "设想：大三起抽签，中签赴澳三年、靠攒下的钱回国 FIRE；未中则国内轻松工作。回国 FIRE 门槛仍按牡丹江口径 ¥180,837.21 / ¥382,604.65，不因本档改变。"
 
 # ------------------------------------------------------------
 # 价格与汇率
